@@ -1,12 +1,7 @@
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-
-typedef struct { // TTL state that the CPU controls
-  uint16_t PC;
-  uint8_t IR, D, AC, X, Y, OUT, undef;
-} CpuState;
+#include "gtemu.h"
 
 uint8_t ROM[1<<16][2], RAM[1<<15], IN=0xff;
 
@@ -85,9 +80,9 @@ int main(int argc, char *argv[])
 {
   CpuState S;
   srand(time(NULL)); // Initialize with randomized data
-  garble((void*)ROM, sizeof ROM);
-  garble((void*)RAM, sizeof RAM);
-  garble((void*)&S, sizeof S);
+  garble((uint8_t*)(void*)ROM, sizeof ROM);
+  garble((uint8_t*)(void*)RAM, sizeof RAM);
+  garble((uint8_t*)(void*)&S, sizeof S);
 
   FILE *fp = fopen(argc>1 ? argv[1] : "gigatron.rom", "rb");
   if (!fp) {

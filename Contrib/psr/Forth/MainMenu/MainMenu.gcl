@@ -7,12 +7,6 @@ gcl0x
 |                                                                       |
 +-----------------------------------------------------------------------}
 
-{ Fall into Easter Egg if [Start] is pressed for >4 seconds }
-\buttonState;                   {Fetch buttonState and resetTimer}
-[if>0                           {If resetTimer positive}
-  16& [if=0                     {And [Start] pressed}
-  \Egg \sysArgs0: 88!]]         {Start program. SYS_Exec_88 still in sysFn}
-
 { Print ASCII character (32..127) on screen in 5x8 pixels }
 [def
   {Map ASCII code to offset in font table}
@@ -102,17 +96,17 @@ gcl0x
 
     42 {Gray} Color= PrintArrow!
 
-    MenuItem [if=0 \Snake      else     {Map menu item to program}
-        1-   [if=0 \Racer      else
-        1-   [if=0 \Mandelbrot else
-        1-   [if=0 \Pictures   else
-        1-   [if=0 \Credits    else
-        1-   [if=0 \Loader     else
-        1-   [if=0 \Tetronis   else
-        1-   [if=0 \Bricks     else
-        2-   [if<=0 \TinyBASIC else     {TicTacToe and stand-alone BASIC}
-        1-   [if=0 \WozMon     else
-        1-   [if=0 \Apple1     else loop]]]]]]]]]]]
+    MenuItem [if=0 \Reset      else     {Map menu item to program}
+        1-   [if=0 \Reset      else
+        1-   [if=0 \Reset else
+        1-   [if=0 \Reset   else
+        1-   [if=0 \Reset    else
+        1-   [if=0 \Reset     else
+        1-   [if=0 \Reset   else
+        1-   [if=0 \Reset     else
+        2-   [if<=0 \Reset else     {TicTacToe and stand-alone BASIC}
+        1-   [if=0 \Reset     else
+        1-   [if=0 \Reset     else loop]]]]]]]]]]]
     Program=
   ]
   pop ret
@@ -202,26 +196,5 @@ Pos 48+ j& q=                   {Box of current cursor}
 \SYS_Exec_88 \sysFn:            {ROM loader}
 Program \sysArgs0:              {ROM image}
 \userCode _vLR=                 {Start of execution address}
-MenuItem 8^ [if=0               {TicTacToe needs special launcher}
-  &_LaunchTicTacToe call]
-MenuItem 11^ [if=0              {Apple1 workaround}
-  \channelMask_v4, $f8&         { 1. Clear channelMask before loading}
-  \channelMask_v4.]
 88!                             {Load from ROM and execute}
-
-{-----------------------------------------------------------------------+
-|       Tic Tac Toe launcher                                            |
-+-----------------------------------------------------------------------}
-
-*=$7fa0 _LaunchTicTacToe=*
-
-  11+ _vLR=                     {Return to this program after SYS}
-  \TinyBASIC \sysArgs0: 88!     {Load only, SYS_Exec_88 still in sysFn}
-                                {Return here}
-  \userCode _vLR=
-  \TicTac \sysArgs0: 88!        {Load Tic-Tac-Toe and execute BASIC}
-
-{-----------------------------------------------------------------------+
-|                                                                       |
-+-----------------------------------------------------------------------}
 

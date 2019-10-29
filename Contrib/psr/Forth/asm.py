@@ -221,7 +221,7 @@ def end():
   if _errors:
     print '%d error(s)' % _errors
     print
-    exit()
+    exit(1)
 
   align(1)
 

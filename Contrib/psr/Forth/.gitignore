@@ -1,1 +1,5 @@
 *.pyc
+.venv/
+dev.rom
+dev.asm
+.vscode/

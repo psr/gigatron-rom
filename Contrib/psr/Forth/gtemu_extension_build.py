@@ -15,7 +15,6 @@ ffibuilder.set_source("_gtemu",  # name of the output C extension
 #include "gtemu.h"
 """,
     sources=["gtemu.cpp"],
-    libraries=[])    # on Unix, link with the math library
-
+    libraries=[])
 if __name__ == "__main__":
     ffibuilder.compile(verbose=True)

@@ -4423,18 +4423,68 @@ sys_Exec:     11fc d617  st   [$17],y
               123d 1403  ld   $03,y
               123e e0cb  jmp  y,$cb
               123f 00d4  ld   $d4
-              1240 0200  nop              ;192 fillers
+              1240 0200  nop
               1241 0200  nop
               1242 0200  nop
-              * 193 times
-              1301 0200  nop              ;255 fillers
-              1302 0200  nop
-              1303 0200  nop
-              * 256 times
-              1401 0200  nop              ;255 fillers
-              1402 0200  nop
-              1403 0200  nop
-              * 254 times
+              * 190 times
+              12fe 0200  nop              ;You are now entering... Forth
+FORTH_ENTER:  12ff 801c  adda $1c
+              1300 c215  st   [$15]       ;Timing point: [vTicks] == AC == accurate number of ticks until we need to be back
+forth.next1:  1301 a00c  suba $0c
+              1302 1531  ld   [$31],y
+              1303 e130  jmp  y,[$30]
+              1304 fc00  bra  $00
+forth.next1.reenter.even:
+              1305 0200  nop
+forth.next1.reenter.odd:
+              1306 a008  suba $08
+              1307 8115  adda [$15]
+              1308 c215  st   [$15]
+              1309 a012  suba $12
+              130a f800  ble  $1300
+              130b 00ff  ld   $ff
+              130c fc00  bra  $1300
+              130d 0115  ld   [$15]
+forth.next2.even:
+              130e 0200  nop
+forth.next2.odd:
+              130f a014  suba $14
+              1310 8115  adda [$15]
+              1311 c215  st   [$15]
+              1312 0132  ld   [$32]
+              1313 c031  st   $31,[$31]
+              1314 0082  ld   $82
+              1315 c230  st   [$30]
+              1316 0115  ld   [$15]
+              1317 a012  suba $12
+              1318 f800  ble  $1300
+              1319 0001  ld   $01
+              131a fc00  bra  $1300
+              131b 0115  ld   [$15]
+forth.exit:
+forth.exit.from-failed-test:
+              131c 00fa  ld   $fa
+forth.exit.from-next1-reenter:
+forth.exit.from-next2:
+              131d 8115  adda [$15]
+              131e 1401  ld   $01,y
+              131f e41f  bgt  $131f
+              1320 a001  suba $01
+              1321 e11e  jmp  y,[$1e]
+              1322 0200  nop
+              1323 0200  nop              ;221 fillers
+              1324 0200  nop
+              1325 0200  nop
+              * 221 times
+forth.restart_or_quit:
+              1400 fd30  bra  [$30]
+              1401 f800  ble  forth.restart_or_quit
+.quit:        1402 1413  ld   $13,y
+              1403 e000  jmp  y,$00
+              1404 0200  nop              ;252 fillers
+              1405 0200  nop
+              1406 0200  nop
+              * 251 times
               14ff 0200  nop              ;+-----------------------------------+
                                           ;| MainMenu\MainMenu.gcl             |
                                           ;+-----------------------------------+

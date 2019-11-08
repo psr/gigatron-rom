@@ -5097,13 +5097,28 @@ ld(-88/2)                       #85
 
 #-----------------------------------------------------------------------
 
-# XXX Lots of space here
-
-align(0x100)
-nop()
-align(0x100, 0x100)
-nop()
-align(0x100, 0x100)
+while pc()&255 < 255:
+  nop()
+import forth
+assert forth.INTERPRETER_ENTER_PAGE == pc() >> 8
+label('FORTH_ENTER')
+C('You are now entering... Forth')
+adda(forth.INBOUND_TICK_CORRECTION)
+# --- Page boundary ---
+align(0x100,0x100)
+forth_next1_page = pc() >> 8
+st([vTicks])
+forth.next1(vTicks)
+forth.next1_reenter(vTicks)
+forth.next2(vTicks)
+forth.exit(vTicks, vReturn)
+# Check that we've kept all of this on the predicted page
+assert pc() >> 8 == forth_next1_page, (hex(pc()), forth_next1_page)
+# --- Page boundary ---
+align(0x100,0x100)
+forth.restart_or_quit()
+#forth.next3()
+align(0x100,0x100)
 
 #-----------------------------------------------------------------------
 #

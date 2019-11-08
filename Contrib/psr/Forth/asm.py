@@ -313,6 +313,19 @@ def _assemble(op, val, to=AC, addr=None):
   """Assemble and emit one instruction"""
   d, mode, bus = 0, 0, 0                                # [D] (default)
 
+  if isinstance(val, float):
+    # Floating point values could have crept in if
+    # our operand is the result of a division in a file with
+    # from __future__ import division enabled.
+    # This happens in the Forth NEXT code, where we divide by two
+    # to convert cycle counts to ticks.
+    # If the number of cycles was not even, this is a clear bug.
+    # Otherwise convert to int.
+    if int(val) != val:
+      raise TypeError(
+        "Invalid operand: non-integer value %s provided" % (val,))
+    val = int(val)
+
   # First operand can be optional
   if isinstance(val, list):
     val, addr = None, val

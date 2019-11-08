@@ -1,7 +1,6 @@
 *.pyc
 .venv/
 dev.rom
-dev.asm
 .vscode/
 _gtemu*
 Release/

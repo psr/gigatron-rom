@@ -10,7 +10,9 @@ from __future__ import (
 
 import pytest
 
-import forth
+from gtemu import emulator, ROM
+import forth  # Must be imported after gtemu!
+
 
 ##
 # Odd and odd is even, even and even is even. Even and odd is odd.
@@ -83,3 +85,21 @@ def test_parity_depends(from_, to, must_match):
     on whether the successful test case is even or odd"""
     assert (even(from_) is even(to)
         if even(must_match) else (even(from_) is not even(to)))
+
+
+##
+# Run various processes in the emulator
+
+WORD_START = 0x1404  # TODO - this is based on the disassembly, and will change
+
+
+def test_next1_successful_test():
+    """A successful test should result in us being in the right place"""
+    # Arrange
+    emulator.next_instruction = 'forth.next1'
+    emulator.AC = 20  # Time remaining is 20 ticks - 40 cycles
+    ROM[WORD_START] = b'\xa0\x02'  # suba $02 - worst case runtime is two ticks
+    # Act
+    emulator.run_for(forth.cost_of_successful_test)
+    # Assert
+    assert emulator.next_instruction == WORD_START

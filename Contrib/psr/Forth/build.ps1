@@ -1,5 +1,16 @@
 $ErrorActionPreference = 'Stop';
 
+$dirExcludes = '.venv', '.pytest_cache'
+$fileExcludes = 'asm.py', 'dev.py', 'font_v3.py', 'gcl0x.py'
+$filesToFormat = get-childitem -Exclude $dirExcludes -Directory | % { get-childitem -path $_ -Recurse -Include '*.py' }
+$filesToFormat += get-childitem -Name '*.py' -Exclude $fileExcludes
+
+& 'black' $filesToFormat
+if ($LASTEXITCODE -ne 0 ) {
+    exit 1;
+}
+
+
 try {
     get-item '.venv' -ErrorAction Stop > $null
 } catch {
@@ -23,6 +34,7 @@ if ($LASTEXITCODE -ne 0 ) {
 if ($LASTEXITCODE -ne 0 ) {
     exit 1;
 }
+
 
 
 'success'

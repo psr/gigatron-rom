@@ -12,7 +12,7 @@ import pathlib2
 import asm
 
 
-interface_file = pathlib2.Path(__file__).parent.parent / 'interface.json'
+interface_file = pathlib2.Path(__file__).parent.parent / "interface.json"
 
 
 with interface_file.open() as fp:

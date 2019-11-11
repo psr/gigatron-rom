@@ -8,10 +8,13 @@ from __future__ import (
     unicode_literals,
 )
 
+import struct
+
 import pytest
 
-from gtemu import emulator, ROM
-import forth  # Must be imported after gtemu!
+import asm
+from gtemu import ROM, RAM
+import forth
 
 
 ##
@@ -87,12 +90,20 @@ def test_parity_depends(from_, to, must_match):
 
 WORD_START = 0x1404  # TODO - this is based on the disassembly, and will change
 
+W = slice(forth.variables.W_lo, forth.variables.W_hi + 1)
 
-def test_next1_successful_test():
+
+def set_W(value):
+    assert 0 <= value < (1 << 16)
+    RAM[W] = bytearray(struct.pack("<H", value))
+
+
+def test_next1_successful_test(emulator):
     """A successful test should result in us being in the right place"""
     # Arrange
     emulator.next_instruction = "forth.next1"
     emulator.AC = 20  # Time remaining is 20 ticks - 40 cycles
+    set_W(WORD_START)
     ROM[WORD_START] = b"\xa0\x02"  # suba $02 - worst case runtime is two ticks
     # Act
     emulator.run_for(forth.cost_of_successful_test)

@@ -12,8 +12,13 @@ import pathlib2
 import asm
 
 
-interface_file = pathlib2.Path(__file__).parent.parent / "interface.json"
+W = W_lo = asm.zpByte(2)
+W_hi = W_lo + 1
+mode = asm.zpByte()
 
 
-with interface_file.open() as fp:
+_interface_file = pathlib2.Path(__file__).parent.parent / "interface.json"
+
+
+with _interface_file.open() as fp:
     globals().update(json.load(fp))

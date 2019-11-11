@@ -7,12 +7,12 @@ from __future__ import (
 )
 
 from asm import *
-from .variables import maxTicks
-
-W = W_lo = zpByte(2)
-W_hi = W_lo + 1
-mode = zpByte()
-
+from .variables import (
+    maxTicks,
+    mode,
+    W_hi,
+    W_lo,
+)
 
 INTERPRETER_ENTER_PAGE = 0x12
 INBOUND_TICK_CORRECTION = maxTicks * 2

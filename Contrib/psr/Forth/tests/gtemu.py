@@ -26,7 +26,10 @@ def _make_state_field_accessors(name):
     def _getter(self):
         state = self._state
         state_is_dict = isinstance(state, dict)
-        return state[name] if state_is_dict else getattr(state, name)
+        try:
+            return state[name] if state_is_dict else getattr(state, name)
+        except KeyError:
+            return 0  # Uninitialised.
 
     def _setter(self, value):
         state = self._state
@@ -42,10 +45,11 @@ def _make_state_field_accessors(name):
     )
 
 
-class _Emulator(object):
+class Emulator(object):
     def __init__(self):
         self._state = {}
         self._last_pc = None
+        self._print = False
 
     def _step(self):
         """Run a single step of the interpreter"""
@@ -53,8 +57,10 @@ class _Emulator(object):
         # This is needed because of the pipeline
         self._last_pc = self.PC
         self._state = _gtemu.lib.cpuCycle(self._state)
+        if self._print:
+            print(self.state)
 
-    globals().update(
+    locals().update(
         {
             field: _make_state_field_accessors(field)
             for field in ["PC", "IR", "D", "AC", "X", "Y", "OUT"]
@@ -103,11 +109,33 @@ class _Emulator(object):
             self._step()
         raise ValueError("Did not hit address in %d instructions" % (max_instructions,))
 
-
-emulator = _Emulator()
+    @property
+    def state(self):
+        """Return a string representation of the current state"""
+        registers = [
+            ("PC", 2),
+            ("IR", 1),
+            ("D", 1),
+            ("AC", 1),
+            ("X", 1),
+            ("Y", 1),
+            ("OUT", 1),
+        ]
+        heading = " ".join(
+            [r.rjust(w * 2 + 2) for r, w in registers] + ["Loaded instruction"]
+        )
+        separator = " ".join(
+            ["-" * (2 * w + 2) for _, w in registers] + ["------------------"]
+        )
+        values = " ".join(
+            [("{:#0%dx}" % (w * 2 + 2,)).format(getattr(self, r)) for r, w in registers]
+            + [asm.disassemble(self.IR, self.D)]
+        )
+        return "\n".join([heading, separator, values])
 
 
 ROM = _gtemu.lib.ROM
+RAM = _gtemu.lib.RAM
 
 # On load, populate the ROM from dev.py, and load the labels
 # HACK!
@@ -115,7 +143,7 @@ ROM = _gtemu.lib.ROM
 # in multiple ways.
 
 # We create a 'Reset' label, and stub out writeRomFiles() to prevent
-# breakage.
+# breakage, and set sys.argv to ['dev.py']
 
 asm.label("Reset")  # Creates it at 0x00
 
@@ -125,11 +153,14 @@ def _stub(*args, **kwargs):
 
 
 _original_writeRomFiles = asm.writeRomFiles
+_original_argv = sys.argv
 asm.writeRomFiles = _stub
+sys.argv = ["dev.py"]
 try:
     import dev
 finally:
     asm.writeRomFiles = _original_writeRomFiles
+    sys.argv = _original_argv
 
 
 def gen_rom_data():
@@ -142,4 +173,4 @@ rom_data = bytearray(gen_rom_data())
 _gtemu.ffi.buffer(ROM)[0 : len(rom_data)] = rom_data
 
 
-__all__ = ["emulator", "ROM"]
+__all__ = ["Emulator", "RAM", "ROM"]

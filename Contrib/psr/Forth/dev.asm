@@ -4478,9 +4478,9 @@ forth.exit.from-next2:
               * 221 times
 forth.restart_or_quit:
               1400 fd30  bra  [$30]
-              1401 f800  ble  forth.restart_or_quit
-.quit:        1402 1413  ld   $13,y
-              1403 e000  jmp  y,$00
+              1401 f802  ble  .quit
+.quit:        1402 1413  ld   $13,y       ;jmp forth.exit.from-failed-test
+              1403 e01c  jmp  y,$1c
               1404 0200  nop              ;252 fillers
               1405 0200  nop
               1406 0200  nop

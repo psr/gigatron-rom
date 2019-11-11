@@ -109,3 +109,15 @@ def test_next1_successful_test(emulator):
     emulator.run_for(forth.cost_of_successful_test)
     # Assert
     assert emulator.next_instruction == WORD_START
+
+
+def test_next1_unsuccessful_test(emulator):
+    # Arrange
+    emulator.next_instruction = "forth.next1"
+    emulator.AC = 20  # Time remaining is 20 ticks - 40 cycles
+    set_W(WORD_START)
+    ROM[WORD_START] = b"\xa0\x14"  # suba $14 - worst case runtime is twenty ticks
+    # Act
+    emulator.run_for(forth.cost_of_failed_next1)
+    # Assert
+    assert emulator.next_instruction == asm.symbol("forth.exit.from-failed-test")

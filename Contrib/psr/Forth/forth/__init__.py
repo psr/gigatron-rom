@@ -44,11 +44,12 @@ def restart_or_quit():
     assert pc() & 0xFF == 0, "restart_or_quit must be placed at the start of a page"
     label("forth.restart_or_quit")
     bra([W_lo])  # 6
-    ble(".quit")  # 7
+    ble(pc() + 1)  # 7
     # 8 happens in start of thread again
     label(".quit")
     ld(hi("forth.exit"), Y)  # 9
-    jmp(Y, "forth.exit.from-failed-test")  # 10
+    C("jmp forth.exit.from-failed-test")
+    jmp(Y, lo("forth.exit.from-failed-test"))  # 10
     # 11, overlap with whatever comes next - hopefully not a branch or jump!
 
 

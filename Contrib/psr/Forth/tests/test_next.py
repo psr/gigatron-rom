@@ -189,14 +189,12 @@ minimum_vticks_for_successful_next2 = (
     + forth.cost_of_next2_success
     + forth.cost_of_failed_test
 ) / 2
-
 maximum_vticks_for_successful_next2 = 127
 
 minimum_vticks_for_failed_next2 = (
     forth.cost_of_successful_test + forth.cost_of_failfast_next2
 ) / 2
-
-maximum_vticks_for_failed_next2 = minimum_vticks_for_successful_next2 - 1
+maximum_vticks_for_failed_next2 = 127
 
 # Hypothesis strategies to generate vticks values consistent with passing and failing next2
 
@@ -224,7 +222,9 @@ maximum_word_cycles_for_sucessful_next2 = lambda vticks: (
     - forth.cost_of_failed_test
 )
 
-minimum_word_cycles_for_failed_next2 = 0
+minimum_word_cycles_for_failed_next2 = (
+    lambda vticks: maximum_word_cycles_for_sucessful_next2(vticks) + 1
+)
 maximum_word_cycles_for_failed_next2 = lambda vticks: (
     vticks * 2 - forth.cost_of_successful_test - forth.cost_of_failfast_next2
 )
@@ -239,7 +239,7 @@ word_cycles_next2_success = vticks_next2_success.flatmap(
 )
 word_cycles_next2_failure = vticks_next2_failure.flatmap(
     lambda vticks: integers(
-        min_value=minimum_word_cycles_for_failed_next2,
+        min_value=minimum_word_cycles_for_failed_next2(vticks),
         max_value=maximum_word_cycles_for_failed_next2(vticks),
     )
 )

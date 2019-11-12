@@ -103,9 +103,9 @@ class Emulator(object):
             if max_instructions is not None
             else itertools.count()
         )
-        for _ in iterator:
+        for i, _ in enumerate(iterator):
             if self._last_pc == address:
-                return
+                return i
             self._step()
         raise ValueError("Did not hit address in %d instructions" % (max_instructions,))
 

@@ -15,7 +15,7 @@ try {
     get-item '.venv' -ErrorAction Stop > $null
 } catch {
     py -2 -m virtualenv '.\.venv'
-    .\.venv\Scripts\pip install cffi ipython pytest
+    .\.venv\Scripts\pip install cffi ipython pytest hypothesis
 }
 
 

@@ -10,9 +10,15 @@ from __future__ import (
 
 import struct
 
+from hypothesis import given
+from hypothesis.strategies import (
+    integers,
+    shared,
+)
 import pytest
 
 import asm
+import dev
 from gtemu import ROM, RAM
 import forth
 
@@ -93,9 +99,60 @@ WORD_START = 0x1404  # TODO - this is based on the disassembly, and will change
 W = slice(forth.variables.W_lo, forth.variables.W_hi + 1)
 
 
-def set_W(value):
+def _set_ram(slice, bytes):
+    RAM[slice] = bytes
+
+
+def _set_u8(addr, byte):
+    assert 0 <= byte < 256
+    _set_ram(addr, byte)
+
+
+def _set_i8(addr, byte):
+    assert -128 <= byte < 128
+    _set_ram(addr, byte & 0xFF)
+
+
+def _set_u16(slice, value):
     assert 0 <= value < (1 << 16)
-    RAM[W] = bytearray(struct.pack("<H", value))
+    _set_ram(slice, bytearray(struct.pack("<H", value)))
+
+
+def _set_i16(slice, value):
+    assert -(1 << 15) <= value < (1 << 15)
+    _set_ram(slice, bytearray(struct.pack("<h", value)))
+
+
+def _get_ram(slice):
+    return bytearray(RAM[slice])
+
+
+def _get_i8(addr):
+    return struct.unpack("b", _get_ram(slice(addr, addr + 1)))[0]
+
+
+def _get_u16(addr):
+    return struct.unpack("<H", _get_ram(W))[0]
+
+
+def set_W(value):
+    _set_u16(W, value)
+
+
+def get_W():
+    return _get_u16(W)
+
+
+def set_mode(value):
+    _set_u8(forth.variables.mode, value)
+
+
+def set_vticks(value):
+    _set_i8(dev.vTicks, value)
+
+
+def get_vticks():
+    return _get_i8(dev.vTicks)
 
 
 def test_next1_successful_test(emulator):
@@ -112,6 +169,7 @@ def test_next1_successful_test(emulator):
 
 
 def test_next1_unsuccessful_test(emulator):
+    "A failed test should result in us being in the right place"
     # Arrange
     emulator.next_instruction = "forth.next1"
     emulator.AC = 20  # Time remaining is 20 ticks - 40 cycles
@@ -121,3 +179,127 @@ def test_next1_unsuccessful_test(emulator):
     emulator.run_for(forth.cost_of_failed_next1)
     # Assert
     assert emulator.next_instruction == asm.symbol("forth.exit.from-failed-test")
+
+
+##
+# Setup for the reentry tests.
+
+minimum_vticks_for_successful_next2 = (
+    forth.cost_of_successful_test
+    + forth.cost_of_next2_success
+    + forth.cost_of_failed_test
+) / 2
+
+maximum_vticks_for_successful_next2 = 127
+
+minimum_vticks_for_failed_next2 = (
+    forth.cost_of_successful_test + forth.cost_of_failfast_next2
+) / 2
+
+maximum_vticks_for_failed_next2 = minimum_vticks_for_successful_next2 - 1
+
+# Hypothesis strategies to generate vticks values consistent with passing and failing next2
+
+vticks_next2_success = shared(
+    integers(
+        min_value=minimum_vticks_for_successful_next2,
+        max_value=maximum_vticks_for_successful_next2,
+    )
+)
+vticks_next2_failure = shared(
+    integers(
+        min_value=minimum_vticks_for_failed_next2,
+        max_value=maximum_vticks_for_failed_next2,
+    )
+)
+
+# Given a the value held in vticks, what is the upper and lower bound of the number of cycles a word can have
+# if next2 is to succeed or fail
+
+minimum_word_cycles_for_sucessful_next2 = 0
+maximum_word_cycles_for_sucessful_next2 = lambda vticks: (
+    vticks * 2
+    - forth.cost_of_successful_test
+    - forth.cost_of_next2_success
+    - forth.cost_of_failed_test
+)
+
+minimum_word_cycles_for_failed_next2 = 0
+maximum_word_cycles_for_failed_next2 = lambda vticks: (
+    vticks * 2 - forth.cost_of_successful_test - forth.cost_of_failfast_next2
+)
+
+# Hypothesis strategies to generate elapsed cycles consistent with passing and failing next2 and vticks
+
+word_cycles_next2_success = vticks_next2_success.flatmap(
+    lambda vticks: integers(
+        min_value=minimum_word_cycles_for_sucessful_next2,
+        max_value=maximum_word_cycles_for_sucessful_next2(vticks),
+    )
+)
+word_cycles_next2_failure = vticks_next2_failure.flatmap(
+    lambda vticks: integers(
+        min_value=minimum_word_cycles_for_failed_next2,
+        max_value=maximum_word_cycles_for_failed_next2(vticks),
+    )
+)
+
+
+@given(vticks=vticks_next2_success, cycles_executed_in_word=word_cycles_next2_success)
+def test_next2_success(emulator, vticks, cycles_executed_in_word):
+    # Arrange
+    ticks_returned = -(
+        (cycles_executed_in_word + 1) // 2  # Round up to a whole number of ticks
+    )  # We round up on entry to next2
+    entry_point = (
+        "forth.next2.even" if even(cycles_executed_in_word) else "forth.next2.odd"
+    )
+    emulator.next_instruction = entry_point
+    expected_cycles = forth.cost_of_next2_success
+    if not even(cycles_executed_in_word):
+        expected_cycles += 1
+    emulator.AC = ticks_returned & 0xFF
+    set_mode(0x42)
+    set_vticks(vticks)
+    # Act
+    cycles_taken_by_next2 = emulator.run_to("forth.next1")
+    # Assert
+    assert get_W() == 0x4282
+    assert cycles_taken_by_next2 == expected_cycles
+    assert get_vticks() == emulator.AC
+    assert get_vticks() * 2 >= forth.cost_of_failed_test
+    assert get_vticks() * 2 == (
+        vticks * 2
+        - forth.cost_of_successful_test
+        - cycles_executed_in_word
+        - cycles_taken_by_next2
+    )
+
+
+@given(vticks=vticks_next2_failure, cycles_executed_in_word=word_cycles_next2_failure)
+def test_next2_failure(emulator, vticks, cycles_executed_in_word):
+    # Arrange
+    ticks_returned = -(
+        (cycles_executed_in_word + 1) // 2  # Round up to a whole number of ticks
+    )  # We round up on entry to next2
+    entry_point = (
+        "forth.next2.even" if even(cycles_executed_in_word) else "forth.next2.odd"
+    )
+    emulator.next_instruction = entry_point
+    expected_cycles = forth.cost_of_next2_failure
+    if not even(cycles_executed_in_word):
+        expected_cycles += 1
+    emulator.AC = ticks_returned & 0xFF
+    set_mode(0x42)
+    set_vticks(vticks)
+    # Act
+    cycles_taken_by_next2 = emulator.run_to("forth.exit.from-next2")
+    # Assert
+    assert get_W() == 0x4282
+    assert cycles_taken_by_next2 == expected_cycles
+    assert (emulator.AC + get_vticks()) * 2 == (
+        vticks * 2
+        - forth.cost_of_successful_test
+        - cycles_executed_in_word
+        - cycles_taken_by_next2
+    )

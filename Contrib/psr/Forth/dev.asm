@@ -4445,21 +4445,21 @@ forth.next1.reenter.odd:
               130b 00ff  ld   $ff
               130c fc00  bra  $1300
               130d 0115  ld   [$15]
-forth.next2.even:
-              130e 0200  nop
 forth.next2.odd:
-              130f a014  suba $14
+              130e 0200  nop
+forth.next2.even:
+              130f a00a  suba $0a
               1310 8115  adda [$15]
               1311 c215  st   [$15]
               1312 0132  ld   [$32]
-              1313 c031  st   $31,[$31]
+              1313 c231  st   [$31]
               1314 0082  ld   $82
               1315 c230  st   [$30]
               1316 0115  ld   [$15]
-              1317 a012  suba $12
-              1318 f800  ble  $1300
+              1317 a009  suba $09
+              1318 e81d  blt  forth.exit.from-next2
               1319 0001  ld   $01
-              131a fc00  bra  $1300
+              131a fc01  bra  forth.next1
               131b 0115  ld   [$15]
 forth.exit:
 forth.exit.from-failed-test:

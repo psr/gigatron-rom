@@ -4,3 +4,4 @@ dev.rom
 .vscode/
 _gtemu*
 Release/
+/.hypothesis/

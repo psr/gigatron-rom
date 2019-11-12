@@ -58,24 +58,24 @@ cost_of_failed_next1 = 11
 
 
 def next2(vTicks):
-    label("forth.next2.even")
-    nop()
     label("forth.next2.odd")
+    nop()
+    label("forth.next2.even")
     # On entry AC holds the negative of the number of ticks taken by the just executed instruction
     # To have entered the instruction we must have also had a successful test,
-    suba(cost_of_successful_test + cost_of_next2_success)  # 1
+    suba((cost_of_successful_test + cost_of_next2_success) / 2)  # 1
     adda([vTicks])  # 2
     st([vTicks])  # 3; If we exit successfully we'll be ready for next1
     ld([mode])  # 4
-    st(W_hi)  # 5
+    st([W_hi])  # 5
     ld(0x82)  # 6  # TODO
     st([W_lo])  # 7
     ld([vTicks])  # 8
-    suba(cost_of_failed_test)  # 9
-    ble("forth.exit.from-next2")  # 10
+    suba((cost_of_failed_test) / 2)  # 9
+    blt(lo("forth.exit.from-next2"))  # 10
     tick_correction = cost_of_next2_success - cost_of_next2_failure
     ld(tick_correction / 2)  # 11; Restore
-    bra("forth.next1")  # 12
+    bra(lo("forth.next1"))  # 12
     ld([vTicks])  # 13
 
 

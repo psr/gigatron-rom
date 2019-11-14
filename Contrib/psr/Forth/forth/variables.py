@@ -15,7 +15,8 @@ import asm
 W = W_lo = asm.zpByte(2)
 W_hi = W_lo + 1
 mode = asm.zpByte()
-
+IP = IP_lo = asm.zpByte(2)
+IP_hi = IP_lo + 1
 
 _interface_file = pathlib2.Path(__file__).parent.parent / "interface.json"
 

@@ -94,7 +94,7 @@ def test_parity_depends(from_, to, must_match):
 ##
 # Run various processes in the emulator
 
-WORD_START = 0x1404  # TODO - this is based on the disassembly, and will change
+WORD_START = dev.start_of_forth_word_space
 
 W = slice(forth.variables.W_lo, forth.variables.W_hi + 1)
 

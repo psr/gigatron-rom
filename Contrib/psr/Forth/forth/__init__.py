@@ -10,6 +10,10 @@ from asm import *
 from .variables import (
     maxTicks,
     mode,
+    IP,
+    IP_lo,
+    IP_hi,
+    W,
     W_hi,
     W_lo,
 )
@@ -84,6 +88,7 @@ cost_of_next2_success = 13
 
 
 def next1_reenter(vTicks):
+    label("forth.next1.reenter")
     label(
         "forth.next1.reenter.even"
     )  # When a word took an even number of cycles, enter here
@@ -132,3 +137,33 @@ cost_of_failfast_next1_reenter = (
 cost_of_failfast = max(cost_of_failfast_next2, cost_of_failfast_next1_reenter)
 
 cost_of_failed_test = cost_of_failed_next1 + cost_of_exit_from_failed_test
+
+
+def next3_rom_head():
+    """Start the process of next3"""
+    label("forth.next3")
+    label("forth.next3.rom-mode")
+    adda(-cost_of_next3_rom / 2)  # 1
+    label("forth.next3.fast-entry")
+    ld(W, X)  # 2
+    ld([IP_hi], Y)  # 3
+    jmp(Y, [W_lo])  # 4
+    ld(0x00, Y)  # 5
+
+
+# Three instructions in the word
+
+
+def next3_rom_tail():
+    """Page-Zero code to finish next3"""
+    assert pc() >> 8 == 0
+    label("forth.next3.rom-mode-tail")
+    ld([IP_lo])  # 9
+    adda(3)  # 10
+    st([IP_lo])  # 11
+    ld(hi("forth.next1.reenter"), Y)  # 12
+    jmp(Y, lo("forth.next1.reenter.even"))  # 13
+    ld(-(cost_of_next3_rom / 2))  # 14
+
+
+cost_of_next3_rom = 14

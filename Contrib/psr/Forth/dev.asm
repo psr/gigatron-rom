@@ -125,10 +125,14 @@ SYS_Reset_88: 005e 00f8  ld   $f8         ;Set ROM type/version and clear channe
               0076 1403  ld   $03,y
               0077 e0cb  jmp  y,$cb
               0078 00ea  ld   $ea
-              0079 0200  nop              ;7 fillers
-              007a 0200  nop
-              007b 0200  nop
-              * 7 times
+forth.next3.rom-mode-tail:
+              0079 0133  ld   [$33]
+              007a 8003  adda $03
+              007b c233  st   [$33]
+              007c 1413  ld   $13,y
+              007d e005  jmp  y,$05
+              007e 00f9  ld   $f9
+              007f 0200  nop              ;filler
               0080 1403  ld   $03,y
               0081 e0cb  jmp  y,$cb
               0082 00f6  ld   $f6
@@ -4434,6 +4438,7 @@ forth.next1:  1301 a00c  suba $0c
               1302 1531  ld   [$31],y
               1303 e130  jmp  y,[$30]
               1304 fc00  bra  $00
+forth.next1.reenter:
 forth.next1.reenter.even:
               1305 0200  nop
 forth.next1.reenter.odd:
@@ -4481,10 +4486,18 @@ forth.restart_or_quit:
               1401 f802  ble  .quit
 .quit:        1402 1413  ld   $13,y       ;jmp forth.exit.from-failed-test
               1403 e01c  jmp  y,$1c
-              1404 0200  nop              ;252 fillers
-              1405 0200  nop
-              1406 0200  nop
-              * 251 times
+forth.next3:
+forth.next3.rom-mode:
+              1404 80f9  adda $f9
+forth.next3.fast-entry:
+              1405 1030  ld   $30,x
+              1406 1534  ld   [$34],y
+              1407 e130  jmp  y,[$30]
+              1408 1400  ld   $00,y
+              1409 0200  nop              ;247 fillers
+              140a 0200  nop
+              140b 0200  nop
+              * 246 times
               14ff 0200  nop              ;+-----------------------------------+
                                           ;| MainMenu\MainMenu.gcl             |
                                           ;+-----------------------------------+

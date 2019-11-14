@@ -660,6 +660,9 @@ ld(hi('REENTER'),Y)             #39
 jmp(Y,'REENTER')                #40
 ld(-44/2)                       #41
 
+import forth
+forth.next3_rom_tail()
+
 #-----------------------------------------------------------------------
 # Placeholders for future SYS functions. This works as a kind of jump
 # table. The indirection allows SYS implementations to be moved around
@@ -678,7 +681,7 @@ ld(-44/2)                       #41
 #-----------------------------------------------------------------------
 
 align(0x80, 0x80)
-
+assert pc() >> 8 == 0, "forth.next3_rom_return must not push the SYS placeholders off page zero"
 ld(hi('REENTER'),Y)             #15 slot 0x80
 jmp(Y,'REENTER')                #16
 ld(-20/2)                       #17

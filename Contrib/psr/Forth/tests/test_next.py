@@ -155,26 +155,45 @@ def get_vticks():
     return _get_i8(dev.vTicks)
 
 
-def test_next1_successful_test(emulator):
+## Setup for next1 tests
+
+vticks_next1 = shared(
+    integers(min_value=forth.cost_of_failed_test + 1 // 2, max_value=127)
+)
+cost_of_word_success = vticks_next1.flatmap(
+    lambda ticks: integers(
+        min_value=0, max_value=(ticks - (forth.cost_of_failfast + 1) // 2)
+    )
+)
+cost_of_word_failure = vticks_next1.flatmap(
+    lambda ticks: integers(
+        min_value=(ticks - (forth.cost_of_failfast + 1) // 2), max_value=127
+    )
+)
+
+
+@given(vticks=vticks_next1, word_cost=cost_of_word_success)
+def test_next1_successful_test(emulator, vticks, word_cost):
     """A successful test should result in us being in the right place"""
     # Arrange
     emulator.next_instruction = "forth.next1"
     emulator.AC = 20  # Time remaining is 20 ticks - 40 cycles
     set_W(WORD_START)
-    ROM[WORD_START] = b"\xa0\x02"  # suba $02 - worst case runtime is two ticks
+    ROM[WORD_START] = [0xA0, word_cost]
     # Act
     emulator.run_for(forth.cost_of_successful_test)
     # Assert
     assert emulator.next_instruction == WORD_START
 
 
-def test_next1_unsuccessful_test(emulator):
+@given(vticks=vticks_next1, word_cost=cost_of_word_failure)
+def test_next1_unsuccessful_test(emulator, vticks, word_cost):
     "A failed test should result in us being in the right place"
     # Arrange
     emulator.next_instruction = "forth.next1"
     emulator.AC = 20  # Time remaining is 20 ticks - 40 cycles
     set_W(WORD_START)
-    ROM[WORD_START] = b"\xa0\x14"  # suba $14 - worst case runtime is twenty ticks
+    ROM[WORD_START] = [0xA0, word_cost]  # suba $14 - worst case runtime is twenty ticks
     # Act
     emulator.run_for(forth.cost_of_failed_next1)
     # Assert

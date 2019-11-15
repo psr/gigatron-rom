@@ -4492,7 +4492,7 @@ forth.next3.rom-mode:
 forth.next3.fast-entry:
               1405 1030  ld   $30,x
               1406 1534  ld   [$34],y
-              1407 e130  jmp  y,[$30]
+              1407 e133  jmp  y,[$33]
               1408 1400  ld   $00,y
               1409 0200  nop              ;247 fillers
               140a 0200  nop

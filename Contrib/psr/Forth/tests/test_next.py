@@ -97,6 +97,7 @@ def test_parity_depends(from_, to, must_match):
 WORD_START = dev.start_of_forth_word_space
 
 W = slice(forth.variables.W_lo, forth.variables.W_hi + 1)
+IP = slice(forth.variables.IP_lo, forth.variables.IP_hi + 1)
 
 
 def _set_ram(slice, bytes):
@@ -153,6 +154,10 @@ def set_vticks(value):
 
 def get_vticks():
     return _get_i8(dev.vTicks)
+
+
+def set_IP(value):
+    _set_i16(IP, value)
 
 
 ## Setup for next1 tests
@@ -446,3 +451,31 @@ def test_next1_reenter_failure(emulator, vticks, cycles_executed_in_word):
         - cycles_taken_by_next1
     ) / 2
     assert sext(emulator.AC) + get_vticks() >= forth.cost_of_exit_from_next1_reenter / 2
+
+
+def negate(value):
+    return -sext(value)
+
+
+def _get_max_tick_cost_of_word(emulator, address):
+    emulator.next_instruction = asm.symbol(address) or address
+    emulator.AC = 0
+    emulator.run_for(1)
+    return negate(emulator.AC)
+
+
+## Test for Next3_rom
+def test_next3_rom(emulator):
+    worst_case_ticks = _get_max_tick_cost_of_word(emulator, "forth.next3.rom-mode")
+    emulator.next_instruction = "forth.next3.rom-mode"
+    set_IP(WORD_START)
+    ROM[WORD_START : WORD_START + 3] = [
+        b"\xdc\x42",  # st $42,[y, x++]
+        [0xE0, asm.symbol("forth.next3.rom-mode-tail")],  # jmp [y,]
+        b"\xdc\x82",  # $82,[y, x++]
+    ]
+
+    cycles_taken = emulator.run_to("forth.next1.reenter")
+
+    assert get_W() == 0x8242
+    assert negate(emulator.AC) * 2 == cycles_taken <= worst_case_ticks * 2

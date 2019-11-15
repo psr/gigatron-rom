@@ -147,7 +147,7 @@ def next3_rom_head():
     label("forth.next3.fast-entry")
     ld(W, X)  # 2
     ld([IP_hi], Y)  # 3
-    jmp(Y, [W_lo])  # 4
+    jmp(Y, [IP_lo])  # 4
     ld(0x00, Y)  # 5
 
 

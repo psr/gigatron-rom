@@ -201,7 +201,7 @@ def test_next1_unsuccessful_test(emulator, vticks, word_cost):
 
 
 ##
-# Setup for the reentry tests.
+# Setup for the Next2 tests.
 
 minimum_vticks_for_successful_next2 = (
     forth.cost_of_successful_test
@@ -322,3 +322,127 @@ def test_next2_failure(emulator, vticks, cycles_executed_in_word):
         - cycles_executed_in_word
         - cycles_taken_by_next2
     )
+
+
+##
+# Setup for the Next1_reenter tests
+
+# For next1_reenter to succeed, vticks + AC needs to be >= cost_of_successful_test + next1_reenter_success + cost_of_failed_test
+
+vticks_next1_reenter_success = shared(
+    integers(
+        min_value=(
+            forth.cost_of_successful_test
+            + forth.cost_of_next1_reenter_success
+            + forth.cost_of_failed_test
+        )
+        // 2,
+        max_value=127,
+    )
+)
+minimum_word_cycles_for_sucessful_next1_reenter = 0
+maximum_word_cycles_for_sucessful_next1_reenter = lambda vticks: (
+    vticks * 2
+    - forth.cost_of_successful_test
+    - forth.cost_of_next1_reenter_success
+    - forth.cost_of_failed_test
+    + 1  # To account for the fact that we can round down
+)
+word_cycles_next1_reenter_success = vticks_next1_reenter_success.flatmap(
+    lambda vticks: integers(
+        min_value=minimum_word_cycles_for_sucessful_next1_reenter,
+        max_value=maximum_word_cycles_for_sucessful_next1_reenter(vticks),
+    )
+)
+
+
+@given(
+    vticks=vticks_next1_reenter_success,
+    cycles_executed_in_word=word_cycles_next1_reenter_success,
+)
+def test_next1_reenter_success(emulator, vticks, cycles_executed_in_word):
+    # Arrange
+    # Round down to a whole number of ticks
+    ticks_returned = -((cycles_executed_in_word) // 2)
+    entry_point = (
+        "forth.next1.reenter.even"
+        if even(cycles_executed_in_word)
+        else "forth.next1.reenter.odd"
+    )
+    emulator.next_instruction = entry_point
+    expected_cycles = forth.cost_of_next1_reenter_success
+    if not even(cycles_executed_in_word):
+        expected_cycles -= 1  # Skip NOP
+    emulator.AC = ticks_returned & 0xFF
+    set_vticks(vticks)
+    # Act
+    cycles_taken_by_next1 = emulator.run_to("forth.next1")
+    # Assert
+    assert cycles_taken_by_next1 == expected_cycles
+    assert get_vticks() == emulator.AC
+    assert get_vticks() * 2 >= forth.cost_of_failed_test
+    assert get_vticks() * 2 == (
+        vticks * 2
+        - forth.cost_of_successful_test
+        - cycles_executed_in_word
+        - cycles_taken_by_next1
+    )
+
+
+vticks_next1_reenter_failure = shared(
+    integers(
+        min_value=(forth.cost_of_successful_test + forth.cost_of_failfast_next1_reenter)
+        // 2,
+        max_value=127,
+    )
+)
+minimum_word_cycles_for_failed_next1_reenter = lambda vticks: (
+    maximum_word_cycles_for_sucessful_next1_reenter(vticks) + 1
+)
+maximum_word_cycles_for_failed_next1_reenter = lambda vticks: (
+    vticks * 2 - forth.cost_of_successful_test - forth.cost_of_failfast_next1_reenter
+)
+word_cycles_next1_reenter_failure = vticks_next1_reenter_failure.flatmap(
+    lambda vticks: integers(
+        min_value=minimum_word_cycles_for_failed_next1_reenter(vticks),
+        max_value=maximum_word_cycles_for_failed_next1_reenter(vticks),
+    )
+)
+
+
+def sext(num):
+    """Sign extend 8-bit integer"""
+    num |= (-1 & ~0xFF) if (num & 0x80) else 0
+    return num
+
+
+@given(
+    vticks=vticks_next1_reenter_failure,
+    cycles_executed_in_word=word_cycles_next1_reenter_failure,
+)
+def test_next1_reenter_failure(emulator, vticks, cycles_executed_in_word):
+    # Arrange
+    # Round down to a whole number of ticks
+    ticks_returned = -((cycles_executed_in_word) // 2)
+    entry_point = (
+        "forth.next1.reenter.even"
+        if even(cycles_executed_in_word)
+        else "forth.next1.reenter.odd"
+    )
+    emulator.next_instruction = entry_point
+    expected_cycles = forth.cost_of_next1_reenter_failure
+    if not even(cycles_executed_in_word):
+        expected_cycles -= 1  # Skip NOP
+    emulator.AC = ticks_returned & 0xFF
+    set_vticks(vticks)
+    # Act
+    cycles_taken_by_next1 = emulator.run_to("forth.exit.from-next1-reenter")
+    # Assert
+    assert cycles_taken_by_next1 == expected_cycles
+    assert (sext(emulator.AC) + get_vticks()) == (
+        vticks * 2
+        - forth.cost_of_successful_test
+        - cycles_executed_in_word
+        - cycles_taken_by_next1
+    ) / 2
+    assert sext(emulator.AC) + get_vticks() >= forth.cost_of_exit_from_next1_reenter / 2

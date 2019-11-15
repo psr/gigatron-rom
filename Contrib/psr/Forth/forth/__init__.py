@@ -99,11 +99,11 @@ def next1_reenter(vTicks):
     suba((cost_of_successful_test + cost_of_next1_reenter_success) / 2)  # 2
     adda([vTicks])  # 3
     st([vTicks])  # 4; If we exit successfully we'll be ready for next1
-    suba(cost_of_failed_test)  # 5
-    ble("forth.exit.from-next1-reenter")  # 6
+    suba(cost_of_failed_test / 2)  # 5
+    blt(lo("forth.exit.from-next1-reenter"))  # 6
     vticks_error = cost_of_next1_reenter_success - cost_of_next1_reenter_failure
-    ld(-(vticks_error / 2))  # 7  ; load vTicks wrongness into A
-    bra("forth.next1")  # 8
+    ld((vticks_error / 2))  # 7  ; load vTicks wrongness into A
+    bra(lo("forth.next1"))  # 8
     ld([vTicks])  # 9
 
 

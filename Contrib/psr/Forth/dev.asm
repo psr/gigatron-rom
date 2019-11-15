@@ -4445,10 +4445,10 @@ forth.next1.reenter.odd:
               1306 a008  suba $08
               1307 8115  adda [$15]
               1308 c215  st   [$15]
-              1309 a012  suba $12
-              130a f800  ble  $1300
-              130b 00ff  ld   $ff
-              130c fc00  bra  $1300
+              1309 a009  suba $09
+              130a e81d  blt  forth.exit.from-next2
+              130b 0001  ld   $01
+              130c fc01  bra  forth.next1
               130d 0115  ld   [$15]
 forth.next2.odd:
               130e 0200  nop

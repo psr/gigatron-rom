@@ -4498,10 +4498,57 @@ forth.next3.fast-entry:
               1428 1534  ld   [$34],y
               1429 e133  jmp  y,[$33]
               142a 1400  ld   $00,y
-              142b 0200  nop              ;213 fillers
-              142c 0200  nop
-              142d 0200  nop
-              * 212 times
+forth.next3.ram-rom-mode:
+              142b 80f5  adda $f5
+              142c 1534  ld   [$34],y
+              142d 1133  ld   [$33],x
+              142e 0d00  ld   [y,x]
+              142f c231  st   [$31]
+              1430 0133  ld   [$33]
+              1431 8001  adda $01
+              1432 c600  st   [x]
+              1433 0d00  ld   [y,x]
+              1434 c233  st   [$33]
+              1435 8002  adda $02
+              1436 f03c  beq  .page-boundary
+              1437 c233  st   [$33]
+              1438 00f7  ld   $f7
+.exit:        1439 1414  ld   $14,y
+              143a 0200  nop
+              143b e008  jmp  y,$08
+.page-boundary:
+              143c 0134  ld   [$34]
+              143d 8001  adda $01
+              143e c234  st   [$34]
+              143f fc39  bra  .exit
+              1440 00f5  ld   $f5
+              1441 80f5  adda $f5
+              1442 1534  ld   [$34],y
+              1443 1133  ld   [$33],x
+              1444 0d00  ld   [y,x]
+              1445 c231  st   [$31]
+              1446 0133  ld   [$33]
+              1447 8001  adda $01
+              1448 c200  st   [$00]
+              1449 0d00  ld   [y,x]
+              144a c233  st   [$33]
+              144b 8002  adda $02
+              144c f052  beq  .page-boundary
+              144d c233  st   [$33]
+              144e 00f7  ld   $f7
+.exit:        144f 1414  ld   $14,y
+              1450 0200  nop
+              1451 e008  jmp  y,$08
+.page-boundary:
+              1452 0134  ld   [$34]
+              1453 8001  adda $01
+              1454 c234  st   [$34]
+              1455 fc4f  bra  .exit
+              1456 00f5  ld   $f5
+              1457 0200  nop              ;169 fillers
+              1458 0200  nop
+              1459 0200  nop
+              * 168 times
               14ff 0200  nop              ;+-----------------------------------+
                                           ;| MainMenu\MainMenu.gcl             |
                                           ;+-----------------------------------+

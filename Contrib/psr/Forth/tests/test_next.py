@@ -283,12 +283,12 @@ def test_next2_success(emulator, vticks, cycles_executed_in_word):
     if not even(cycles_executed_in_word):
         expected_cycles += 1
     emulator.AC = ticks_returned & 0xFF
-    set_mode(0x42)
+    set_mode(asm.symbol("forth.next3.rom-mode") & 0xFF)
     set_vticks(vticks)
     # Act
     cycles_taken_by_next2 = emulator.run_to("forth.next1")
     # Assert
-    assert get_W() == 0x4282
+    assert get_W() == asm.symbol("forth.next3.rom-mode")
     assert cycles_taken_by_next2 == expected_cycles
     assert get_vticks() == emulator.AC
     assert get_vticks() * 2 >= forth.cost_of_failed_test
@@ -314,12 +314,12 @@ def test_next2_failure(emulator, vticks, cycles_executed_in_word):
     if not even(cycles_executed_in_word):
         expected_cycles += 1
     emulator.AC = ticks_returned & 0xFF
-    set_mode(0x42)
+    set_mode(asm.symbol("forth.next3.rom-mode") & 0xFF)
     set_vticks(vticks)
     # Act
     cycles_taken_by_next2 = emulator.run_to("forth.exit.from-next2")
     # Assert
-    assert get_W() == 0x4282
+    assert get_W() == asm.symbol("forth.next3.rom-mode")
     assert cycles_taken_by_next2 == expected_cycles
     assert (emulator.AC + get_vticks()) * 2 == (
         vticks * 2

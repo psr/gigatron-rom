@@ -71,9 +71,9 @@ def next2(vTicks):
     adda([vTicks])  # 2
     st([vTicks])  # 3; If we exit successfully we'll be ready for next1
     ld([mode])  # 4
-    st([W_hi])  # 5
-    ld(0x82)  # 6  # TODO
-    st([W_lo])  # 7
+    st([W_lo])  # 5
+    ld(hi("forth.next3"))  # 6  # TODO
+    st([W_hi])  # 7
     ld([vTicks])  # 8
     suba((cost_of_failed_test) / 2)  # 9
     blt(lo("forth.exit.from-next2"))  # 10
@@ -167,3 +167,38 @@ def next3_rom_tail():
 
 
 cost_of_next3_rom = 14
+
+
+def next3_ram_rom():
+    """NEXT3 to use when in RAM->ROM mode"""
+    adda(-(cost_of_next3_ram_rom / 2))  # 1
+    ld([IP_hi], Y)  # 2
+    ld([IP_lo], X)  # 3
+    ld([X, Y])  # 4
+    st([W_hi])  # 5
+    ld([IP_lo])  # 6
+    adda(1)  # 7
+    st(X)  # 8
+    ld([Y, X])  # 9
+    st([IP_lo])  # 10
+    adda(2)  # 11
+    beq(lo(".page-boundary"))  # 12
+    st([IP_lo])  # 13
+    ld((-cost_of_next3_ram_rom__no_page_cross / 2))  # 14
+    label(".exit")
+    ld(hi("NEXT1"), Y)  # 15, 19
+    nop()  # 16, 20
+    jmp(Y, lo("NEXT1-reenter"))  # 17, 21
+    label(".page-boundary")
+    ld([IP_hi])  # 18, 14, 22 - Overlap
+    adda(1)  # 15
+    st([IP_hi])  # 16
+    bra(lo(".exit"))  # 17
+    ld(-cost_of_next3_ram_rom__page_crossed / 2)  # 18
+
+
+cost_of_next3_ram_rom__no_page_cross = 18
+cost_of_next3_ram_rom__page_crossed = 22
+cost_of_next3_ram_rom = max(
+    cost_of_next3_ram_rom__no_page_cross, cost_of_next3_ram_rom__page_crossed
+)

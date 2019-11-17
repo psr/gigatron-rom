@@ -129,8 +129,8 @@ forth.next3.rom-mode-tail:
               0079 0133  ld   [$33]
               007a 8003  adda $03
               007b c233  st   [$33]
-              007c 1413  ld   $13,y
-              007d e005  jmp  y,$05
+              007c 1414  ld   $14,y
+              007d e008  jmp  y,$08
               007e 00f9  ld   $f9
               007f 0200  nop              ;filler
               0080 1403  ld   $03,y
@@ -4438,66 +4438,70 @@ forth.next1:  1301 a00c  suba $0c
               1302 1531  ld   [$31],y
               1303 e130  jmp  y,[$30]
               1304 fc00  bra  $00
-forth.next1.reenter:
-forth.next1.reenter.even:
-              1305 0200  nop
-forth.next1.reenter.odd:
-              1306 a008  suba $08
-              1307 8115  adda [$15]
-              1308 c215  st   [$15]
-              1309 a009  suba $09
-              130a e81d  blt  forth.exit.from-next2
-              130b 0001  ld   $01
-              130c fc01  bra  forth.next1
-              130d 0115  ld   [$15]
-forth.next2.odd:
-              130e 0200  nop
-forth.next2.even:
-              130f a00a  suba $0a
-              1310 8115  adda [$15]
-              1311 c215  st   [$15]
-              1312 0132  ld   [$32]
-              1313 c231  st   [$31]
-              1314 0082  ld   $82
-              1315 c230  st   [$30]
-              1316 0115  ld   [$15]
-              1317 a009  suba $09
-              1318 e81d  blt  forth.exit.from-next2
-              1319 0001  ld   $01
-              131a fc01  bra  forth.next1
-              131b 0115  ld   [$15]
-forth.exit:
-forth.exit.from-failed-test:
-              131c 00fa  ld   $fa
-forth.exit.from-next1-reenter:
-forth.exit.from-next2:
-              131d 8115  adda [$15]
-              131e 1401  ld   $01,y
-              131f e41f  bgt  $131f
-              1320 a001  suba $01
-              1321 e11e  jmp  y,[$1e]
-              1322 0200  nop
-              1323 0200  nop              ;221 fillers
-              1324 0200  nop
-              1325 0200  nop
-              * 221 times
+              1305 0200  nop              ;251 fillers
+              1306 0200  nop
+              1307 0200  nop
+              * 251 times
 forth.restart_or_quit:
               1400 fd30  bra  [$30]
               1401 f802  ble  .quit
-.quit:        1402 1413  ld   $13,y       ;jmp forth.exit.from-failed-test
-              1403 e01c  jmp  y,$1c
+.quit:        1402 1414  ld   $14,y       ;jmp forth.exit.from-failed-test
+              1403 e01f  jmp  y,$1f       ;Timing point: [vTicks] == AC == accurate number of ticks until we need to be back
+forth.next1:  1404 a00c  suba $0c
+              1405 1531  ld   [$31],y
+              1406 e130  jmp  y,[$30]
+              1407 fc00  bra  $00
+forth.next1.reenter:
+forth.next1.reenter.even:
+              1408 0200  nop
+forth.next1.reenter.odd:
+              1409 a008  suba $08
+              140a 8115  adda [$15]
+              140b c215  st   [$15]
+              140c a009  suba $09
+              140d e820  blt  forth.exit.from-next2
+              140e 0001  ld   $01
+              140f fc04  bra  forth.next1
+              1410 0115  ld   [$15]
+forth.next2.odd:
+              1411 0200  nop
+forth.next2.even:
+              1412 a00a  suba $0a
+              1413 8115  adda [$15]
+              1414 c215  st   [$15]
+              1415 0132  ld   [$32]
+              1416 c230  st   [$30]
+              1417 0014  ld   $14
+              1418 c231  st   [$31]
+              1419 0115  ld   [$15]
+              141a a009  suba $09
+              141b e820  blt  forth.exit.from-next2
+              141c 0001  ld   $01
+              141d fc04  bra  forth.next1
+              141e 0115  ld   [$15]
+forth.exit:
+forth.exit.from-failed-test:
+              141f 00fa  ld   $fa
+forth.exit.from-next1-reenter:
+forth.exit.from-next2:
+              1420 8115  adda [$15]
+              1421 1401  ld   $01,y
+              1422 e422  bgt  $1422
+              1423 a001  suba $01
+              1424 e11e  jmp  y,[$1e]
+              1425 0200  nop
 forth.next3:
 forth.next3.rom-mode:
-              1404 80f9  adda $f9
+              1426 80f9  adda $f9
 forth.next3.fast-entry:
-              1405 1030  ld   $30,x
-              1406 1534  ld   [$34],y
-              1407 e133  jmp  y,[$33]
-              1408 1400  ld   $00,y
-              1409 0200  nop              ;247 fillers
-              140a 0200  nop
-              140b 0200  nop
-              * 246 times
+              1427 1030  ld   $30,x
+              1428 1534  ld   [$34],y
+              1429 e133  jmp  y,[$33]
+              142a 1400  ld   $00,y
+              142b 0200  nop              ;213 fillers
+              142c 0200  nop
+              142d 0200  nop
+              * 212 times
               14ff 0200  nop              ;+-----------------------------------+
                                           ;| MainMenu\MainMenu.gcl             |
                                           ;+-----------------------------------+

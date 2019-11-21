@@ -5,3 +5,4 @@ dev.rom
 _gtemu*
 Release/
 /.hypothesis/
+/.pytest_cache/

@@ -22,4 +22,20 @@ _interface_file = pathlib2.Path(__file__).parent.parent / "interface.json"
 
 
 with _interface_file.open() as fp:
-    globals().update(json.load(fp))
+    _interface = json.load(fp)
+    globals().update(
+        {
+            name: int(value, base=0) if not isinstance(value, int) else value
+            for name, value in _interface.viewitems()
+        }
+    )
+
+
+tmp0 = sysArgs0
+tmp1 = sysArgs1
+tmp2 = sysArgs2
+tmp3 = sysArgs3
+tmp4 = sysArgs4
+tmp5 = sysArgs5
+tmp6 = sysArgs6
+tmp7 = sysArgs7

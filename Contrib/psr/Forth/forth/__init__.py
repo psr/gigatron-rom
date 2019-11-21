@@ -13,6 +13,7 @@ from .variables import (
     IP,
     IP_lo,
     IP_hi,
+    tmp0,
     W,
     W_hi,
     W_lo,
@@ -174,66 +175,91 @@ def next3_ram_rom():
     label("forth.next3.ram-rom-mode")
     adda(-(cost_of_next3_ram_rom / 2))  # 1
     ld([IP_hi], Y)  # 2
+    C("W <- [IP]")
     ld([IP_lo], X)  # 3
     ld([Y, X])  # 4
-    st([W_hi])  # 5
+    st([W_lo])  # 5
     ld([IP_lo])  # 6
     adda(1)  # 7
-    st([X])  # 8
+    ld(AC, X)  # 8
     ld([Y, X])  # 9
-    st([IP_lo])  # 10
-    adda(2)  # 11
-    beq(pc() + 6)  # 12
-    st([IP_lo])  # 13
-    ld((-cost_of_next3_ram_rom__no_page_cross / 2))  # 14
-    label(".exit")
-    ld(hi("forth.next1"), Y)  # 15, 19
-    nop()  # 16, 20
-    jmp(Y, lo("forth.next1.reenter"))  # 17, 21
+    # Increment IP
+    st([W_hi])  # 10
+    C("IP <- IP + 2")
+    ld([IP_lo])  # 11
+    adda(2)  # 12
+    beq(pc() + 5)  # 13
+    st([IP_lo])  # 14
+    ld(hi("forth.next1"), Y)  # 15
+    jmp(Y, lo("forth.next1.reenter.odd"))  # 16
+    ld(-(cost_of_next3_ram_rom__no_page_cross // 2))  # 17
     label(".page-boundary")
-    ld([IP_hi])  # 18, 14, 22 - Overlap
-    adda(1)  # 15
-    st([IP_hi])  # 16
-    bra(pc() - 6)  # 17
-    ld(-cost_of_next3_ram_rom__page_crossed / 2)  # 18
+    ld([IP_hi])  # 15
+    adda(1)  # 16
+    st([IP_hi])  # 17
+    ld(hi("forth.next1"), Y)  # 18
+    jmp(Y, lo("forth.next1.reenter.even"))  # 19
+    ld(-cost_of_next3_ram_rom__page_crossed / 2)  # 20
 
 
-cost_of_next3_ram_rom__no_page_cross = 18
-cost_of_next3_ram_rom__page_crossed = 22
+cost_of_next3_ram_rom__no_page_cross = 17
+cost_of_next3_ram_rom__page_crossed = 20
 cost_of_next3_ram_rom = max(
     cost_of_next3_ram_rom__no_page_cross, cost_of_next3_ram_rom__page_crossed
 )
 
 
 def next3_ram_ram():
-    adda(-cost_of_next3_ram_ram / 2)  # 1
-    ld([IP_hi], Y)  # 2
-    ld([IP_lo], X)  # 3
-    ld([Y, X])  # 4
-    st([W_hi])  # 5
-    ld([IP_lo])  # 6
-    adda(1)  # 7
-    st(AC, X)  # 8
-    ld([Y, X])  # 9
-    st([IP_lo])  # 10
-    adda(2)  # 11
-    beq(pc() + 6)  # 12
-    st([IP_lo])  # 13
-    ld(-cost_of_next3_ram_ram__no_page_cross / 2)  # 14
-    label(".exit")
-    ld(hi("forth.next1"), Y)  # 15, 19
-    nop()  # 16, 20
-    jmp(Y, lo("forth.next1.reenter"))  # 17, 21
-    label(".page-boundary")
-    ld([IP_hi])  # 18, 14, 22 - Overlap
-    adda(1)  # 15
-    st([IP_hi])  # 16
-    bra(pc() - 6)  # 17
-    ld(-cost_of_next3_ram_ram__page_crossed / 2)  # 18
+    label("forth.next3.ram-ram-mode")
+    adda(-(cost_of_next3_ram_ram // 2))
+
+    # Copy low byte to zero-page
+    ld([IP_hi], Y)
+    C("[tmp] <- [IP]")
+    ld([IP_lo], X)
+    ld([Y, X])
+    st([tmp0])
+    # High byte to zero-page
+    ld([IP_lo])
+    adda(1)
+    ld(AC, X)
+    ld([Y, X])
+    ld(AC, Y)
+
+    # Update W
+    C("[W] <- [tmp]")
+    ld([tmp0], X)
+    ld([Y, X])
+    st([W_lo])
+    ld([tmp0])
+    adda(1)
+    ld(AC, X)
+    ld([Y, X])
+    st([W_hi])
+
+    # Increment IP
+    ld([IP_lo])
+    C("IP <- IP + 2")
+    adda(2)
+    bne(pc() + 8)
+    st([IP_lo])
+
+    ld([IP_hi])
+    adda(1)
+    st([IP_hi])
+
+    ld(hi("forth.next1"), Y)
+    jmp(Y, lo("forth.next1.reenter.even"))
+    ld(-(cost_of_next3_ram_ram__page_crossed / 2))
+
+    label(".not-page-boundary")
+    ld(hi("forth.next1"), Y)
+    jmp(Y, lo("forth.next1.reenter.odd"))
+    ld(-(cost_of_next3_ram_ram__no_page_cross // 2))
 
 
-cost_of_next3_ram_ram__no_page_cross = 18
-cost_of_next3_ram_ram__page_crossed = 22
+cost_of_next3_ram_ram__no_page_cross = 25
+cost_of_next3_ram_ram__page_crossed = 28
 cost_of_next3_ram_ram = max(
     cost_of_next3_ram_ram__no_page_cross, cost_of_next3_ram_ram__page_crossed
 )

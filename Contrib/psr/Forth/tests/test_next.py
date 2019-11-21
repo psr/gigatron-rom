@@ -10,7 +10,10 @@ from __future__ import (
 
 import struct
 
-from hypothesis import given
+from hypothesis import (
+    assume,
+    given,
+)
 from hypothesis.strategies import (
     integers,
     shared,
@@ -132,8 +135,8 @@ def _get_i8(addr):
     return struct.unpack("b", _get_ram(slice(addr, addr + 1)))[0]
 
 
-def _get_u16(addr):
-    return struct.unpack("<H", _get_ram(W))[0]
+def _get_u16(slice):
+    return struct.unpack("<H", _get_ram(slice))[0]
 
 
 def set_W(value):
@@ -157,7 +160,11 @@ def get_vticks():
 
 
 def set_IP(value):
-    _set_i16(IP, value)
+    _set_u16(IP, value)
+
+
+def get_IP():
+    return _get_u16(IP)
 
 
 ## Setup for next1 tests
@@ -479,3 +486,69 @@ def test_next3_rom(emulator):
 
     assert get_W() == 0x8242
     assert negate(emulator.AC) * 2 == cycles_taken <= worst_case_ticks * 2
+
+
+## Hypothesis strategy to generate valid IP values.
+# We're assuming that all of our addresses are two-byte
+# aligned - at least for now. The range is from 0x100 to
+# 0x7fff, but generate integers over half that range and multiply by two.
+valid_ips = integers(min_value=0x100 / 2, max_value=(1 << 15) / 2 - 4).map(
+    lambda i: i * 2
+)
+
+
+@given(ip=valid_ips)
+def test_next3_ram_rom(emulator, ip):
+    # Arrange
+    will_cross_page = not ((ip + 2) & 0xFF)
+    expected_cycles = (
+        forth.cost_of_next3_ram_rom__page_crossed
+        if will_cross_page
+        else forth.cost_of_next3_ram_rom__no_page_cross
+    )
+    if even(expected_cycles):
+        # We enter at the even point, but we're counting to the odd entry-point
+        expected_cycles += 1
+    worst_case_ticks = _get_max_tick_cost_of_word(emulator, "forth.next3.ram-rom-mode")
+    emulator.next_instruction = "forth.next3.ram-rom-mode"
+    set_IP(ip)
+    RAM[ip : ip + 2] = bytearray(struct.pack("<H", WORD_START))
+    # Act
+    actual_cycles = emulator.run_to("forth.next1.reenter.odd")
+    # Assert
+    assert get_W() == WORD_START
+    assert get_IP() == ip + 2
+    assert actual_cycles == expected_cycles
+    # -1 because we're counting to the odd entry_point
+    assert worst_case_ticks >= actual_cycles // 2
+    assert -sext(emulator.AC) == actual_cycles // 2
+
+
+@given(ip=valid_ips, target=valid_ips)
+def test_next3_ram_ram(emulator, ip, target):
+    # Arrange
+    # Address IP and target address can't intersect
+    assume(not set(xrange(target, target + 2)) & set(xrange(ip, ip + 2)))
+    will_cross_page = not ((ip + 2) & 0xFF)
+    expected_cycles = (
+        forth.cost_of_next3_ram_ram__page_crossed
+        if will_cross_page
+        else forth.cost_of_next3_ram_ram__no_page_cross
+    )
+    if even(expected_cycles):
+        # We enter at the even point, but we're counting to the odd entry-point
+        expected_cycles += 1
+    worst_case_ticks = _get_max_tick_cost_of_word(emulator, "forth.next3.ram-ram-mode")
+    emulator.next_instruction = "forth.next3.ram-ram-mode"
+    RAM[target : target + 2] = bytearray(struct.pack("<H", WORD_START))
+    set_IP(ip)
+    RAM[ip : ip + 2] = bytearray(struct.pack("<H", target))
+    # Act
+    actual_cycles = emulator.run_to("forth.next1.reenter.odd")
+    # Assert
+    # Actual cycles is +1 because we're timing to odd entrypoint
+    assert get_W() == WORD_START
+    assert get_IP() == ip + 2
+    assert actual_cycles == expected_cycles
+    assert worst_case_ticks >= actual_cycles // 2
+    assert -sext(emulator.AC) == actual_cycles // 2

@@ -16,6 +16,9 @@ assert "asm" not in sys.modules, "gtemu needs to load before anything else touch
 import asm
 
 
+BLANK_RAM = bytearray([0 for _ in range(1 << 15)])
+
+
 def _make_state_field_accessors(name):
     """Return a descriptor that accesses the fields of the state
 
@@ -132,6 +135,9 @@ class Emulator(object):
             + [asm.disassemble(self.IR, self.D)]
         )
         return "\n".join([heading, separator, values])
+
+    def zero_memory(self):
+        _gtemu.ffi.buffer(RAM)[:] = BLANK_RAM
 
 
 ROM = _gtemu.lib.ROM

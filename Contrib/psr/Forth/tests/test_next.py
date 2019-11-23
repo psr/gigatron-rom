@@ -23,7 +23,8 @@ import pytest
 import asm
 import dev
 from gtemu import ROM, RAM
-import forth
+from forth import _next as next
+from forth import variables
 
 
 ##
@@ -50,7 +51,7 @@ parity_must_match = {
 
 _parity_match_cases = [
     pytest.param(
-        getattr(forth, from_), getattr(forth, to), id="{} to {}".format(from_, to)
+        getattr(next, from_), getattr(next, to), id="{} to {}".format(from_, to)
     )
     for from_, tos in parity_must_match.viewitems()
     for to in tos
@@ -75,9 +76,9 @@ parity_depends = {
 
 _parity_match_cases = [
     pytest.param(
-        getattr(forth, from_),
-        getattr(forth, to),
-        getattr(forth, "cost_of_next2_success"),
+        getattr(next, from_),
+        getattr(next, to),
+        getattr(next, "cost_of_next2_success"),
         id="{} to {} must match cost_of_next2_success".format(from_, to),
     )
     for from_, to in parity_depends
@@ -99,8 +100,8 @@ def test_parity_depends(from_, to, must_match):
 
 WORD_START = dev.start_of_forth_word_space
 
-W = slice(forth.variables.W_lo, forth.variables.W_hi + 1)
-IP = slice(forth.variables.IP_lo, forth.variables.IP_hi + 1)
+W = slice(variables.W_lo, variables.W_hi + 1)
+IP = slice(variables.IP_lo, variables.IP_hi + 1)
 
 
 def _set_ram(slice, bytes):
@@ -148,7 +149,7 @@ def get_W():
 
 
 def set_mode(value):
-    _set_u8(forth.variables.mode, value)
+    _set_u8(variables.mode, value)
 
 
 def set_vticks(value):
@@ -170,16 +171,16 @@ def get_IP():
 ## Setup for next1 tests
 
 vticks_next1 = shared(
-    integers(min_value=forth.cost_of_failed_test + 1 // 2, max_value=127)
+    integers(min_value=next.cost_of_failed_test + 1 // 2, max_value=127)
 )
 cost_of_word_success = vticks_next1.flatmap(
     lambda ticks: integers(
-        min_value=0, max_value=(ticks - (forth.cost_of_failfast + 1) // 2)
+        min_value=0, max_value=(ticks - (next.cost_of_failfast + 1) // 2)
     )
 )
 cost_of_word_failure = vticks_next1.flatmap(
     lambda ticks: integers(
-        min_value=(ticks - (forth.cost_of_failfast + 1) // 2), max_value=127
+        min_value=(ticks - (next.cost_of_failfast + 1) // 2), max_value=127
     )
 )
 
@@ -193,7 +194,7 @@ def test_next1_successful_test(emulator, vticks, word_cost):
     set_W(WORD_START)
     ROM[WORD_START] = [0xA0, word_cost]
     # Act
-    emulator.run_for(forth.cost_of_successful_test)
+    emulator.run_for(next.cost_of_successful_test)
     # Assert
     assert emulator.next_instruction == WORD_START
 
@@ -207,7 +208,7 @@ def test_next1_unsuccessful_test(emulator, vticks, word_cost):
     set_W(WORD_START)
     ROM[WORD_START] = [0xA0, word_cost]  # suba $14 - worst case runtime is twenty ticks
     # Act
-    emulator.run_for(forth.cost_of_failed_next1)
+    emulator.run_for(next.cost_of_failed_next1)
     # Assert
     assert emulator.next_instruction == asm.symbol("forth.exit.from-failed-test")
 
@@ -216,14 +217,12 @@ def test_next1_unsuccessful_test(emulator, vticks, word_cost):
 # Setup for the Next2 tests.
 
 minimum_vticks_for_successful_next2 = (
-    forth.cost_of_successful_test
-    + forth.cost_of_next2_success
-    + forth.cost_of_failed_test
+    next.cost_of_successful_test + next.cost_of_next2_success + next.cost_of_failed_test
 ) / 2
 maximum_vticks_for_successful_next2 = 127
 
 minimum_vticks_for_failed_next2 = (
-    forth.cost_of_successful_test + forth.cost_of_failfast_next2
+    next.cost_of_successful_test + next.cost_of_failfast_next2
 ) / 2
 maximum_vticks_for_failed_next2 = 127
 
@@ -248,16 +247,16 @@ vticks_next2_failure = shared(
 minimum_word_cycles_for_sucessful_next2 = 0
 maximum_word_cycles_for_sucessful_next2 = lambda vticks: (
     vticks * 2
-    - forth.cost_of_successful_test
-    - forth.cost_of_next2_success
-    - forth.cost_of_failed_test
+    - next.cost_of_successful_test
+    - next.cost_of_next2_success
+    - next.cost_of_failed_test
 )
 
 minimum_word_cycles_for_failed_next2 = (
     lambda vticks: maximum_word_cycles_for_sucessful_next2(vticks) + 1
 )
 maximum_word_cycles_for_failed_next2 = lambda vticks: (
-    vticks * 2 - forth.cost_of_successful_test - forth.cost_of_failfast_next2
+    vticks * 2 - next.cost_of_successful_test - next.cost_of_failfast_next2
 )
 
 # Hypothesis strategies to generate elapsed cycles consistent with passing and failing next2 and vticks
@@ -286,7 +285,7 @@ def test_next2_success(emulator, vticks, cycles_executed_in_word):
         "forth.next2.even" if even(cycles_executed_in_word) else "forth.next2.odd"
     )
     emulator.next_instruction = entry_point
-    expected_cycles = forth.cost_of_next2_success
+    expected_cycles = next.cost_of_next2_success
     if not even(cycles_executed_in_word):
         expected_cycles += 1
     emulator.AC = ticks_returned & 0xFF
@@ -298,10 +297,10 @@ def test_next2_success(emulator, vticks, cycles_executed_in_word):
     assert get_W() == asm.symbol("forth.next3.rom-mode")
     assert cycles_taken_by_next2 == expected_cycles
     assert get_vticks() == emulator.AC
-    assert get_vticks() * 2 >= forth.cost_of_failed_test
+    assert get_vticks() * 2 >= next.cost_of_failed_test
     assert get_vticks() * 2 == (
         vticks * 2
-        - forth.cost_of_successful_test
+        - next.cost_of_successful_test
         - cycles_executed_in_word
         - cycles_taken_by_next2
     )
@@ -317,7 +316,7 @@ def test_next2_failure(emulator, vticks, cycles_executed_in_word):
         "forth.next2.even" if even(cycles_executed_in_word) else "forth.next2.odd"
     )
     emulator.next_instruction = entry_point
-    expected_cycles = forth.cost_of_next2_failure
+    expected_cycles = next.cost_of_next2_failure
     if not even(cycles_executed_in_word):
         expected_cycles += 1
     emulator.AC = ticks_returned & 0xFF
@@ -330,7 +329,7 @@ def test_next2_failure(emulator, vticks, cycles_executed_in_word):
     assert cycles_taken_by_next2 == expected_cycles
     assert (emulator.AC + get_vticks()) * 2 == (
         vticks * 2
-        - forth.cost_of_successful_test
+        - next.cost_of_successful_test
         - cycles_executed_in_word
         - cycles_taken_by_next2
     )
@@ -344,9 +343,9 @@ def test_next2_failure(emulator, vticks, cycles_executed_in_word):
 vticks_next1_reenter_success = shared(
     integers(
         min_value=(
-            forth.cost_of_successful_test
-            + forth.cost_of_next1_reenter_success
-            + forth.cost_of_failed_test
+            next.cost_of_successful_test
+            + next.cost_of_next1_reenter_success
+            + next.cost_of_failed_test
         )
         // 2,
         max_value=127,
@@ -355,9 +354,9 @@ vticks_next1_reenter_success = shared(
 minimum_word_cycles_for_sucessful_next1_reenter = 0
 maximum_word_cycles_for_sucessful_next1_reenter = lambda vticks: (
     vticks * 2
-    - forth.cost_of_successful_test
-    - forth.cost_of_next1_reenter_success
-    - forth.cost_of_failed_test
+    - next.cost_of_successful_test
+    - next.cost_of_next1_reenter_success
+    - next.cost_of_failed_test
     + 1  # To account for the fact that we can round down
 )
 word_cycles_next1_reenter_success = vticks_next1_reenter_success.flatmap(
@@ -382,7 +381,7 @@ def test_next1_reenter_success(emulator, vticks, cycles_executed_in_word):
         else "forth.next1.reenter.odd"
     )
     emulator.next_instruction = entry_point
-    expected_cycles = forth.cost_of_next1_reenter_success
+    expected_cycles = next.cost_of_next1_reenter_success
     if not even(cycles_executed_in_word):
         expected_cycles -= 1  # Skip NOP
     emulator.AC = ticks_returned & 0xFF
@@ -392,10 +391,10 @@ def test_next1_reenter_success(emulator, vticks, cycles_executed_in_word):
     # Assert
     assert cycles_taken_by_next1 == expected_cycles
     assert get_vticks() == emulator.AC
-    assert get_vticks() * 2 >= forth.cost_of_failed_test
+    assert get_vticks() * 2 >= next.cost_of_failed_test
     assert get_vticks() * 2 == (
         vticks * 2
-        - forth.cost_of_successful_test
+        - next.cost_of_successful_test
         - cycles_executed_in_word
         - cycles_taken_by_next1
     )
@@ -403,7 +402,7 @@ def test_next1_reenter_success(emulator, vticks, cycles_executed_in_word):
 
 vticks_next1_reenter_failure = shared(
     integers(
-        min_value=(forth.cost_of_successful_test + forth.cost_of_failfast_next1_reenter)
+        min_value=(next.cost_of_successful_test + next.cost_of_failfast_next1_reenter)
         // 2,
         max_value=127,
     )
@@ -412,7 +411,7 @@ minimum_word_cycles_for_failed_next1_reenter = lambda vticks: (
     maximum_word_cycles_for_sucessful_next1_reenter(vticks) + 1
 )
 maximum_word_cycles_for_failed_next1_reenter = lambda vticks: (
-    vticks * 2 - forth.cost_of_successful_test - forth.cost_of_failfast_next1_reenter
+    vticks * 2 - next.cost_of_successful_test - next.cost_of_failfast_next1_reenter
 )
 word_cycles_next1_reenter_failure = vticks_next1_reenter_failure.flatmap(
     lambda vticks: integers(
@@ -442,7 +441,7 @@ def test_next1_reenter_failure(emulator, vticks, cycles_executed_in_word):
         else "forth.next1.reenter.odd"
     )
     emulator.next_instruction = entry_point
-    expected_cycles = forth.cost_of_next1_reenter_failure
+    expected_cycles = next.cost_of_next1_reenter_failure
     if not even(cycles_executed_in_word):
         expected_cycles -= 1  # Skip NOP
     emulator.AC = ticks_returned & 0xFF
@@ -453,11 +452,11 @@ def test_next1_reenter_failure(emulator, vticks, cycles_executed_in_word):
     assert cycles_taken_by_next1 == expected_cycles
     assert (sext(emulator.AC) + get_vticks()) == (
         vticks * 2
-        - forth.cost_of_successful_test
+        - next.cost_of_successful_test
         - cycles_executed_in_word
         - cycles_taken_by_next1
     ) / 2
-    assert sext(emulator.AC) + get_vticks() >= forth.cost_of_exit_from_next1_reenter / 2
+    assert sext(emulator.AC) + get_vticks() >= next.cost_of_exit_from_next1_reenter / 2
 
 
 def negate(value):
@@ -502,9 +501,9 @@ def test_next3_ram_rom(emulator, ip):
     # Arrange
     will_cross_page = not ((ip + 2) & 0xFF)
     expected_cycles = (
-        forth.cost_of_next3_ram_rom__page_crossed
+        next.cost_of_next3_ram_rom__page_crossed
         if will_cross_page
-        else forth.cost_of_next3_ram_rom__no_page_cross
+        else next.cost_of_next3_ram_rom__no_page_cross
     )
     if even(expected_cycles):
         # We enter at the even point, but we're counting to the odd entry-point
@@ -531,9 +530,9 @@ def test_next3_ram_ram(emulator, ip, target):
     assume(not set(xrange(target, target + 2)) & set(xrange(ip, ip + 2)))
     will_cross_page = not ((ip + 2) & 0xFF)
     expected_cycles = (
-        forth.cost_of_next3_ram_ram__page_crossed
+        next.cost_of_next3_ram_ram__page_crossed
         if will_cross_page
-        else forth.cost_of_next3_ram_ram__no_page_cross
+        else next.cost_of_next3_ram_ram__no_page_cross
     )
     if even(expected_cycles):
         # We enter at the even point, but we're counting to the odd entry-point

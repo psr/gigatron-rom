@@ -25,6 +25,18 @@ import dev
 from gtemu import ROM, RAM
 from forth import _next as next
 from forth import variables
+from utilities import (
+    do_test_word,
+    even,
+    get_IP,
+    get_W,
+    get_vticks,
+    set_IP,
+    set_W,
+    set_mode,
+    set_vticks,
+    sign_extend,
+)
 
 
 ##
@@ -32,10 +44,6 @@ from forth import variables
 # ================================================================
 # Tests relating to whether the number of cycles on a given path
 # is even or odd.
-
-
-def even(n):
-    return n % 2 == 0
 
 
 parity_must_match = {
@@ -99,73 +107,6 @@ def test_parity_depends(from_, to, must_match):
 # Run various processes in the emulator
 
 WORD_START = dev.start_of_forth_word_space
-
-W = slice(variables.W_lo, variables.W_hi + 1)
-IP = slice(variables.IP_lo, variables.IP_hi + 1)
-
-
-def _set_ram(slice, bytes):
-    RAM[slice] = bytes
-
-
-def _set_u8(addr, byte):
-    assert 0 <= byte < 256
-    _set_ram(addr, byte)
-
-
-def _set_i8(addr, byte):
-    assert -128 <= byte < 128
-    _set_ram(addr, byte & 0xFF)
-
-
-def _set_u16(slice, value):
-    assert 0 <= value < (1 << 16)
-    _set_ram(slice, bytearray(struct.pack("<H", value)))
-
-
-def _set_i16(slice, value):
-    assert -(1 << 15) <= value < (1 << 15)
-    _set_ram(slice, bytearray(struct.pack("<h", value)))
-
-
-def _get_ram(slice):
-    return bytearray(RAM[slice])
-
-
-def _get_i8(addr):
-    return struct.unpack("b", _get_ram(slice(addr, addr + 1)))[0]
-
-
-def _get_u16(slice):
-    return struct.unpack("<H", _get_ram(slice))[0]
-
-
-def set_W(value):
-    _set_u16(W, value)
-
-
-def get_W():
-    return _get_u16(W)
-
-
-def set_mode(value):
-    _set_u8(variables.mode, value)
-
-
-def set_vticks(value):
-    _set_i8(dev.vTicks, value)
-
-
-def get_vticks():
-    return _get_i8(dev.vTicks)
-
-
-def set_IP(value):
-    _set_u16(IP, value)
-
-
-def get_IP():
-    return _get_u16(IP)
 
 
 ## Setup for next1 tests
@@ -421,12 +362,6 @@ word_cycles_next1_reenter_failure = vticks_next1_reenter_failure.flatmap(
 )
 
 
-def sext(num):
-    """Sign extend 8-bit integer"""
-    num |= (-1 & ~0xFF) if (num & 0x80) else 0
-    return num
-
-
 @given(
     vticks=vticks_next1_reenter_failure,
     cycles_executed_in_word=word_cycles_next1_reenter_failure,
@@ -450,29 +385,20 @@ def test_next1_reenter_failure(emulator, vticks, cycles_executed_in_word):
     cycles_taken_by_next1 = emulator.run_to("forth.exit.from-next1-reenter")
     # Assert
     assert cycles_taken_by_next1 == expected_cycles
-    assert (sext(emulator.AC) + get_vticks()) == (
+    assert (sign_extend(emulator.AC) + get_vticks()) == (
         vticks * 2
         - next.cost_of_successful_test
         - cycles_executed_in_word
         - cycles_taken_by_next1
     ) / 2
-    assert sext(emulator.AC) + get_vticks() >= next.cost_of_exit_from_next1_reenter / 2
-
-
-def negate(value):
-    return -sext(value)
-
-
-def _get_max_tick_cost_of_word(emulator, address):
-    emulator.next_instruction = asm.symbol(address) or address
-    emulator.AC = 0
-    emulator.run_for(1)
-    return negate(emulator.AC)
+    assert (
+        sign_extend(emulator.AC) + get_vticks()
+        >= next.cost_of_exit_from_next1_reenter / 2
+    )
 
 
 ## Test for Next3_rom
 def test_next3_rom(emulator):
-    worst_case_ticks = _get_max_tick_cost_of_word(emulator, "forth.next3.rom-mode")
     emulator.next_instruction = "forth.next3.rom-mode"
     set_IP(WORD_START)
     ROM[WORD_START : WORD_START + 3] = [
@@ -481,10 +407,9 @@ def test_next3_rom(emulator):
         b"\xdc\x82",  # $82,[y, x++]
     ]
 
-    cycles_taken = emulator.run_to("forth.next1.reenter")
-
+    do_test_word(emulator, continue_on_reenter=False)
     assert get_W() == 0x8242
-    assert negate(emulator.AC) * 2 == cycles_taken <= worst_case_ticks * 2
+    assert get_IP() == WORD_START + 3
 
 
 ## Hypothesis strategy to generate valid IP values.
@@ -499,28 +424,14 @@ valid_ips = integers(min_value=0x100 / 2, max_value=(1 << 15) / 2 - 4).map(
 @given(ip=valid_ips)
 def test_next3_ram_rom(emulator, ip):
     # Arrange
-    will_cross_page = not ((ip + 2) & 0xFF)
-    expected_cycles = (
-        next.cost_of_next3_ram_rom__page_crossed
-        if will_cross_page
-        else next.cost_of_next3_ram_rom__no_page_cross
-    )
-    if even(expected_cycles):
-        # We enter at the even point, but we're counting to the odd entry-point
-        expected_cycles += 1
-    worst_case_ticks = _get_max_tick_cost_of_word(emulator, "forth.next3.ram-rom-mode")
     emulator.next_instruction = "forth.next3.ram-rom-mode"
     set_IP(ip)
     RAM[ip : ip + 2] = bytearray(struct.pack("<H", WORD_START))
     # Act
-    actual_cycles = emulator.run_to("forth.next1.reenter.odd")
+    do_test_word(emulator, continue_on_reenter=False)
     # Assert
     assert get_W() == WORD_START
     assert get_IP() == ip + 2
-    assert actual_cycles == expected_cycles
-    # -1 because we're counting to the odd entry_point
-    assert worst_case_ticks >= actual_cycles // 2
-    assert -sext(emulator.AC) == actual_cycles // 2
 
 
 @given(ip=valid_ips, target=valid_ips)
@@ -528,26 +439,12 @@ def test_next3_ram_ram(emulator, ip, target):
     # Arrange
     # Address IP and target address can't intersect
     assume(not set(xrange(target, target + 2)) & set(xrange(ip, ip + 2)))
-    will_cross_page = not ((ip + 2) & 0xFF)
-    expected_cycles = (
-        next.cost_of_next3_ram_ram__page_crossed
-        if will_cross_page
-        else next.cost_of_next3_ram_ram__no_page_cross
-    )
-    if even(expected_cycles):
-        # We enter at the even point, but we're counting to the odd entry-point
-        expected_cycles += 1
-    worst_case_ticks = _get_max_tick_cost_of_word(emulator, "forth.next3.ram-ram-mode")
     emulator.next_instruction = "forth.next3.ram-ram-mode"
     RAM[target : target + 2] = bytearray(struct.pack("<H", WORD_START))
     set_IP(ip)
     RAM[ip : ip + 2] = bytearray(struct.pack("<H", target))
     # Act
-    actual_cycles = emulator.run_to("forth.next1.reenter.odd")
+    do_test_word(emulator, continue_on_reenter=False)
     # Assert
-    # Actual cycles is +1 because we're timing to odd entrypoint
     assert get_W() == WORD_START
     assert get_IP() == ip + 2
-    assert actual_cycles == expected_cycles
-    assert worst_case_ticks >= actual_cycles // 2
-    assert -sext(emulator.AC) == actual_cycles // 2

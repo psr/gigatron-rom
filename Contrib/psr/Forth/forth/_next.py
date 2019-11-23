@@ -7,6 +7,11 @@ from __future__ import (
 )
 
 from asm import *
+
+from ._utilities import (
+    REENTER,
+    cost_of_reenter,
+)
 from .variables import (
     maxTicks,
     mode,
@@ -18,6 +23,7 @@ from .variables import (
     W_hi,
     W_lo,
 )
+
 
 INTERPRETER_ENTER_PAGE = 0x12
 INBOUND_TICK_CORRECTION = maxTicks * 2
@@ -162,12 +168,10 @@ def next3_rom_tail():
     ld([IP_lo])  # 9
     adda(3)  # 10
     st([IP_lo])  # 11
-    ld(hi("forth.next1.reenter"), Y)  # 12
-    jmp(Y, lo("forth.next1.reenter.even"))  # 13
-    ld(-(cost_of_next3_rom / 2))  # 14
+    REENTER(11)
 
 
-cost_of_next3_rom = 14
+cost_of_next3_rom = 11 + cost_of_reenter
 
 
 def next3_ram_rom():
@@ -190,20 +194,16 @@ def next3_ram_rom():
     adda(2)  # 12
     beq(pc() + 5)  # 13
     st([IP_lo])  # 14
-    ld(hi("forth.next1"), Y)  # 15
-    jmp(Y, lo("forth.next1.reenter.odd"))  # 16
-    ld(-(cost_of_next3_ram_rom__no_page_cross // 2))  # 17
+    REENTER(14)
     label(".page-boundary")
     ld([IP_hi])  # 15
     adda(1)  # 16
     st([IP_hi])  # 17
-    ld(hi("forth.next1"), Y)  # 18
-    jmp(Y, lo("forth.next1.reenter.even"))  # 19
-    ld(-cost_of_next3_ram_rom__page_crossed / 2)  # 20
+    REENTER(17)
 
 
-cost_of_next3_ram_rom__no_page_cross = 17
-cost_of_next3_ram_rom__page_crossed = 20
+cost_of_next3_ram_rom__no_page_cross = 14 + cost_of_reenter
+cost_of_next3_ram_rom__page_crossed = 17 + cost_of_reenter
 cost_of_next3_ram_rom = max(
     cost_of_next3_ram_rom__no_page_cross, cost_of_next3_ram_rom__page_crossed
 )
@@ -248,18 +248,14 @@ def next3_ram_ram():
     adda(1)
     st([IP_hi])
 
-    ld(hi("forth.next1"), Y)
-    jmp(Y, lo("forth.next1.reenter.even"))
-    ld(-(cost_of_next3_ram_ram__page_crossed / 2))
+    REENTER(25)
 
     label(".not-page-boundary")
-    ld(hi("forth.next1"), Y)
-    jmp(Y, lo("forth.next1.reenter.odd"))
-    ld(-(cost_of_next3_ram_ram__no_page_cross // 2))
+    REENTER(22)
 
 
-cost_of_next3_ram_ram__no_page_cross = 25
-cost_of_next3_ram_ram__page_crossed = 28
+cost_of_next3_ram_ram__no_page_cross = 22 + cost_of_reenter
+cost_of_next3_ram_ram__page_crossed = 25 + cost_of_reenter
 cost_of_next3_ram_ram = max(
     cost_of_next3_ram_ram__no_page_cross, cost_of_next3_ram_ram__page_crossed
 )

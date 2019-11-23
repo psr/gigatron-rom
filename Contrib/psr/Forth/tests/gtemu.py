@@ -53,6 +53,7 @@ class Emulator(object):
         self._state = {}
         self._last_pc = None
         self._print = False
+        self.breakpoints = set()
 
     def _step(self):
         """Run a single step of the interpreter"""
@@ -90,15 +91,27 @@ class Emulator(object):
         self._last_pc = address
 
     def run_for(self, instructions):
-        """Run the emulator for a fixed number of cycles"""
-        for _ in xrange(instructions):
+        """Run the emulator for a fixed number of cycles
+
+        Will stop at breakpoints if they are hit,
+        but always executes at least one cycle
+
+        Returns the number of cycles executed.
+        """
+        for i in xrange(instructions):
             self._step()
+            if self._last_pc in self.breakpoints:
+                return
+        return instructions
 
     def run_to(self, address, max_instructions=1000):
         """Run the emulator until it is about to execute the instruction at `address`
         
         Due to the pipeline, this means that for the previous instruction PC was `address`,
         and therefore we have loaded the instruction.
+
+        Will stop at breakpoints if they are hit,
+        but always executes at least one cycle
         """
         address = asm.symbol(address) or address
         iterator = (
@@ -107,9 +120,9 @@ class Emulator(object):
             else itertools.count()
         )
         for i, _ in enumerate(iterator):
-            if self._last_pc == address:
-                return i
             self._step()
+            if self._last_pc == address or self._last_pc in self.breakpoints:
+                return i + 1
         raise ValueError("Did not hit address in %d instructions" % (max_instructions,))
 
     @property

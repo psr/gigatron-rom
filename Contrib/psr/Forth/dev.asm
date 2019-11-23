@@ -129,7 +129,7 @@ forth.next3.rom-mode-tail:
               0079 0133  ld   [$33]
               007a 8003  adda $03
               007b c233  st   [$33]
-              007c 1414  ld   $14,y
+              007c 1414  ld   $14,y       ;REENTER
               007d e008  jmp  y,$08
               007e 00f9  ld   $f9
               007f 0200  nop              ;filler
@@ -4513,14 +4513,14 @@ forth.next3.ram-rom-mode:
               1436 8002  adda $02
               1437 f03c  beq  .page-boundary
               1438 c233  st   [$33]
-              1439 1414  ld   $14,y
+              1439 1414  ld   $14,y       ;REENTER
               143a e009  jmp  y,$09
               143b 00f8  ld   $f8
 .page-boundary:
               143c 0134  ld   [$34]
               143d 8001  adda $01
               143e c234  st   [$34]
-              143f 1414  ld   $14,y
+              143f 1414  ld   $14,y       ;REENTER
               1440 e008  jmp  y,$08
               1441 00f6  ld   $f6
 forth.next3.ram-ram-mode:
@@ -4549,11 +4549,11 @@ forth.next3.ram-ram-mode:
               1458 0134  ld   [$34]
               1459 8001  adda $01
               145a c234  st   [$34]
-              145b 1414  ld   $14,y
+              145b 1414  ld   $14,y       ;REENTER
               145c e008  jmp  y,$08
               145d 00f2  ld   $f2
 .not-page-boundary:
-              145e 1414  ld   $14,y
+              145e 1414  ld   $14,y       ;REENTER
               145f e009  jmp  y,$09
               1460 00f4  ld   $f4
               1461 0200  nop              ;159 fillers

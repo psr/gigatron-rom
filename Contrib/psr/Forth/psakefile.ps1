@@ -5,7 +5,7 @@ $fileExcludes = 'asm.py', 'dev.py', 'font_v3.py', 'gcl0x.py'
 $filesToFormat = get-childitem -Exclude $dirExcludes -Directory | % { get-childitem -path $_ -Recurse -Include '*.py' }
 $filesToFormat += get-childitem -Name '*.py' -Exclude $fileExcludes
 
-task default -depends Blacken, Test
+task default -depends Blacken, Test, ROM
 
 task Blacken {
     & 'black' $filesToFormat

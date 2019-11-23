@@ -4521,7 +4521,7 @@ forth.next3.ram-rom-mode:
               143d 8001  adda $01
               143e c234  st   [$34]
               143f 1414  ld   $14,y
-              1440 e009  jmp  y,$09
+              1440 e008  jmp  y,$08
               1441 00f6  ld   $f6
 forth.next3.ram-ram-mode:
               1442 80f2  adda $f2
@@ -4533,34 +4533,33 @@ forth.next3.ram-ram-mode:
               1448 8001  adda $01
               1449 1200  ld   ac,x
               144a 0d00  ld   [y,x]
-              144b c225  st   [$25]
-              144c 1525  ld   [$25],y     ;[W] <- [tmp]
-              144d 1124  ld   [$24],x
-              144e 0d00  ld   [y,x]
-              144f c230  st   [$30]
-              1450 0124  ld   [$24]
-              1451 8001  adda $01
-              1452 c200  st   [$00]
-              1453 0d00  ld   [y,x]
-              1454 c230  st   [$30]
-              1455 0133  ld   [$33]       ;IP <- IP + 2
-              1456 8002  adda $02
-              1457 ec5f  bne  .not-page-boundary
-              1458 c233  st   [$33]
-              1459 0134  ld   [$34]
-              145a 8001  adda $01
-              145b c233  st   [$33]
-              145c 1414  ld   $14,y
-              145d e009  jmp  y,$09
-              145e 00f2  ld   $f2
+              144b 1600  ld   ac,y        ;[W] <- [tmp]
+              144c 1124  ld   [$24],x
+              144d 0d00  ld   [y,x]
+              144e c230  st   [$30]
+              144f 0124  ld   [$24]
+              1450 8001  adda $01
+              1451 1200  ld   ac,x
+              1452 0d00  ld   [y,x]
+              1453 c231  st   [$31]
+              1454 0133  ld   [$33]       ;IP <- IP + 2
+              1455 8002  adda $02
+              1456 ec5e  bne  .not-page-boundary
+              1457 c233  st   [$33]
+              1458 0134  ld   [$34]
+              1459 8001  adda $01
+              145a c234  st   [$34]
+              145b 1414  ld   $14,y
+              145c e008  jmp  y,$08
+              145d 00f2  ld   $f2
 .not-page-boundary:
-              145f 1414  ld   $14,y
-              1460 e008  jmp  y,$08
-              1461 00f3  ld   $f3
-              1462 0200  nop              ;158 fillers
+              145e 1414  ld   $14,y
+              145f e009  jmp  y,$09
+              1460 00f4  ld   $f4
+              1461 0200  nop              ;159 fillers
+              1462 0200  nop
               1463 0200  nop
-              1464 0200  nop
-              * 157 times
+              * 158 times
               14ff 0200  nop              ;+-----------------------------------+
                                           ;| MainMenu\MainMenu.gcl             |
                                           ;+-----------------------------------+

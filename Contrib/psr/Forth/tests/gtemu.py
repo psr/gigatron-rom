@@ -101,7 +101,7 @@ class Emulator(object):
         for i in xrange(instructions):
             self._step()
             if self._last_pc in self.breakpoints:
-                return
+                return i + 1
         return instructions
 
     def run_to(self, address, max_instructions=1000):

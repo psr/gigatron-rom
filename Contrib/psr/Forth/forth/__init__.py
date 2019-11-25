@@ -28,3 +28,4 @@ from ._core import *
 def emit_core_words():
     drop()
     drop_two()
+    swap()

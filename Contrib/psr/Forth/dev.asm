@@ -4573,10 +4573,43 @@ forth.core.2DROP:
               146c 1414  ld   $14,y       ;NEXT
               146d e011  jmp  y,$11
               146e 00fc  ld   $fc
-              146f 0200  nop              ;145 fillers
-              1470 0200  nop
-              1471 0200  nop
-              * 144 times
+forth.core.SWAP:
+              146f 80f0  adda $f0         ;Copy top 4 bytes of stack to tmp
+              1470 111c  ld   [$1c],x
+              1471 0500  ld   [x]
+              1472 c224  st   [$24]
+              1473 011c  ld   [$1c]
+              1474 8001  adda $01
+              1475 1200  ld   ac,x
+              1476 0500  ld   [x]
+              1477 c225  st   [$25]
+              1478 011c  ld   [$1c]
+              1479 8002  adda $02
+              147a 1200  ld   ac,x
+              147b 0500  ld   [x]
+              147c c226  st   [$26]
+              147d 011c  ld   [$1c]
+              147e 8003  adda $03
+              147f 1200  ld   ac,x
+              1480 0500  ld   [x]
+              1481 c227  st   [$27]
+              1482 1400  ld   $00,y       ;Copy back to stack in order
+              1483 111c  ld   [$1c],x
+              1484 0126  ld   [$26]
+              1485 de00  st   [y,x++]
+              1486 0127  ld   [$27]
+              1487 de00  st   [y,x++]
+              1488 0124  ld   [$24]
+              1489 de00  st   [y,x++]
+              148a 0125  ld   [$25]
+              148b de00  st   [y,x++]
+              148c 1414  ld   $14,y       ;NEXT
+              148d e012  jmp  y,$12
+              148e 00f0  ld   $f0
+              148f 0200  nop              ;113 fillers
+              1490 0200  nop
+              1491 0200  nop
+              * 112 times
               14ff 0200  nop              ;+-----------------------------------+
                                           ;| MainMenu\MainMenu.gcl             |
                                           ;+-----------------------------------+

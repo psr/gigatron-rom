@@ -21,3 +21,10 @@ from ._next import (
     next3_ram_rom,
     restart_or_quit,
 )
+
+from ._core import *
+
+
+def emit_core_words():
+    drop()
+    drop_two()

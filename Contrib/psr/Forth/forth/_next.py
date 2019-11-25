@@ -69,6 +69,7 @@ cost_of_failed_next1 = 11
 
 
 def next2(vTicks):
+    label("forth.next2")
     label("forth.next2.odd")
     nop()
     label("forth.next2.even")

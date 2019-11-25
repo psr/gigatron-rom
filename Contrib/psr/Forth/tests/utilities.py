@@ -157,7 +157,7 @@ def do_test_word(emulator, entrypoint=None, continue_on_reenter=True):
 
     if emulator.next_instruction == next2_even:
         assert even(actual_cycles)
-        assert negate_byte(emulator.AC) == actual_cycles
+        assert negate_byte(emulator.AC) * 2 == actual_cycles
         return
 
     raise AssertionError(

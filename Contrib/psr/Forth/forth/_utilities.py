@@ -28,11 +28,21 @@ def next(cycles_so_far):
     ld(hi("forth.next2"), Y)  # 1
     C("NEXT")
     jmp(Y, lo(target))  # 2
-    ld(-cost / 2)  # 3
+    ld(-(cost / 2))  # 3
 
 
 NEXT = next
 cost_of_next = 3
+
+
+def add_cost_of_next(cycles_before):
+    cost = cycles_before + cost_of_next
+    if cost % 2 != 0:
+        cost += 1
+    return cost
+
+
+"add_cost_of_reenter"
 
 
 def reenter(cycles_so_far):
@@ -53,4 +63,18 @@ REENTER = reenter
 cost_of_reenter = 3
 
 
-__all__ = ["next", "NEXT", "reenter", "REENTER"]
+def add_cost_of_reenter(cycles_before):
+    cost = cycles_before + cost_of_reenter
+    if cost % 2 != 0:
+        cost -= 1
+    return cost
+
+
+__all__ = [
+    "next",
+    "NEXT",
+    "reenter",
+    "REENTER",
+    "add_cost_of_reenter",
+    "add_cost_of_next",
+]

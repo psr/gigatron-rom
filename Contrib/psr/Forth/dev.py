@@ -5127,6 +5127,7 @@ forth.exit(vTicks, vReturn)
 forth.next3_rom_head()
 forth.next3_ram_rom()
 forth.next3_ram_ram()
+forth.emit_core_words()
 # Check that we've kept all of this on the predicted page
 start_of_forth_word_space = pc()
 assert pc() >> 8 == forth_next1_page, (hex(pc()), forth_next1_page)

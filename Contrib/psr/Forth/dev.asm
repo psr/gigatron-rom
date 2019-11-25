@@ -4463,6 +4463,7 @@ forth.next1.reenter.odd:
               140e 0001  ld   $01
               140f fc04  bra  forth.next1
               1410 0115  ld   [$15]
+forth.next2:
 forth.next2.odd:
               1411 0200  nop
 forth.next2.even:
@@ -4556,10 +4557,26 @@ forth.next3.ram-ram-mode:
               145e 1414  ld   $14,y       ;REENTER
               145f e009  jmp  y,$09
               1460 00f4  ld   $f4
-              1461 0200  nop              ;159 fillers
-              1462 0200  nop
-              1463 0200  nop
-              * 158 times
+forth.core.DROP:
+              1461 80fc  adda $fc
+              1462 011c  ld   [$1c]
+              1463 8002  adda $02
+              1464 c21c  st   [$1c]
+              1465 1414  ld   $14,y       ;NEXT
+              1466 e011  jmp  y,$11
+              1467 00fc  ld   $fc
+forth.core.2DROP:
+              1468 80fc  adda $fc
+              1469 011c  ld   [$1c]
+              146a 8004  adda $04
+              146b c21c  st   [$1c]
+              146c 1414  ld   $14,y       ;NEXT
+              146d e011  jmp  y,$11
+              146e 00fc  ld   $fc
+              146f 0200  nop              ;145 fillers
+              1470 0200  nop
+              1471 0200  nop
+              * 144 times
               14ff 0200  nop              ;+-----------------------------------+
                                           ;| MainMenu\MainMenu.gcl             |
                                           ;+-----------------------------------+

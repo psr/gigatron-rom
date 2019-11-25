@@ -408,6 +408,7 @@ def test_next3_rom(emulator):
     ]
 
     do_test_word(emulator, continue_on_reenter=False)
+
     assert get_W() == 0x8242
     assert get_IP() == WORD_START + 3
 

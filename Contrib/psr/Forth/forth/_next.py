@@ -53,7 +53,7 @@ def next1(vTicks):
 
 def restart_or_quit():
     assert pc() & 0xFF == 0, "restart_or_quit must be placed at the start of a page"
-    label("forth.restart_or_quit")
+    label("forth.restart-or-quit")
     bra([W_lo])  # 6
     ble(pc() + 1)  # 7
     # 8 happens in start of thread again

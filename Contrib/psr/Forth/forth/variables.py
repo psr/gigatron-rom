@@ -7,7 +7,10 @@ from __future__ import (
 )
 import json
 
-import pathlib2
+try:
+    import pathlib
+except ImportError:
+    import pathlib2 as pathlib
 
 import asm
 
@@ -18,7 +21,7 @@ mode = asm.zpByte()
 IP = IP_lo = asm.zpByte(2)
 IP_hi = IP_lo + 1
 
-_interface_file = pathlib2.Path(__file__).parent.parent / "interface.json"
+_interface_file = pathlib.Path(__file__).parent.parent / "interface.json"
 
 
 with _interface_file.open() as fp:
@@ -26,7 +29,7 @@ with _interface_file.open() as fp:
     globals().update(
         {
             name: int(value, base=0) if not isinstance(value, int) else value
-            for name, value in _interface.viewitems()
+            for name, value in _interface.items()
         }
     )
 

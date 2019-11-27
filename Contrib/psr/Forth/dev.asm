@@ -4454,7 +4454,7 @@ forth.next1:  1301 a00c  suba $0c
               1306 0200  nop
               1307 0200  nop
               * 251 times
-forth.restart_or_quit:
+forth.restart-or-quit:
               1400 fd30  bra  [$30]
               1401 f802  ble  .quit
 .quit:        1402 1414  ld   $14,y       ;jmp forth.exit.from-failed-test

@@ -10,6 +10,7 @@
 
 from os.path import basename, splitext
 import json
+import sys
 
 #------------------------------------------------------------------------
 #       Public interface

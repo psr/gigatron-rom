@@ -1,7 +1,7 @@
 $ErrorActionPreference = 'Stop';
 
 $dirExcludes = '.venv', '.pytest_cache'
-$fileExcludes = 'asm.py', 'dev.py', 'font_v3.py', 'gcl0x.py'
+$fileExcludes = 'asm.py', 'dev.py', 'font_vX.py', 'gcl0x.py'
 $filesToFormat = get-childitem -Exclude $dirExcludes -Directory | % { get-childitem -path $_ -Recurse -Include '*.py' }
 $filesToFormat += get-childitem -Name '*.py' -Exclude $fileExcludes
 

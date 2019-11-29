@@ -484,7 +484,7 @@ def loadBindings(symfile):
       _symbols[_str(name)] = value
 
 def getRom1():
-  return ''.join(chr(byte) for byte in _rom1)
+  return bytearray(_rom1)
 
 def writeRomFiles(sourceFile):
 

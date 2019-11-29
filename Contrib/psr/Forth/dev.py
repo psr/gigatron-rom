@@ -5332,14 +5332,14 @@ for application in argv[1:]:
   if application.endswith(('.gt1', '.gt1x')):
     print('Load type .gt1 at $%04x' % pc())
     with open(application, 'rb') as f:
-      raw = f.read()
+      raw = bytearray(f.read())
     label(name)
     raw = raw[:-2] # Drop start address
-    if ord(raw[0]) == 0 and ord(raw[1]) + ord(raw[2]) > 0xc0:
+    if raw[0] == 0 and raw[1] + raw[2] > 0xc0:
       print('Warning: zero-page conflict with ROM loader (SYS_Exec_88)')
     program = gcl.Program(None)
     for byte in raw:
-      program.putInRomTable(ord(byte))
+      program.putInRomTable(byte)
     program.end()
 
   # GCL files
@@ -5396,13 +5396,13 @@ for application in argv[1:]:
     width, height = 256, 16
     print('Convert type .rgb/sequential at $%04x' % pc())
     f = open(application, 'rb')
-    raw = f.read()
+    raw = bytearray(f.read())
     f.close()
     label(name)
     packed, quartet = [], []
     for i in range(0, len(raw), 3):
-      R, G, B = ord(raw[i+0]), ord(raw[i+1]), ord(raw[i+2])
-      quartet.append((R/85) + 4*(G/85) + 16*(B/85))
+      R, G, B = raw[i+0], raw[i+1], raw[i+2]
+      quartet.append((R//85) + 4*(G//85) + 16*(B//85))
       if len(quartet) == 4:
         # Pack 4 pixels in 3 bytes
         packed.append( ((quartet[0]&0b111111)>>0) + ((quartet[1]&0b000011)<<6) )
@@ -5419,12 +5419,12 @@ for application in argv[1:]:
   elif application.endswith('/gigatron.rgb'):
     print(('Convert type gigatron.rgb at $%04x' % pc()))
     f = open(application, 'rb')
-    raw = f.read()
+    raw = bytearray(f.read())
     f.close()
     label(name)
     for i in range(len(raw)):
       if pc()&255 < 251:
-        ld(ord(raw[i]))
+        ld(raw[i])
       elif pc()&255 == 251:
         trampoline()
 

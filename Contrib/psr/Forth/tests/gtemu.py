@@ -1,13 +1,5 @@
-# -*- coding: utf-8 -*-
 """Wrapper for the gtemu emulator"""
 
-from __future__ import (
-    absolute_import,
-    division,
-    print_function,
-    unicode_literals,
-)
-import itertools
 import sys
 
 import _gtemu
@@ -98,7 +90,7 @@ class Emulator(object):
 
         Returns the number of cycles executed.
         """
-        for i in xrange(instructions):
+        for i in range(instructions):
             self._step()
             if self._last_pc in self.breakpoints:
                 return i + 1
@@ -115,7 +107,7 @@ class Emulator(object):
         """
         address = asm.symbol(address) or address
         iterator = (
-            xrange(max_instructions)
+            range(max_instructions)
             if max_instructions is not None
             else itertools.count()
         )
@@ -183,7 +175,7 @@ finally:
 
 
 def gen_rom_data():
-    for opcode, operand in itertools.izip(asm._rom0, asm._rom1):
+    for opcode, operand in zip(asm._rom0, asm._rom1):
         yield opcode
         yield operand
 

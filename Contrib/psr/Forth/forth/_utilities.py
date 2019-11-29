@@ -1,11 +1,4 @@
-# -*- coding: utf-8 -*-
 """Helpers for generating the right code"""
-from __future__ import (
-    absolute_import,
-    division,
-    print_function,
-    unicode_literals,
-)
 
 from asm import (
     C,

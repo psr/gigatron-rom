@@ -1,12 +1,4 @@
-# -*- coding: utf-8 -*-
 """Tests for the Forth NEXT implementation"""
-
-from __future__ import (
-    absolute_import,
-    division,
-    print_function,
-    unicode_literals,
-)
 
 import struct
 
@@ -61,7 +53,7 @@ _parity_match_cases = [
     pytest.param(
         getattr(next, from_), getattr(next, to), id="{} to {}".format(from_, to)
     )
-    for from_, tos in parity_must_match.viewitems()
+    for from_, tos in parity_must_match.items()
     for to in tos
 ]
 
@@ -439,7 +431,7 @@ def test_next3_ram_rom(emulator, ip):
 def test_next3_ram_ram(emulator, ip, target):
     # Arrange
     # Address IP and target address can't intersect
-    assume(not set(xrange(target, target + 2)) & set(xrange(ip, ip + 2)))
+    assume(not set(range(target, target + 2)) & set(range(ip, ip + 2)))
     emulator.next_instruction = "forth.next3.ram-ram-mode"
     RAM[target : target + 2] = bytearray(struct.pack("<H", WORD_START))
     set_IP(ip)

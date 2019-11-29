@@ -26,7 +26,7 @@ task Virtualenv {
         get-item '.venv' -ErrorAction Stop > $null
     }
     catch {
-        py -2 -m virtualenv '.\.venv'
+        python3 -m venv '.\.venv'
     }
 }
 
@@ -46,7 +46,7 @@ task Extension -depends Packages {
 
 
 task ROM {
-    .\.venv\Scripts\python.exe -3 .\dev.py Main=MainMenu\MainMenu.gcl Reset=Reset.gcl
+    .\.venv\Scripts\python.exe .\dev.py Main=MainMenu\MainMenu.gcl Reset=Reset.gcl
     if ($LASTEXITCODE -ne 0 ) {
         throw "Rom failed";
     }

@@ -1,12 +1,4 @@
-# -*- coding: utf-8 -*-
 """Native code Forth implementation for the Gigatron"""
-
-from __future__ import (
-    absolute_import,
-    division,
-    print_function,
-    unicode_literals,
-)
 
 from ._next import (
     INBOUND_TICK_CORRECTION,

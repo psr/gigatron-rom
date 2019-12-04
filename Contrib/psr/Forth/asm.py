@@ -101,31 +101,18 @@ bmi = blt # Alias
 
 def label(name):
   """Label the current address"""
-  address = _romSize
-  define(name, address)
-  if address not in _labels:
-    _labels[address] = [] # There can be more than one
-  _labels[_romSize].append(name)
+  _assemblerState.label(name)
 
 def C(line):
   """Insert comment to print in disassembly"""
-  if line:
-    address = max(0, _romSize-1)
-    if address not in _comments:
-      _comments[address] = []
-    _comments[address].append(line)
-  return None
+  _assemblerState.comment(line)
 
 def define(name, newValue):
-  if name in _symbols:
-    oldValue =  _symbols[name]
-    if newValue != oldValue:
-      print('Warning: redefining %s (old %s new %s)' % (name, oldValue, newValue))
-  _symbols[name] = newValue
+  _assemblerState.define(name, newValue)
 
 def symbol(name):
   """Lookup a symbol, return None if not defined"""
-  return _symbols[name] if name in _symbols else None
+  return _assemblerState.symbols.get(name, None)
 
 def has(x):
   """Useful primitive"""
@@ -135,19 +122,19 @@ def lo(name):
   if isinstance(name, int):
     return name & 255
   else:
-    _refsL.append((name, _romSize))
-    return 0 # placeholder
+    return _assemblerState.lowAddressReference(name)
 
 def hi(name):
   if isinstance(name, int):
     return (name >> 8) & 255
   else:
-    _refsH.append((name, _romSize))
-    return 0 # placeholder
+    return _assemblerState.highAddressReference(name)
 
 def align(m=0x100, chunkSize=0x10000):
   """Insert nops to align with chunk boundary"""
   global _maxRomSize
+  if _assemblerState is not _rootAssemblerState:
+    raise RuntimeError("align() only makes sense at the root scope")
   n = (m - pc()) % m
   comment = 'filler' if n==1 else '%d fillers' % n
   while pc() % m > 0:
@@ -163,7 +150,7 @@ def wait(n):
     n -= 1
     ld(n//2 - 1)
     comment = C(comment)
-    bne(_romSize & 255)
+    bne(pc() & 255)
     suba(1)
     n = n % 2
   while n > 0:
@@ -172,7 +159,7 @@ def wait(n):
 
 def pc():
   """Current ROM address"""
-  return _romSize
+  return _assemblerState._romSize
 
 def zpByte(len=1):
   """Allocate one or more bytes from the zero-page"""
@@ -191,6 +178,8 @@ def zpReset(startFrom=1):
 
 def fillers(until=256, instruction=nop):
   """Insert fillers until given page offset"""
+  if _assemblerState is not _rootAssemblerState:
+    raise RuntimeError("fillers() only makes sense at the root scope")
   n = until - (pc() & 255)
   comment = 'filler' if n==1 else '%d fillers' % n
   for i in range(n):
@@ -218,6 +207,44 @@ def trampoline():
   C('+-----------------------------------+')
   align(1, 0x100)
 
+PARENT_SCOPE = object()  # Sentinal value
+def begin(write_to=PARENT_SCOPE, pc=None):
+  """Begin a new nested assembler state
+
+  This gives a new scope for local labels etc.
+
+  can be used as a contextmanager:
+
+  >>> assembled_code = []
+  >>> global_labels = {}
+  >>> labels = {}
+  >>> with begin(writeto=assembled_code, pc=5, globals=global_labels, labels=lables):
+  ...     label("global_label")
+  ...     ld(3)
+  ...     adda(4)
+  ...     st(0)
+  ...     bra(pc() - 3)
+  ...     label('.private-label')
+  ...     bra('.private-label')
+  >>> len(assembled_code)
+  5
+  >>> assembled_code[3][2]
+  5
+  >>> labels
+  {'global-label': 5, '.private-label': 10}
+  >>> global_labels
+  {'global-label': 5}
+  >>> print(disassemble(assembled_code, labels, pc=5))
+  global_label: 0005 xxxx  ld   $03
+                0006 xxxx  adda $04
+                0007 xxxx  st   $00
+                0008 xxxx  br   $05
+  .private-label:
+                0009 xxxx  br   $09
+  """
+  pass  # TODO
+
+
 def end():
   """Resolve symbols and write output"""
   global _errors
@@ -244,17 +271,61 @@ def end():
 
   align(1)
 
+
+
+
 #------------------------------------------------------------------------
 #       Behind the scenes
 #------------------------------------------------------------------------
 
-# Module variables because I don't feel like making a class
-_romSize, _maxRomSize, _zpSize = 0, 0, 1
-_symbols, _refsL, _refsH = {}, [], []
-_labels = {} # Inverse of _symbols, but only when made with label(). For disassembler
-_comments = {}
-_rom0, _rom1 = [], []
-_errors = 0
+_maxRomSize = 0
+_zpSize = 1
+
+class _AssemblerState(object):
+
+  def __init__(self):
+    self._romSize = 0
+    self.symbols = {}
+    self. _refsL = []
+    self._refsH = []
+    self._labels = {} # Inverse of _symbols, but only when made with label(). For disassembler
+    self._comments = {}
+    self._rom0 = bytearray()
+    self._rom1 =  bytearray()
+    self._errors = 0
+
+  def label(self, name):
+    address = self._romSize
+    self.define(name, address)
+    if address not in self._labels:
+      self._labels[address] = [] # There can be more than one
+    self._labels[self._romSize].append(name)
+
+  def comment(self, line):
+    if line:
+      address = max(0, self._romSize-1)
+      if address not in self._comments:
+        self._comments[address] = []
+      self._comments[address].append(line)
+
+  def define(self, name, newValue):
+    if name in self.symbols:
+      oldValue =  self.symbols[name]
+      if newValue != oldValue:
+        print('Warning: redefining %s (old %s new %s)' % (name, oldValue, newValue))
+    self.symbols[name] = newValue
+
+  def lowAddressReference(self, name):
+    self._refsL.append((name, self._romSize))
+    return 0
+
+  def highAddressReference(self, name):
+    self._refsH.append((name, self._romSize))
+    return 0
+
+_rootAssemblerState = _assemblerState = _AssemblerState()
+
+
 
 # General instruction layout
 _maskOp   = 0b11100000
@@ -372,7 +443,7 @@ def _assemble(op, val, to=AC, addr=None):
   elif isinstance(val, (_bytes, _str)): d = lo(_str(val)) # Convenient for branch instructions
   elif isinstance(val, int): d = val
 
-  _emit(op | mode | bus, d & 255)
+  return(op | mode | bus, d & 255)
 
 _mnemonics = [ 'ld', 'anda', 'ora', 'xora', 'adda', 'suba', 'st', 'j' ]
 

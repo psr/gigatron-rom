@@ -40,3 +40,10 @@ tmp7 = sysArgs7
 data_stack_pointer = vSP
 data_stack_empty = 0x100
 data_stack_full = 129
+data_stack_page = 0
+
+
+return_stack_pointer = asm.zpByte()
+return_stack_empty = 0x8000
+return_stack_full = 0x7FA0
+return_stack_page = return_stack_full >> 8

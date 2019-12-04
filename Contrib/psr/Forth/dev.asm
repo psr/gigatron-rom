@@ -4586,27 +4586,27 @@ forth.core.2DROP:
               146d e011  jmp  y,$11
               146e 00fc  ld   $fc
 forth.core.SWAP:
-              146f 80f0  adda $f0         ;Copy top 4 bytes of stack to tmp
-              1470 111c  ld   [$1c],x
-              1471 0500  ld   [x]
-              1472 c224  st   [$24]
-              1473 011c  ld   [$1c]
-              1474 8001  adda $01
-              1475 1200  ld   ac,x
-              1476 0500  ld   [x]
-              1477 c225  st   [$25]
-              1478 011c  ld   [$1c]
-              1479 8002  adda $02
-              147a 1200  ld   ac,x
-              147b 0500  ld   [x]
-              147c c226  st   [$26]
-              147d 011c  ld   [$1c]
-              147e 8003  adda $03
-              147f 1200  ld   ac,x
+              146f 80f0  adda $f0
+              1470 011c  ld   [$1c]
+              1471 8001  adda $01
+              1472 1200  ld   ac,x
+              1473 0500  ld   [x]
+              1474 c224  st   [$24]
+              1475 011c  ld   [$1c]
+              1476 8002  adda $02
+              1477 1200  ld   ac,x
+              1478 0500  ld   [x]
+              1479 c225  st   [$25]
+              147a 011c  ld   [$1c]
+              147b 8003  adda $03
+              147c 1200  ld   ac,x
+              147d 0500  ld   [x]
+              147e c226  st   [$26]
+              147f 111c  ld   [$1c],x
               1480 0500  ld   [x]
               1481 c227  st   [$27]
-              1482 1400  ld   $00,y       ;Copy back to stack in order
-              1483 111c  ld   [$1c],x
+              1482 111c  ld   [$1c],x
+              1483 1400  ld   $00,y
               1484 0126  ld   [$26]
               1485 de00  st   [y,x++]
               1486 0127  ld   [$27]

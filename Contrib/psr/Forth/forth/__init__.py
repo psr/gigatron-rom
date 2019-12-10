@@ -21,3 +21,7 @@ def emit_core_words():
     drop()
     drop_two()
     swap()
+    dup()
+    over()
+    rot()
+    two_swap()

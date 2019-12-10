@@ -6803,13 +6803,133 @@ forth.core.SWAP:
               146a 1413  ld   $13,y       ;NEXT
               146b e013  jmp  y,$13
               146c 00f0  ld   $f0
+forth.core.DUP:
+              146d 80f6  adda $f6
+              146e 111c  ld   [$1c],x
+              146f 0500  ld   [x]
+              1470 c224  st   [$24]
+              1471 011c  ld   [$1c]
+              1472 9001  adda $01,x
+              1473 0500  ld   [x]
+              1474 c225  st   [$25]
+              1475 1400  ld   $00,y
+              1476 011c  ld   [$1c]
+              1477 a002  suba $02
+              1478 d21c  st   [$1c],x
+              1479 0124  ld   [$24]
+              147a de00  st   [y,x++]
+              147b 0125  ld   [$25]
+              147c ce00  st   [y,x]
+              147d 1413  ld   $13,y       ;NEXT
+              147e e012  jmp  y,$12
+              147f 00f6  ld   $f6
+forth.core.OVER:
+              1480 80f6  adda $f6
+              1481 011c  ld   [$1c]
+              1482 9002  adda $02,x
+              1483 0500  ld   [x]
+              1484 c224  st   [$24]
+              1485 011c  ld   [$1c]
+              1486 9003  adda $03,x
+              1487 0500  ld   [x]
+              1488 c225  st   [$25]
+              1489 1400  ld   $00,y
+              148a 011c  ld   [$1c]
+              148b a002  suba $02
+              148c d21c  st   [$1c],x
+              148d 0124  ld   [$24]
+              148e de00  st   [y,x++]
+              148f 0125  ld   [$25]
+              1490 ce00  st   [y,x]
+              1491 1413  ld   $13,y       ;NEXT
+              1492 e013  jmp  y,$13
+              1493 00f6  ld   $f6
+forth.core.ROT:
+              1494 80ef  adda $ef
+              1495 1400  ld   $00,y
+              1496 011c  ld   [$1c]
+              1497 9004  adda $04,x
+              1498 0500  ld   [x]
+              1499 c224  st   [$24]
+              149a 011c  ld   [$1c]
+              149b 9005  adda $05,x
+              149c 0500  ld   [x]
+              149d c225  st   [$25]
+              149e 111c  ld   [$1c],x
+              149f 0500  ld   [x]
+              14a0 c226  st   [$26]
+              14a1 0124  ld   [$24]
+              14a2 de00  st   [y,x++]
+              14a3 0500  ld   [x]
+              14a4 c224  st   [$24]
+              14a5 0125  ld   [$25]
+              14a6 de00  st   [y,x++]
+              14a7 0500  ld   [x]
+              14a8 c225  st   [$25]
+              14a9 0126  ld   [$26]
+              14aa de00  st   [y,x++]
+              14ab 0500  ld   [x]
+              14ac c226  st   [$26]
+              14ad 0124  ld   [$24]
+              14ae de00  st   [y,x++]
+              14af 0125  ld   [$25]
+              14b0 de00  st   [y,x++]
+              14b1 0126  ld   [$26]
+              14b2 de00  st   [y,x++]
+              14b3 1413  ld   $13,y       ;NEXT
+              14b4 e013  jmp  y,$13
+              14b5 00ef  ld   $ef
+forth.core.2SWAP:
+              14b6 80ea  adda $ea
+              14b7 1400  ld   $00,y
+              14b8 011c  ld   [$1c]
+              14b9 9004  adda $04,x
+              14ba 0500  ld   [x]
+              14bb de00  st   [y,x++]
+              14bc c224  st   [$24]
+              14bd 0500  ld   [x]
+              14be de00  st   [y,x++]
+              14bf c225  st   [$25]
+              14c0 0500  ld   [x]
+              14c1 de00  st   [y,x++]
+              14c2 c226  st   [$26]
+              14c3 0500  ld   [x]
+              14c4 c227  st   [$27]
+              14c5 111c  ld   [$1c],x
+              14c6 0500  ld   [x]
+              14c7 c228  st   [$28]
+              14c8 0124  ld   [$24]
+              14c9 de00  st   [y,x++]
+              14ca 0500  ld   [x]
+              14cb c224  st   [$24]
+              14cc 0125  ld   [$25]
+              14cd de00  st   [y,x++]
+              14ce 0500  ld   [x]
+              14cf c225  st   [$25]
+              14d0 0126  ld   [$26]
+              14d1 de00  st   [y,x++]
+              14d2 0500  ld   [x]
+              14d3 c226  st   [$26]
+              14d4 0127  ld   [$27]
+              14d5 de00  st   [y,x++]
+              14d6 0128  ld   [$28]
+              14d7 de00  st   [y,x++]
+              14d8 0124  ld   [$24]
+              14d9 de00  st   [y,x++]
+              14da 0125  ld   [$25]
+              14db de00  st   [y,x++]
+              14dc 0126  ld   [$26]
+              14dd de00  st   [y,x++]
+              14de 1413  ld   $13,y       ;NEXT
+              14df e012  jmp  y,$12
+              14e0 00ea  ld   $ea
                                           5230  # Check that we've kept all of this on the predicted page
                                           5231  start_of_forth_word_space = pc()
                                           5232  # --- Page boundary ---
-              146d 0200  nop              5233  align(0x100,0x100)
-              146e 0200  nop
-              146f 0200  nop
-              * 146 times
+              14e1 0200  nop              5233  align(0x100,0x100)
+              14e2 0200  nop
+              14e3 0200  nop
+              * 30 times
               14ff 0200  nop              5233  align(0x100,0x100)
                                           5234
                                           5235  #-----------------------------------------------------------------------

@@ -5214,21 +5214,21 @@ adda(forth.INBOUND_TICK_CORRECTION)
 align(0x100,0x100)
 st([vTicks])
 forth.next1(vTicks)
-# --- Page boundary ---
-align(0x100,0x100)
-forth.restart_or_quit()
 forth_next1_page = pc() >> 8
 forth.next1(vTicks)
 forth.next1_reenter(vTicks)
 forth.next2(vTicks)
 forth.exit(vTicks, vReturn)
+assert pc() >> 8 == forth_next1_page, (hex(pc()), forth_next1_page)
+# --- Page boundary ---
+align(0x100,0x100)
+forth.restart_or_quit()
 forth.next3_rom_head()
 forth.next3_ram_rom()
 forth.next3_ram_ram()
 forth.emit_core_words()
 # Check that we've kept all of this on the predicted page
 start_of_forth_word_space = pc()
-assert pc() >> 8 == forth_next1_page, (hex(pc()), forth_next1_page)
 # --- Page boundary ---
 align(0x100,0x100)
 

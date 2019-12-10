@@ -529,8 +529,8 @@ forth.next3.rom-mode-tail:
               0079 0133  ld   [$33]       685   forth.next3_rom_tail()
               007a 8003  adda $03
               007b c233  st   [$33]
-              007c 1414  ld   $14,y       ;REENTER
-              007d e008  jmp  y,$08
+              007c 1413  ld   $13,y       ;REENTER
+              007d e009  jmp  y,$09
               007e 00f9  ld   $f9
                                           686
                                           687   #-----------------------------------------------------------------------
@@ -6631,185 +6631,185 @@ FORTH_ENTER:  12ff 801c  adda $1c         5212  adda(forth.INBOUND_TICK_CORRECTI
 forth.next1:  1301 a00c  suba $0c         5216  forth.next1(vTicks)
               1302 1531  ld   [$31],y
               1303 e130  jmp  y,[$30]
-              1304 fc00  bra  $00
-                                          5217  # --- Page boundary ---
-              1305 0200  nop              5218  align(0x100,0x100)
-              1306 0200  nop
-              1307 0200  nop
-              * 251 times
-forth.restart-or-quit:
-              1400 fd30  bra  [$30]       5219  forth.restart_or_quit()
-              1401 f802  ble  .quit
-.quit:        1402 1414  ld   $14,y       ;jmp forth.exit.from-failed-test
-              1403 e01f  jmp  y,$1f       ;Timing point: [vTicks] == AC == accurate number of ticks until we need to be back
-                                          5220  forth_next1_page = pc() >> 8
-forth.next1:  1404 a00c  suba $0c         5221  forth.next1(vTicks)
-              1405 1531  ld   [$31],y
-              1406 e130  jmp  y,[$30]
-              1407 fc00  bra  $00
+              1304 fc00  bra  $00         ;Timing point: [vTicks] == AC == accurate number of ticks until we need to be back
+                                          5217  forth_next1_page = pc() >> 8
+forth.next1:  1305 a00c  suba $0c         5218  forth.next1(vTicks)
+              1306 1531  ld   [$31],y
+              1307 e130  jmp  y,[$30]
+              1308 fc00  bra  $00
 forth.next1.reenter:
 forth.next1.reenter.even:
-              1408 0200  nop              5222  forth.next1_reenter(vTicks)
+              1309 0200  nop              5219  forth.next1_reenter(vTicks)
 forth.next1.reenter.odd:
-              1409 a008  suba $08
-              140a 8115  adda [$15]
-              140b c215  st   [$15]
-              140c a009  suba $09
-              140d e820  blt  forth.exit.from-next2
-              140e 0001  ld   $01
-              140f fc04  bra  forth.next1
-              1410 0115  ld   [$15]
+              130a a008  suba $08
+              130b 8115  adda [$15]
+              130c c215  st   [$15]
+              130d a009  suba $09
+              130e e821  blt  forth.exit.from-next2
+              130f 0001  ld   $01
+              1310 fc05  bra  forth.next1
+              1311 0115  ld   [$15]
 forth.next2:
 forth.next2.odd:
-              1411 0200  nop              5223  forth.next2(vTicks)
+              1312 0200  nop              5220  forth.next2(vTicks)
 forth.next2.even:
-              1412 a00a  suba $0a
-              1413 8115  adda [$15]
-              1414 c215  st   [$15]
-              1415 0132  ld   [$32]
-              1416 c230  st   [$30]
-              1417 0014  ld   $14
-              1418 c231  st   [$31]
-              1419 0115  ld   [$15]
-              141a a009  suba $09
-              141b e820  blt  forth.exit.from-next2
-              141c 0001  ld   $01
-              141d fc04  bra  forth.next1
-              141e 0115  ld   [$15]
+              1313 a00a  suba $0a
+              1314 8115  adda [$15]
+              1315 c215  st   [$15]
+              1316 0132  ld   [$32]
+              1317 c230  st   [$30]
+              1318 0014  ld   $14
+              1319 c231  st   [$31]
+              131a 0115  ld   [$15]
+              131b a009  suba $09
+              131c e821  blt  forth.exit.from-next2
+              131d 0001  ld   $01
+              131e fc05  bra  forth.next1
+              131f 0115  ld   [$15]
 forth.exit:
 forth.exit.from-failed-test:
-              141f 00fa  ld   $fa         5224  forth.exit(vTicks, vReturn)
+              1320 00fa  ld   $fa         5221  forth.exit(vTicks, vReturn)
 forth.exit.from-next1-reenter:
 forth.exit.from-next2:
-              1420 8115  adda [$15]
-              1421 1401  ld   $01,y
-              1422 e422  bgt  $1422
-              1423 a001  suba $01
-              1424 e11e  jmp  y,[$1e]
-              1425 0200  nop
+              1321 8115  adda [$15]
+              1322 1401  ld   $01,y
+              1323 e423  bgt  $1323
+              1324 a001  suba $01
+              1325 e11e  jmp  y,[$1e]
+              1326 0200  nop
+                                          5222  assert pc() >> 8 == forth_next1_page, (hex(pc()), forth_next1_page)
+                                          5223  # --- Page boundary ---
+              1327 0200  nop              5224  align(0x100,0x100)
+              1328 0200  nop
+              1329 0200  nop
+              * 217 times
+forth.restart-or-quit:
+              1400 fd30  bra  [$30]       5225  forth.restart_or_quit()
+              1401 f802  ble  .quit
+.quit:        1402 1413  ld   $13,y       ;jmp forth.exit.from-failed-test
+              1403 e020  jmp  y,$20
 forth.next3:
 forth.next3.rom-mode:
-              1426 80f9  adda $f9         5225  forth.next3_rom_head()
+              1404 80f9  adda $f9         5226  forth.next3_rom_head()
 forth.next3.fast-entry:
-              1427 1030  ld   $30,x
-              1428 1534  ld   [$34],y
-              1429 e133  jmp  y,[$33]
-              142a 1400  ld   $00,y
+              1405 1030  ld   $30,x
+              1406 1534  ld   [$34],y
+              1407 e133  jmp  y,[$33]
+              1408 1400  ld   $00,y
 forth.next3.ram-rom-mode:
-              142b 80f6  adda $f6         5226  forth.next3_ram_rom()
-              142c 1534  ld   [$34],y     ;W <- [IP]
-              142d 1133  ld   [$33],x
-              142e 0d00  ld   [y,x]
-              142f c230  st   [$30]
-              1430 0133  ld   [$33]
-              1431 8001  adda $01
-              1432 1200  ld   ac,x
-              1433 0d00  ld   [y,x]
-              1434 c231  st   [$31]       ;IP <- IP + 2
-              1435 0133  ld   [$33]
-              1436 8002  adda $02
-              1437 f03c  beq  .page-boundary
-              1438 c233  st   [$33]
-              1439 1414  ld   $14,y       ;REENTER
-              143a e009  jmp  y,$09
-              143b 00f8  ld   $f8
+              1409 80f6  adda $f6         5227  forth.next3_ram_rom()
+              140a 1534  ld   [$34],y     ;W <- [IP]
+              140b 1133  ld   [$33],x
+              140c 0d00  ld   [y,x]
+              140d c230  st   [$30]
+              140e 0133  ld   [$33]
+              140f 8001  adda $01
+              1410 1200  ld   ac,x
+              1411 0d00  ld   [y,x]
+              1412 c231  st   [$31]       ;IP <- IP + 2
+              1413 0133  ld   [$33]
+              1414 8002  adda $02
+              1415 f01a  beq  .page-boundary
+              1416 c233  st   [$33]
+              1417 1413  ld   $13,y       ;REENTER
+              1418 e00a  jmp  y,$0a
+              1419 00f8  ld   $f8
 .page-boundary:
-              143c 0134  ld   [$34]
-              143d 8001  adda $01
-              143e c234  st   [$34]
-              143f 1414  ld   $14,y       ;REENTER
-              1440 e008  jmp  y,$08
-              1441 00f6  ld   $f6
+              141a 0134  ld   [$34]
+              141b 8001  adda $01
+              141c c234  st   [$34]
+              141d 1413  ld   $13,y       ;REENTER
+              141e e009  jmp  y,$09
+              141f 00f6  ld   $f6
 forth.next3.ram-ram-mode:
-              1442 80f2  adda $f2         5227  forth.next3_ram_ram()
-              1443 1534  ld   [$34],y     ;[tmp] <- [IP]
-              1444 1133  ld   [$33],x
-              1445 0d00  ld   [y,x]
-              1446 c224  st   [$24]
-              1447 0133  ld   [$33]
-              1448 8001  adda $01
-              1449 1200  ld   ac,x
-              144a 0d00  ld   [y,x]
-              144b 1600  ld   ac,y        ;[W] <- [tmp]
-              144c 1124  ld   [$24],x
-              144d 0d00  ld   [y,x]
-              144e c230  st   [$30]
-              144f 0124  ld   [$24]
-              1450 8001  adda $01
-              1451 1200  ld   ac,x
-              1452 0d00  ld   [y,x]
-              1453 c231  st   [$31]
-              1454 0133  ld   [$33]       ;IP <- IP + 2
-              1455 8002  adda $02
-              1456 ec5e  bne  .not-page-boundary
-              1457 c233  st   [$33]
-              1458 0134  ld   [$34]
-              1459 8001  adda $01
-              145a c234  st   [$34]
-              145b 1414  ld   $14,y       ;REENTER
-              145c e008  jmp  y,$08
-              145d 00f2  ld   $f2
+              1420 80f2  adda $f2         5228  forth.next3_ram_ram()
+              1421 1534  ld   [$34],y     ;[tmp] <- [IP]
+              1422 1133  ld   [$33],x
+              1423 0d00  ld   [y,x]
+              1424 c224  st   [$24]
+              1425 0133  ld   [$33]
+              1426 8001  adda $01
+              1427 1200  ld   ac,x
+              1428 0d00  ld   [y,x]
+              1429 1600  ld   ac,y        ;[W] <- [tmp]
+              142a 1124  ld   [$24],x
+              142b 0d00  ld   [y,x]
+              142c c230  st   [$30]
+              142d 0124  ld   [$24]
+              142e 8001  adda $01
+              142f 1200  ld   ac,x
+              1430 0d00  ld   [y,x]
+              1431 c231  st   [$31]
+              1432 0133  ld   [$33]       ;IP <- IP + 2
+              1433 8002  adda $02
+              1434 ec3c  bne  .not-page-boundary
+              1435 c233  st   [$33]
+              1436 0134  ld   [$34]
+              1437 8001  adda $01
+              1438 c234  st   [$34]
+              1439 1413  ld   $13,y       ;REENTER
+              143a e009  jmp  y,$09
+              143b 00f2  ld   $f2
 .not-page-boundary:
-              145e 1414  ld   $14,y       ;REENTER
-              145f e009  jmp  y,$09
-              1460 00f4  ld   $f4
+              143c 1413  ld   $13,y       ;REENTER
+              143d e00a  jmp  y,$0a
+              143e 00f4  ld   $f4
 forth.core.DROP:
-              1461 80fc  adda $fc         5228  forth.emit_core_words()
-              1462 011c  ld   [$1c]
-              1463 8002  adda $02
-              1464 c21c  st   [$1c]
-              1465 1414  ld   $14,y       ;NEXT
-              1466 e011  jmp  y,$11
-              1467 00fc  ld   $fc
+              143f 80fc  adda $fc         5229  forth.emit_core_words()
+              1440 011c  ld   [$1c]
+              1441 8002  adda $02
+              1442 c21c  st   [$1c]
+              1443 1413  ld   $13,y       ;NEXT
+              1444 e012  jmp  y,$12
+              1445 00fc  ld   $fc
 forth.core.2DROP:
-              1468 80fc  adda $fc
-              1469 011c  ld   [$1c]
-              146a 8004  adda $04
-              146b c21c  st   [$1c]
-              146c 1414  ld   $14,y       ;NEXT
-              146d e011  jmp  y,$11
-              146e 00fc  ld   $fc
+              1446 80fc  adda $fc
+              1447 011c  ld   [$1c]
+              1448 8004  adda $04
+              1449 c21c  st   [$1c]
+              144a 1413  ld   $13,y       ;NEXT
+              144b e012  jmp  y,$12
+              144c 00fc  ld   $fc
 forth.core.SWAP:
-              146f 80f0  adda $f0         ;Copy top 4 bytes of stack to tmp
-              1470 111c  ld   [$1c],x
-              1471 0500  ld   [x]
-              1472 c224  st   [$24]
-              1473 011c  ld   [$1c]
-              1474 8001  adda $01
-              1475 1200  ld   ac,x
-              1476 0500  ld   [x]
-              1477 c225  st   [$25]
-              1478 011c  ld   [$1c]
-              1479 8002  adda $02
-              147a 1200  ld   ac,x
-              147b 0500  ld   [x]
-              147c c226  st   [$26]
-              147d 011c  ld   [$1c]
-              147e 8003  adda $03
-              147f 1200  ld   ac,x
-              1480 0500  ld   [x]
-              1481 c227  st   [$27]
-              1482 1400  ld   $00,y       ;Copy back to stack in order
-              1483 111c  ld   [$1c],x
-              1484 0126  ld   [$26]
-              1485 de00  st   [y,x++]
-              1486 0127  ld   [$27]
-              1487 de00  st   [y,x++]
-              1488 0124  ld   [$24]
-              1489 de00  st   [y,x++]
-              148a 0125  ld   [$25]
-              148b de00  st   [y,x++]
-              148c 1414  ld   $14,y       ;NEXT
-              148d e012  jmp  y,$12
-              148e 00f0  ld   $f0
-                                          5229  # Check that we've kept all of this on the predicted page
-                                          5230  start_of_forth_word_space = pc()
-                                          5231  assert pc() >> 8 == forth_next1_page, (hex(pc()), forth_next1_page)
+              144d 80f0  adda $f0         ;Copy top 4 bytes of stack to tmp
+              144e 111c  ld   [$1c],x
+              144f 0500  ld   [x]
+              1450 c224  st   [$24]
+              1451 011c  ld   [$1c]
+              1452 8001  adda $01
+              1453 1200  ld   ac,x
+              1454 0500  ld   [x]
+              1455 c225  st   [$25]
+              1456 011c  ld   [$1c]
+              1457 8002  adda $02
+              1458 1200  ld   ac,x
+              1459 0500  ld   [x]
+              145a c226  st   [$26]
+              145b 011c  ld   [$1c]
+              145c 8003  adda $03
+              145d 1200  ld   ac,x
+              145e 0500  ld   [x]
+              145f c227  st   [$27]
+              1460 1400  ld   $00,y       ;Copy back to stack in order
+              1461 111c  ld   [$1c],x
+              1462 0126  ld   [$26]
+              1463 de00  st   [y,x++]
+              1464 0127  ld   [$27]
+              1465 de00  st   [y,x++]
+              1466 0124  ld   [$24]
+              1467 de00  st   [y,x++]
+              1468 0125  ld   [$25]
+              1469 de00  st   [y,x++]
+              146a 1413  ld   $13,y       ;NEXT
+              146b e013  jmp  y,$13
+              146c 00f0  ld   $f0
+                                          5230  # Check that we've kept all of this on the predicted page
+                                          5231  start_of_forth_word_space = pc()
                                           5232  # --- Page boundary ---
-              148f 0200  nop              5233  align(0x100,0x100)
-              1490 0200  nop
-              1491 0200  nop
-              * 112 times
+              146d 0200  nop              5233  align(0x100,0x100)
+              146e 0200  nop
+              146f 0200  nop
+              * 146 times
               14ff 0200  nop              5233  align(0x100,0x100)
                                           5234
                                           5235  #-----------------------------------------------------------------------

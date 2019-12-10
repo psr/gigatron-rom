@@ -164,12 +164,18 @@ def _stub(*args, **kwargs):
 
 
 _original_writeRomFiles = asm.writeRomFiles
+_original_enableListing = asm.enableListing
+_original_disableListing = asm.disableListing
 _original_argv = sys.argv
 asm.writeRomFiles = _stub
+asm.enableListing = _stub
+asm.disableListing = _stub
 sys.argv = ["dev.py"]
 try:
     import dev
 finally:
+    asm.disableListing = _original_disableListing
+    asm.enableListing = _original_enableListing
     asm.writeRomFiles = _original_writeRomFiles
     sys.argv = _original_argv
 

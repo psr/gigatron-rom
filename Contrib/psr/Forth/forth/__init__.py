@@ -4,6 +4,7 @@ from asm import *
 from . import _next
 from ._next import next3_rom_tail
 from . import _core
+from . import _docol_exit
 
 
 def emit_entry_page(vticks, vreturn):
@@ -25,6 +26,8 @@ def emit_entry_page(vticks, vreturn):
     _next.next1_reenter(vticks)
     _next.next2(vticks)
     _next.exit(vticks, vreturn)
+    _docol_exit.do_docol_rom()
+    _docol_exit.do_docol_ram()
 
 
 def _start_page():
@@ -40,6 +43,10 @@ def emit_core_words():
     _next.next3_rom_head()
     _next.next3_ram_rom()
     _next.next3_ram_ram()
+    _docol_exit.do_restore_mode()
+    _docol_exit.restore_mode()
+    _docol_exit.exit()
+    ####
     _start_page()
     # Stack manipulation words
     _core.drop()

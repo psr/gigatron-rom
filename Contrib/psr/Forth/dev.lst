@@ -6662,10 +6662,48 @@ forth.exit.from-next2:
               1320 a001  suba $01
               1321 e11e  jmp  y,[$1e]
               1322 0200  nop
-              1323 0200  nop              5205  forth.emit_core_words()
-              1324 0200  nop
-              1325 0200  nop
-              * 221 times
+forth.DO-DOCOL-ROM:
+              1323 0135  ld   [$35]
+              1324 8002  adda $02
+              1325 d235  st   [$35],x
+              1326 0133  ld   [$33]
+              1327 de00  st   [y,x++]
+              1328 0134  ld   [$34]
+              1329 ce00  st   [y,x]
+              132a 0131  ld   [$31]
+              132b c234  st   [$34]
+              132c 0130  ld   [$30]
+              132d 8004  adda $04
+              132e c233  st   [$33]
+              132f 1413  ld   $13,y       ;NEXT
+              1330 e00e  jmp  y,$0e
+              1331 00f6  ld   $f6
+forth.DO-DOCOL-RAM:
+              1332 0135  ld   [$35]
+              1333 80fe  adda $fe
+              1334 d235  st   [$35],x
+              1335 dc14  st   $14,[y,x++]
+              1336 dc4e  st   $4e,[y,x++]
+              1337 0132  ld   [$32]
+              1338 de00  st   [y,x++]
+              1339 0133  ld   [$33]
+              133a 8002  adda $02
+              133b de00  st   [y,x++]
+              133c ec40  bne  $1340
+              133d 0134  ld   [$34]
+              133e 8001  adda $01
+              133f de00  st   [y,x++]
+              1340 1413  ld   $13,y       ;NEXT
+              1341 e00e  jmp  y,$0e
+              1342 00f5  ld   $f5
+              1343 de00  st   [y,x++]
+              1344 1413  ld   $13,y       ;NEXT
+              1345 e00f  jmp  y,$0f
+              1346 00f6  ld   $f6
+              1347 0200  nop              5205  forth.emit_core_words()
+              1348 0200  nop
+              1349 0200  nop
+              * 185 times
 forth.restart-or-quit:
               1400 fd30  bra  [$30]
               1401 f802  ble  .quit
@@ -6737,10 +6775,44 @@ forth.next3.ram-ram-mode:
               143c 1413  ld   $13,y       ;REENTER
               143d e006  jmp  y,$06
               143e 00f4  ld   $f4
-              143f 0200  nop
-              1440 0200  nop
-              1441 0200  nop
-              * 193 times
+forth.DO-RESTORE-MODE:
+              143f 80f9  adda $f9
+              1440 147f  ld   $7f,y
+              1441 1135  ld   [$35],x
+              1442 0135  ld   [$35]
+              1443 8001  adda $01
+              1444 c235  st   [$35]
+              1445 0d00  ld   [y,x]
+              1446 c232  st   [$32]
+              1447 1400  ld   $00,y
+              1448 1133  ld   [$33],x
+              1449 dc51  st   $51,[y,x++]
+              144a dc14  st   $14,[y,x++]
+              144b 1413  ld   $13,y       ;REENTER
+              144c e006  jmp  y,$06
+              144d 00f9  ld   $f9
+forth.RESTORE-MODE:
+              144e dc14  st   $14,[y,x++]
+              144f e079  jmp  y,$79
+              1450 dc3f  st   $3f,[y,x++]
+forth.EXIT:   1451 80f9  adda $f9
+              1452 147f  ld   $7f,y
+              1453 1135  ld   [$35],x
+              1454 0d00  ld   [y,x]
+              1455 c233  st   [$33]
+              1456 0135  ld   [$35]
+              1457 9001  adda $01,x
+              1458 8002  adda $02
+              1459 c235  st   [$35]
+              145a 0d00  ld   [y,x]
+              145b c234  st   [$34]
+              145c 1413  ld   $13,y       ;NEXT
+              145d e00f  jmp  y,$0f
+              145e 00f9  ld   $f9
+              145f 0200  nop
+              1460 0200  nop
+              1461 0200  nop
+              * 161 times
 forth.restart-or-quit:
               1500 fd30  bra  [$30]
               1501 f802  ble  .quit

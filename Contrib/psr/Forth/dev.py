@@ -5201,35 +5201,10 @@ ld(-44//2)                      #42
 
 #-----------------------------------------------------------------------
 
-while pc()&255 < 255:
-  nop()
-
-## TODO: Find somewhere else to put this entry point, as I no longer
-## want it on the same page as the NEXT implementation
-assert forth.INTERPRETER_ENTER_PAGE == pc() >> 8
-label('FORTH_ENTER')
-C('You are now entering... Forth')
-adda(forth.INBOUND_TICK_CORRECTION)
-# --- Page boundary ---
-align(0x100,0x100)
-st([vTicks])
-forth.next1(vTicks)
-forth_next1_page = pc() >> 8
-forth.next1(vTicks)
-forth.next1_reenter(vTicks)
-forth.next2(vTicks)
-forth.exit(vTicks, vReturn)
-assert pc() >> 8 == forth_next1_page, (hex(pc()), forth_next1_page)
-# --- Page boundary ---
-align(0x100,0x100)
-forth.restart_or_quit()
-forth.next3_rom_head()
-forth.next3_ram_rom()
-forth.next3_ram_ram()
+forth.emit_entry_page(vTicks, vReturn)
 forth.emit_core_words()
-# Check that we've kept all of this on the predicted page
-start_of_forth_word_space = pc()
 # --- Page boundary ---
+start_of_forth_word_space = pc()  # Variable used in unit tests to locate test data
 align(0x100,0x100)
 
 #-----------------------------------------------------------------------

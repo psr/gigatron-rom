@@ -1,27 +1,51 @@
 """Native code Forth implementation for the Gigatron"""
 
-from ._next import (
-    INBOUND_TICK_CORRECTION,
-    INTERPRETER_ENTER_PAGE,
-    exit,
-    next1,
-    next1_reenter,
-    next2,
-    next3_rom_head,
-    next3_rom_tail,
-    next3_ram_ram,
-    next3_ram_rom,
-    restart_or_quit,
-)
-
-from ._core import *
+from asm import *
+from . import _next
+from ._next import next3_rom_tail
+from . import _core
 
 
+def emit_entry_page(vticks, vreturn):
+    """Emit the data for NEXT and some other core routines
+
+    The first page does not have the 'restart-or-quit' trampoline at 0x00
+    So we can't put any Forth word in here.
+    """
+    while pc() & 255 < 255:
+        nop()
+    assert _next.INTERPRETER_ENTER_PAGE == pc() >> 8
+    label("FORTH_ENTER")
+    C("You are now entering... Forth")
+    adda(_next.INBOUND_TICK_CORRECTION)
+    # --- Page boundary ---
+    align(0x100, 0x100)
+    st([vticks])
+    _next.next1(vticks)
+    _next.next1_reenter(vticks)
+    _next.next2(vticks)
+    _next.exit(vticks, vreturn)
+
+
+def _start_page():
+    align(0x100, 0x100)
+    _next.restart_or_quit()
+
+
+# TODO: find a neater way of packing these things
 def emit_core_words():
-    drop()
-    drop_two()
-    swap()
-    dup()
-    over()
-    rot()
-    two_swap()
+    #### Page
+    _start_page()
+    # Core stuff
+    _next.next3_rom_head()
+    _next.next3_ram_rom()
+    _next.next3_ram_ram()
+    _start_page()
+    # Stack manipulation words
+    _core.drop()
+    _core.drop_two()
+    _core.swap()
+    _core.dup()
+    _core.over()
+    _core.rot()
+    _core.two_swap()

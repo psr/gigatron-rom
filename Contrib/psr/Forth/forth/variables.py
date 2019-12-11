@@ -40,3 +40,4 @@ tmp7 = sysArgs7
 data_stack_pointer = vSP
 data_stack_empty = 0x100
 data_stack_full = 129
+data_stack_page = 0

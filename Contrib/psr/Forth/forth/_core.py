@@ -6,6 +6,7 @@ from ._utilities import (
 )
 from .variables import (
     data_stack_pointer,
+    data_stack_page,
     tmp0,
     tmp1,
     tmp2,
@@ -50,7 +51,7 @@ def swap():
         ld(AC, X)
         ld([X])
         st([location])  # 5
-    ld(0x00, Y)
+    ld(data_stack_page, Y)
     C("Copy back to stack in order")
     ld([data_stack_pointer], X)  # 2
     for location in [tmp2, tmp3, tmp0, tmp1]:
@@ -72,7 +73,7 @@ def dup():
     adda(1, X)
     ld([X])
     st([tmp1])
-    ld(0, Y)
+    ld(data_stack_page, Y)
     ld([data_stack_pointer])  # 10
     suba(2)
     st([data_stack_pointer], X)
@@ -97,7 +98,7 @@ def over():
     adda(3, X)
     ld([X])
     st([tmp1])
-    ld(0, Y)  # 10
+    ld(data_stack_page, Y)  # 10
     ld([data_stack_pointer])
     suba(2)
     st([data_stack_pointer], X)
@@ -114,7 +115,7 @@ cost_of_over = 17
 def rot():
     label("forth.core.ROT")
     adda(-add_cost_of_next(cost_of_rot) / 2)
-    ld(0, Y)  # 2
+    ld(data_stack_page, Y)  # 2
     # copy 3OS -> tmp{0,1}
     for offset, dest in enumerate([tmp0, tmp1], start=4):
         ld([data_stack_pointer])
@@ -140,7 +141,7 @@ cost_of_rot = 31  # 31 = 27 + 2 * 2
 def two_swap():
     label("forth.core.2SWAP")
     adda(-add_cost_of_next(cost_of_2swap) / 2)
-    ld(0, Y)
+    ld(data_stack_page, Y)
     ld([data_stack_pointer])
     adda(4, X)  # 4
     for copy_to in [tmp0, tmp1, tmp2]:
@@ -158,6 +159,7 @@ def two_swap():
     for copy_from in [tmp4, tmp0, tmp1, tmp2]:
         ld([copy_from])
         st([Y, Xpp])
+
     NEXT(cost_of_2swap)
 
 

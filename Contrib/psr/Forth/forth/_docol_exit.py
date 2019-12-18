@@ -92,7 +92,7 @@ def do_restore_mode():
     ld([Y, X])
     st([mode])
     ld(0, Y)
-    ld([IP_lo], X)
+    ld(W, X)
     st(lo("forth.EXIT"), [Y, Xpp])
     st(hi("forth.EXIT"), [Y, Xpp])  # 12
     REENTER(cost_of_do_restore_mode)
@@ -104,9 +104,9 @@ cost_of_do_restore_mode = 12
 def restore_mode():
     label("forth.RESTORE-MODE")
     # Hand compiled thread with no exit
-    st(hi("forth.DO-RESTORE-MODE"), [Y, Xpp])
-    jmp(Y, "forth.next3.rom-mode-tail")
     st(lo("forth.DO-RESTORE-MODE"), [Y, Xpp])
+    jmp(Y, "forth.next3.rom-mode-tail")
+    st(hi("forth.DO-RESTORE-MODE"), [Y, Xpp])
 
 
 def exit():

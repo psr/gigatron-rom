@@ -95,3 +95,30 @@ def test_docol_rom(emulator, return_stack, ip):
     assert end_of_docol == get_IP()
     assert asm.symbol("forth.next3.rom-mode") & 0xFF == get_mode()
     assert [ip] == [return_stack.pop_u16()]
+
+
+@given(return_address=integers(min_value=2, max_value=(1 << 15) - 2))
+def test_exit(emulator, return_stack, return_address):
+    # Arrange
+    return_stack.push_word(return_address)
+    # Act
+    do_test_word(emulator, "forth.EXIT")
+    # Assert
+    assert return_address == get_IP()
+    assert not len(return_stack)
+
+
+@given(return_address=integers(min_value=2, max_value=(1 << 15) - 2), mode=ram_modes)
+def test_exit_to_ram_mode(emulator, return_stack, return_address, mode):
+    # Arrange
+    return_stack.push_word(return_address)
+    return_stack.push_byte(mode)
+    return_stack.push_word(asm.symbol("forth.RESTORE-MODE"))
+    # Act
+    do_test_word(emulator, "forth.EXIT")
+    # Exit should have left restore-mode in IP, so next should DTRT
+    do_test_word(emulator, "forth.next3.rom-mode")
+    # Assert
+    assert mode == get_mode()
+    assert return_address == get_IP()
+    assert not len(return_stack)

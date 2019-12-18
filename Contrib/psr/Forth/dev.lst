@@ -6785,16 +6785,16 @@ forth.DO-RESTORE-MODE:
               1445 0d00  ld   [y,x]
               1446 c232  st   [$32]
               1447 1400  ld   $00,y
-              1448 1133  ld   [$33],x
+              1448 1030  ld   $30,x
               1449 dc51  st   $51,[y,x++]
               144a dc14  st   $14,[y,x++]
               144b 1413  ld   $13,y       ;REENTER
               144c e006  jmp  y,$06
               144d 00f9  ld   $f9
 forth.RESTORE-MODE:
-              144e dc14  st   $14,[y,x++]
+              144e dc3f  st   $3f,[y,x++]
               144f e079  jmp  y,$79
-              1450 dc3f  st   $3f,[y,x++]
+              1450 dc14  st   $14,[y,x++]
 forth.EXIT:   1451 80f9  adda $f9
               1452 147f  ld   $7f,y
               1453 1135  ld   [$35],x

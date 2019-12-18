@@ -1,13 +1,6 @@
 """Helpers for generating the right code"""
 
-from asm import (
-    C,
-    Y,
-    hi,
-    jmp,
-    ld,
-    lo,
-)
+from asm import C, Y, hi, jmp, ld, lo
 
 
 def next(cycles_so_far):

@@ -1,12 +1,9 @@
 from asm import *
 
-from ._utilities import (
-    NEXT,
-    add_cost_of_next,
-)
+from ._utilities import NEXT, add_cost_of_next
 from .variables import (
-    data_stack_pointer,
     data_stack_page,
+    data_stack_pointer,
     tmp0,
     tmp1,
     tmp2,
@@ -132,7 +129,7 @@ def rot():
     for src in [tmp1, tmp2]:  # 27 = 11 + 16
         ld([src])
         st([Y, Xpp])
-    NEXT(31)
+    NEXT(cost_of_rot)
 
 
 cost_of_rot = 31  # 31 = 27 + 2 * 2

@@ -1,12 +1,7 @@
 import json
-
-try:
-    import pathlib
-except ImportError:
-    import pathlib2 as pathlib
+import pathlib
 
 import asm
-
 
 W = W_lo = asm.zpByte(2)
 W_hi = W_lo + 1

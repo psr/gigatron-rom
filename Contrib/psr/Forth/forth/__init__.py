@@ -1,10 +1,9 @@
 """Native code Forth implementation for the Gigatron"""
 
 from asm import *
-from . import _next
+
+from . import _core, _docol_exit, _next
 from ._next import next3_rom_tail
-from . import _core
-from . import _docol_exit
 
 
 def emit_entry_page(vticks, vreturn):

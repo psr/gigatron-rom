@@ -2,34 +2,26 @@
 
 import struct
 
-from hypothesis import (
-    assume,
-    given,
-)
-from hypothesis.strategies import (
-    integers,
-    shared,
-)
-import pytest
-
 import asm
 import dev
-from gtemu import ROM, RAM
+import pytest
 from forth import _next as next
 from forth import variables
+from gtemu import RAM, ROM
+from hypothesis import assume, given
+from hypothesis.strategies import integers, shared
 from utilities import (
     do_test_word,
     even,
     get_IP,
-    get_W,
     get_vticks,
+    get_W,
     set_IP,
-    set_W,
     set_mode,
     set_vticks,
+    set_W,
     sign_extend,
 )
-
 
 ##
 # Odd and odd is even, even and even is even. Even and odd is odd.

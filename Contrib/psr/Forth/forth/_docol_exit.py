@@ -1,7 +1,12 @@
 """Implementations of DOCOL and EXIT"""
 from asm import *
 
-from ._utilities import NEXT, add_cost_of_next, REENTER, add_cost_of_reenter
+from ._utilities import (
+    NEXT,
+    REENTER,
+    add_cost_of_next,
+    add_cost_of_reenter,
+)
 from .variables import *
 
 

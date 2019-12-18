@@ -5,7 +5,14 @@ $fileExcludes = 'asm.py', 'dev.py', 'font_vX.py', 'gcl0x.py'
 $filesToFormat = get-childitem -Exclude $dirExcludes -Directory | % { get-childitem -path $_ -Recurse -Include '*.py' }
 $filesToFormat += get-childitem -Name '*.py' -Exclude $fileExcludes
 
-task default -depends Blacken, Test, ROM
+task default -depends isort, Blacken, Test, ROM
+
+task isort {
+    & 'isort' $filesToFormat
+    if ($LASTEXITCODE -ne 0 ) {
+        throw "isort failed";
+    }
+}
 
 task Blacken {
     & 'black' $filesToFormat

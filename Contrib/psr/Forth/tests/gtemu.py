@@ -5,7 +5,7 @@ import sys
 import _gtemu
 
 assert "asm" not in sys.modules, "gtemu needs to load before anything else touches asm"
-import asm
+import asm  # isort:skip
 
 
 BLANK_RAM = bytearray([0 for _ in range(1 << 15)])

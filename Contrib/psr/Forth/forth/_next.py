@@ -1,21 +1,17 @@
 from asm import *
 
-from ._utilities import (
-    REENTER,
-    cost_of_reenter,
-)
+from ._utilities import REENTER, cost_of_reenter
 from .variables import (
-    maxTicks,
-    mode,
     IP,
-    IP_lo,
     IP_hi,
-    tmp0,
+    IP_lo,
     W,
     W_hi,
     W_lo,
+    maxTicks,
+    mode,
+    tmp0,
 )
-
 
 INTERPRETER_ENTER_PAGE = 0x12
 INBOUND_TICK_CORRECTION = maxTicks * 2

@@ -1,23 +1,17 @@
 """Tests for DOCOL, EXIT and company"""
 
-from hypothesis import given
-from hypothesis.strategies import (
-    integers,
-    just,
-    lists,
-    one_of,
-)
 import asm
 from forth import variables
-
+from hypothesis import given
+from hypothesis.strategies import integers, just, lists, one_of
 from utilities import (
     do_test_word,
     get_IP,
-    get_W,
     get_mode,
+    get_W,
     set_IP,
-    set_W,
     set_mode,
+    set_W,
 )
 
 max_return_stack_size = (

@@ -2,15 +2,12 @@ import struct
 
 import pytest
 
-from gtemu import (
-    Emulator,
-    RAM,
-)
-
-from forth import variables
+# This lines need to happen in (roughly) this order
+from gtemu import RAM, Emulator  # isort:skip
+from forth import variables  # isort:skip
 
 pytest.register_assert_rewrite("utilities")
-import utilities
+import utilities  # isort:skip
 
 
 @pytest.fixture

@@ -56,3 +56,7 @@ def emit_core_words():
     _core.over()
     _core.rot()
     _core.two_swap()
+    # No-op thread used for testing DOCOL and EXIT
+    # This can probably be removed later
+    label("forth.NOP")
+    _docol_exit.make_thread()

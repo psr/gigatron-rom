@@ -6680,26 +6680,26 @@ forth.DO-DOCOL-ROM:
               1331 00f6  ld   $f6
 forth.DO-DOCOL-RAM:
               1332 0135  ld   [$35]
-              1333 80fe  adda $fe
+              1333 80fb  adda $fb
               1334 d235  st   [$35],x
-              1335 dc14  st   $14,[y,x++]
-              1336 dc4e  st   $4e,[y,x++]
+              1335 dc4e  st   $4e,[y,x++]
+              1336 dc14  st   $14,[y,x++]
               1337 0132  ld   [$32]
               1338 de00  st   [y,x++]
               1339 0133  ld   [$33]
-              133a 8002  adda $02
-              133b de00  st   [y,x++]
-              133c ec40  bne  $1340
-              133d 0134  ld   [$34]
-              133e 8001  adda $01
-              133f de00  st   [y,x++]
-              1340 1413  ld   $13,y       ;NEXT
-              1341 e00e  jmp  y,$0e
-              1342 00f5  ld   $f5
-              1343 de00  st   [y,x++]
+              133a de00  st   [y,x++]
+              133b 0134  ld   [$34]
+              133c ce00  st   [y,x]
+              133d 0004  ld   $04
+              133e c232  st   [$32]
+              133f 0131  ld   [$31]
+              1340 c234  st   [$34]
+              1341 0130  ld   [$30]
+              1342 8008  adda $08
+              1343 c233  st   [$33]
               1344 1413  ld   $13,y       ;NEXT
-              1345 e00f  jmp  y,$0f
-              1346 00f6  ld   $f6
+              1345 e00e  jmp  y,$0e
+              1346 00f3  ld   $f3
               1347 0200  nop              5205  forth.emit_core_words()
               1348 0200  nop
               1349 0200  nop
@@ -6987,12 +6987,23 @@ forth.core.2SWAP:
               15a3 1413  ld   $13,y       ;NEXT
               15a4 e00e  jmp  y,$0e
               15a5 00ea  ld   $ea
+forth.NOP:    15a6 80f3  adda $f3
+              15a7 1413  ld   $13,y
+              15a8 e032  jmp  y,$32
+              15a9 147f  ld   $7f,y
+              15aa 80f6  adda $f6
+              15ab 1413  ld   $13,y
+              15ac e023  jmp  y,$23
+              15ad 147f  ld   $7f,y
+              15ae dc51  st   $51,[y,x++]
+              15af e079  jmp  y,$79
+              15b0 dc14  st   $14,[y,x++]
                                           5206  # --- Page boundary ---
                                           5207  start_of_forth_word_space = pc()  # Variable used in unit tests to locate test data
-              15a6 0200  nop              5208  align(0x100,0x100)
-              15a7 0200  nop
-              15a8 0200  nop
-              * 89 times
+              15b1 0200  nop              5208  align(0x100,0x100)
+              15b2 0200  nop
+              15b3 0200  nop
+              * 78 times
               15ff 0200  nop              5208  align(0x100,0x100)
                                           5209
                                           5210  #-----------------------------------------------------------------------

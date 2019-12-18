@@ -63,6 +63,10 @@ def _get_i8(addr):
     return struct.unpack("b", _get_ram(slice(addr, addr + 1)))[0]
 
 
+def _get_u8(addr):
+    return RAM[addr]
+
+
 def _get_u16(slice):
     return struct.unpack("<H", _get_ram(slice))[0]
 
@@ -77,6 +81,10 @@ def get_W():
 
 def set_mode(value):
     _set_u8(variables.mode, value)
+
+
+def get_mode():
+    return _get_u8(variables.mode)
 
 
 def set_vticks(value):

@@ -6663,14 +6663,15 @@ forth.exit.from-next2:
               1321 e11e  jmp  y,[$1e]
               1322 0200  nop
 forth.DO-DOCOL-ROM:
-              1323 0135  ld   [$35]
-              1324 8002  adda $02
+              1323 0135  ld   [$35]       ;Y holds the page of the return stack
+                                          ;Push [IP] to Return stack
+              1324 a002  suba $02
               1325 d235  st   [$35],x
               1326 0133  ld   [$33]
               1327 de00  st   [y,x++]
               1328 0134  ld   [$34]
               1329 ce00  st   [y,x]
-              132a 0131  ld   [$31]
+              132a 0131  ld   [$31]       ;Copy [W] to [IP], incrementing it by 4
               132b c234  st   [$34]
               132c 0130  ld   [$30]
               132d 8004  adda $04
@@ -6680,9 +6681,9 @@ forth.DO-DOCOL-ROM:
               1331 00f6  ld   $f6
 forth.DO-DOCOL-RAM:
               1332 0135  ld   [$35]
-              1333 80fb  adda $fb
+              1333 a005  suba $05
               1334 d235  st   [$35],x
-              1335 dc4e  st   $4e,[y,x++]
+              1335 dc4b  st   $4b,[y,x++]
               1336 dc14  st   $14,[y,x++]
               1337 0132  ld   [$32]
               1338 de00  st   [y,x++]
@@ -6692,7 +6693,7 @@ forth.DO-DOCOL-RAM:
               133c ce00  st   [y,x]
               133d 0004  ld   $04
               133e c232  st   [$32]
-              133f 0131  ld   [$31]
+              133f 0131  ld   [$31]       ;Copy [W] to [IP], incrementing it by 8
               1340 c234  st   [$34]
               1341 0130  ld   [$30]
               1342 8008  adda $08
@@ -6743,76 +6744,98 @@ forth.next3.ram-rom-mode:
               141e e005  jmp  y,$05
               141f 00f6  ld   $f6
 forth.next3.ram-ram-mode:
-              1420 80f2  adda $f2
+              1420 80f4  adda $f4
               1421 1534  ld   [$34],y     ;[tmp] <- [IP]
               1422 1133  ld   [$33],x
               1423 0d00  ld   [y,x]
-              1424 c224  st   [$24]
-              1425 0133  ld   [$33]
-              1426 8001  adda $01
-              1427 1200  ld   ac,x
-              1428 0d00  ld   [y,x]
-              1429 1600  ld   ac,y        ;[W] <- [tmp]
-              142a 1124  ld   [$24],x
-              142b 0d00  ld   [y,x]
-              142c c230  st   [$30]
-              142d 0124  ld   [$24]
-              142e 8001  adda $01
-              142f 1200  ld   ac,x
-              1430 0d00  ld   [y,x]
-              1431 c231  st   [$31]
-              1432 0133  ld   [$33]       ;IP <- IP + 2
-              1433 8002  adda $02
-              1434 ec3c  bne  .not-page-boundary
-              1435 c233  st   [$33]
-              1436 0134  ld   [$34]
-              1437 8001  adda $01
-              1438 c234  st   [$34]
+              1424 de00  st   [y,x++]
+              1425 c224  st   [$24]
+              1426 0d00  ld   [y,x]
+              1427 c225  st   [$25]
+              1428 1600  ld   ac,y        ;[W] <- [tmp]
+              1429 1124  ld   [$24],x
+              142a 0d00  ld   [y,x]
+              142b c230  st   [$30]
+              142c de00  st   [y,x++]
+              142d 0d00  ld   [y,x]
+              142e c231  st   [$31]
+              142f 0133  ld   [$33]       ;IP <- IP + 2
+              1430 8002  adda $02
+              1431 ec39  bne  .not-page-boundary
+              1432 c233  st   [$33]
+              1433 0134  ld   [$34]
+              1434 8001  adda $01
+              1435 c234  st   [$34]
+              1436 1413  ld   $13,y       ;REENTER
+              1437 e006  jmp  y,$06
+              1438 00f4  ld   $f4
+.not-page-boundary:
               1439 1413  ld   $13,y       ;REENTER
               143a e005  jmp  y,$05
-              143b 00f2  ld   $f2
-.not-page-boundary:
-              143c 1413  ld   $13,y       ;REENTER
-              143d e006  jmp  y,$06
-              143e 00f4  ld   $f4
+              143b 00f5  ld   $f5
 forth.DO-RESTORE-MODE:
-              143f 80f9  adda $f9
-              1440 147f  ld   $7f,y
-              1441 1135  ld   [$35],x
-              1442 0135  ld   [$35]
-              1443 8001  adda $01
-              1444 c235  st   [$35]
-              1445 0d00  ld   [y,x]
-              1446 c232  st   [$32]
-              1447 1400  ld   $00,y
-              1448 1030  ld   $30,x
-              1449 dc51  st   $51,[y,x++]
-              144a dc14  st   $14,[y,x++]
-              144b 1413  ld   $13,y       ;REENTER
-              144c e006  jmp  y,$06
-              144d 00f9  ld   $f9
+              143c 80f9  adda $f9
+              143d 147f  ld   $7f,y
+              143e 1135  ld   [$35],x
+              143f 0135  ld   [$35]
+              1440 8001  adda $01
+              1441 c235  st   [$35]
+              1442 0d00  ld   [y,x]
+              1443 c232  st   [$32]
+              1444 1400  ld   $00,y
+              1445 1030  ld   $30,x
+              1446 dc4e  st   $4e,[y,x++]
+              1447 dc14  st   $14,[y,x++]
+              1448 1413  ld   $13,y       ;REENTER
+              1449 e006  jmp  y,$06
+              144a 00f9  ld   $f9
 forth.RESTORE-MODE:
-              144e dc3f  st   $3f,[y,x++]
-              144f e079  jmp  y,$79
-              1450 dc14  st   $14,[y,x++]
-forth.EXIT:   1451 80f9  adda $f9
-              1452 147f  ld   $7f,y
-              1453 1135  ld   [$35],x
-              1454 0d00  ld   [y,x]
-              1455 c233  st   [$33]
-              1456 0135  ld   [$35]
-              1457 9001  adda $01,x
-              1458 8002  adda $02
-              1459 c235  st   [$35]
-              145a 0d00  ld   [y,x]
-              145b c234  st   [$34]
-              145c 1413  ld   $13,y       ;NEXT
-              145d e00f  jmp  y,$0f
-              145e 00f9  ld   $f9
-              145f 0200  nop
-              1460 0200  nop
-              1461 0200  nop
-              * 161 times
+              144b dc3c  st   $3c,[y,x++]
+              144c e079  jmp  y,$79
+              144d dc14  st   $14,[y,x++]
+forth.EXIT:   144e 80f9  adda $f9
+              144f 147f  ld   $7f,y
+              1450 1135  ld   [$35],x
+              1451 0d00  ld   [y,x]
+              1452 c233  st   [$33]
+              1453 0135  ld   [$35]
+              1454 9001  adda $01,x
+              1455 8002  adda $02
+              1456 c235  st   [$35]
+              1457 0d00  ld   [y,x]
+              1458 c234  st   [$34]
+              1459 1413  ld   $13,y       ;NEXT
+              145a e00f  jmp  y,$0f
+              145b 00f9  ld   $f9
+forth.DOCOL:  145c 80f6  adda $f6
+              145d 147f  ld   $7f,y
+              145e 0135  ld   [$35]       ;Y holds the page of the return stack
+                                          ;Push [IP] to Return stack
+              145f a002  suba $02
+              1460 d235  st   [$35],x
+              1461 0133  ld   [$33]
+              1462 de00  st   [y,x++]
+              1463 0134  ld   [$34]
+              1464 ce00  st   [y,x]
+              1465 0124  ld   [$24]
+              1466 8002  adda $02
+              1467 c233  st   [$33]
+              1468 f06e  beq  .page-boundary#docol
+              1469 0125  ld   [$25]
+              146a c234  st   [$34]
+              146b 1413  ld   $13,y       ;NEXT
+              146c e00f  jmp  y,$0f
+              146d 00f7  ld   $f7
+.page-boundary#docol:
+              146e 8001  adda $01
+              146f c234  st   [$34]
+              1470 1413  ld   $13,y       ;NEXT
+              1471 e00e  jmp  y,$0e
+              1472 00f6  ld   $f6
+              1473 0200  nop
+              1474 0200  nop
+              1475 0200  nop
+              * 141 times
 forth.restart-or-quit:
               1500 fd30  bra  [$30]
               1501 f802  ble  .quit
@@ -6995,7 +7018,7 @@ forth.NOP:    15a6 80f3  adda $f3
               15ab 1413  ld   $13,y
               15ac e023  jmp  y,$23
               15ad 147f  ld   $7f,y
-              15ae dc51  st   $51,[y,x++]
+              15ae dc4e  st   $4e,[y,x++]
               15af e079  jmp  y,$79
               15b0 dc14  st   $14,[y,x++]
                                           5206  # --- Page boundary ---

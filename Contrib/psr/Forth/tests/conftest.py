@@ -45,6 +45,13 @@ class _GigatronStack(object):
         else:
             return (self._stack_page << 8) | sp
 
+    @stack_pointer.setter
+    def stack_pointer(self, sp):
+        RAM[self._sp_address] = sp & 0xFF
+
+    def set_depth_in_bytes(self, depth):
+        self.stack_pointer = self._empty_stack - depth
+
     def __len__(self):
         return self._empty_stack - self.stack_pointer
 

@@ -12,7 +12,9 @@ from .variables import *
 
 def _push_ip_to_return_stack():
     ld([return_stack_pointer])
-    adda(2)
+    C("Y holds the page of the return stack")
+    C("Push [IP] to Return stack")
+    suba(2)
     st([return_stack_pointer], X)
     ld([IP_lo])
     st([Y, Xpp])
@@ -20,11 +22,12 @@ def _push_ip_to_return_stack():
     st([Y, X])
 
 
-cost_to_push_ip_to_returnstack = 7
+cost_of_push_ip_to_return_stack = 7
 
 
 def _copy_W_to_IP(*, increment_by):
     ld([W_hi])
+    C(f"Copy [W] to [IP], incrementing it by {increment_by}")
     st([IP_hi])
     ld([W_lo])
     adda(increment_by)
@@ -47,7 +50,7 @@ def do_docol_ram():
     # So the return stack needs to look like:
     # TOP-> [restore_mode, mode, IP]
     ld([return_stack_pointer])  # 1
-    adda(-5)
+    suba(5)
     st([return_stack_pointer], X)
     st(lo("forth.RESTORE-MODE"), [Y, Xpp])
     st(hi("forth.RESTORE-MODE"), [Y, Xpp])  # 5
@@ -74,7 +77,7 @@ def docol_rom_only():
     ld(return_stack_page, Y)  # 4
 
 
-cost_of_docol_rom = 4 + cost_to_push_ip_to_returnstack + cost_of_copy_W_to_IP
+cost_of_docol_rom = 4 + cost_of_push_ip_to_return_stack + cost_of_copy_W_to_IP
 
 
 def docol():
@@ -84,6 +87,34 @@ def docol():
     jmp(Y, "forth.DO-DOCOL-RAM")
     ld(return_stack_page, Y)  # 4
     docol_rom_only()  # 4 + 4
+
+
+def docol_ram_ram():
+    """Word that implements DOCOL for a thread in RAM"""
+    label("forth.DOCOL")
+    adda(-add_cost_of_next(cost_of_docol_ram_ram) / 2)  # 1
+    ld(return_stack_page, Y)
+    _push_ip_to_return_stack()
+    # The Next3 for ram-ram mode leaves the thread address in tmp0, tmp1
+    # We need to increment it by two, and store in IP
+    ld([tmp0])
+    adda(2)
+    st([IP_lo])  # 5
+    beq(lo(".page-boundary#docol"))  # Page boundary test
+    ld([tmp1])  # 7
+    st([IP_hi])  # 8
+    NEXT(cost_of_docol_ram_ram__page_not_crossed)
+    label(".page-boundary#docol")
+    adda(1)  # 8
+    st([IP_hi])  # 9
+    NEXT(cost_of_docol_ram_ram__page_crossed)
+
+
+cost_of_docol_ram_ram__page_not_crossed = 8 + cost_of_push_ip_to_return_stack
+cost_of_docol_ram_ram__page_crossed = 9 + cost_of_push_ip_to_return_stack
+cost_of_docol_ram_ram = max(
+    cost_of_docol_ram_ram__page_crossed, cost_of_docol_ram_ram__page_not_crossed
+)
 
 
 def do_restore_mode():

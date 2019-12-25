@@ -1,6 +1,6 @@
 from asm import *
 
-from ._utilities import REENTER, cost_of_reenter
+from ._utilities import REENTER, add_cost_of_reenter, cost_of_reenter
 from .variables import (
     IP,
     IP_hi,
@@ -11,6 +11,7 @@ from .variables import (
     maxTicks,
     mode,
     tmp0,
+    tmp1,
 )
 
 INTERPRETER_ENTER_PAGE = 0x12
@@ -200,51 +201,48 @@ cost_of_next3_ram_rom = max(
 
 def next3_ram_ram():
     label("forth.next3.ram-ram-mode")
-    adda(-(cost_of_next3_ram_ram // 2))
+    adda(-add_cost_of_reenter(cost_of_next3_ram_ram) // 2)  # 1
 
     # Copy low byte to zero-page
     ld([IP_hi], Y)
     C("[tmp] <- [IP]")
     ld([IP_lo], X)
     ld([Y, X])
+    st([Y, Xpp])  # 5; Advance X
     st([tmp0])
     # High byte to zero-page
-    ld([IP_lo])
-    adda(1)
-    ld(AC, X)
     ld([Y, X])
-    ld(AC, Y)
+    st([tmp1])
 
     # Update W
+    ld(AC, Y)
     C("[W] <- [tmp]")
-    ld([tmp0], X)
+    ld([tmp0], X)  # 10
     ld([Y, X])
     st([W_lo])
-    ld([tmp0])
-    adda(1)
-    ld(AC, X)
+    st([Y, Xpp])  # Advance X
     ld([Y, X])
-    st([W_hi])
+    st([W_hi])  # 15
 
     # Increment IP
     ld([IP_lo])
     C("IP <- IP + 2")
     adda(2)
-    bne(pc() + 8)
-    st([IP_lo])
+    bne(pc() + 8)  # 18
+    st([IP_lo])  # 19
 
-    ld([IP_hi])
+    ld([IP_hi])  # 20
     adda(1)
     st([IP_hi])
 
-    REENTER(25)
+    REENTER(cost_of_next3_ram_ram__page_crossed)
 
     label(".not-page-boundary")
-    REENTER(22)
+    REENTER(cost_of_next3_ram_ram__no_page_cross)
 
 
-cost_of_next3_ram_ram__no_page_cross = 22 + cost_of_reenter
-cost_of_next3_ram_ram__page_crossed = 25 + cost_of_reenter
+cost_of_next3_ram_ram__no_page_cross = 19
+cost_of_next3_ram_ram__page_crossed = 22
 cost_of_next3_ram_ram = max(
     cost_of_next3_ram_ram__no_page_cross, cost_of_next3_ram_ram__page_crossed
 )

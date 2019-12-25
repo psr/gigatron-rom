@@ -2,7 +2,8 @@
 
 import asm
 from forth import variables
-from hypothesis import given
+from gtemu import RAM
+from hypothesis import assume, given
 from hypothesis.strategies import integers, just, lists, one_of
 from utilities import (
     do_test_word,
@@ -14,9 +15,7 @@ from utilities import (
     set_W,
 )
 
-max_return_stack_size = (
-    variables.return_stack_empty - variables.return_stack_full
-) // 2
+max_return_stack_size = variables.return_stack_empty - variables.return_stack_full
 
 # Address for RAM mode
 nop_start = asm.symbol("forth.NOP")
@@ -30,10 +29,21 @@ ram_modes = one_of(
 )
 
 
+def return_stack_depths(*, with_room_for_bytes=0):
+    return integers(
+        min_value=0,
+        max_value=min(
+            max_return_stack_size - with_room_for_bytes, max_return_stack_size
+        ),
+    )
+
+
 @given(
-    ip=integers(min_value=2, max_value=(1 << 15) - 2), mode=ram_modes,
+    ip=integers(min_value=0, max_value=(1 << 15) - 2),
+    mode=ram_modes,
+    return_stack_depth=return_stack_depths(with_room_for_bytes=5),
 )
-def test_docol_ram(emulator, return_stack, ip, mode):
+def test_docol_ram(emulator, return_stack, ip, mode, return_stack_depth):
     """Test the docol implementation for RAM mode
     
     On entry:
@@ -50,6 +60,7 @@ def test_docol_ram(emulator, return_stack, ip, mode):
         3:   The old ip (little endian)
     """
     # Arrange
+    return_stack.set_depth_in_bytes(return_stack_depth)
     set_IP(ip)
     set_mode(mode)
     set_W(asm.symbol("forth.NOP"))
@@ -63,10 +74,43 @@ def test_docol_ram(emulator, return_stack, ip, mode):
         return_stack.pop_u8(),
         return_stack.pop_u16(),
     ]
+    assert len(return_stack) == return_stack_depth
 
 
-@given(ip=integers(min_value=2, max_value=(1 << 15) - 2))
-def test_docol_rom(emulator, return_stack, ip):
+@given(
+    ip=integers(min_value=0x100, max_value=(1 << 14) - 1).map(lambda n: n * 2),
+    target=integers(min_value=0x100, max_value=(1 << 14) - 1).map(lambda n: n * 2),
+    return_stack_depth=return_stack_depths(with_room_for_bytes=2),
+)
+def test_docol_ram_ram(emulator, return_stack, ip, target, return_stack_depth):
+    """Test jumping from one thread in RAM to another"""
+    # Arrange
+    emulator.zero_memory()
+    return_stack.set_depth_in_bytes(return_stack_depth)
+    assume(not {ip, ip + 1} & {target, target + 1})
+    set_IP(ip)
+    set_mode(asm.symbol("forth.next3.ram-ram-mode") & 0xFF)
+    RAM[target : target + 2] = [
+        asm.symbol("forth.DOCOL") & 0xFF,
+        asm.symbol("forth.DOCOL") >> 8,
+    ]
+    RAM[ip : ip + 2] = [
+        target & 0xFF,
+        target >> 8,
+    ]
+    # Act
+    do_test_word(emulator, "forth.next3.ram-ram-mode")
+    # Assert
+    assert len(return_stack) == return_stack_depth + 2
+    assert [ip + 2] == [return_stack.pop_u16()]
+    assert target + 2 == get_IP()
+
+
+@given(
+    ip=integers(min_value=0, max_value=(1 << 15) - 2),
+    return_stack_depth=return_stack_depths(with_room_for_bytes=2),
+)
+def test_docol_rom(emulator, return_stack, ip, return_stack_depth):
     """Test the docol implementation for RAM mode
     
     On entry:
@@ -80,6 +124,7 @@ def test_docol_rom(emulator, return_stack, ip):
     The return stack holds the old ip (little endian)
     """
     # Arrange
+    return_stack.set_depth_in_bytes(return_stack_depth)
     set_IP(ip)
     set_mode(asm.symbol("forth.next3.rom-mode") & 0xFF)
     set_W(nop_start_rom)
@@ -89,22 +134,34 @@ def test_docol_rom(emulator, return_stack, ip):
     assert end_of_docol == get_IP()
     assert asm.symbol("forth.next3.rom-mode") & 0xFF == get_mode()
     assert [ip] == [return_stack.pop_u16()]
+    assert len(return_stack) == return_stack_depth
 
 
-@given(return_address=integers(min_value=2, max_value=(1 << 15) - 2))
-def test_exit(emulator, return_stack, return_address):
+@given(
+    return_address=integers(min_value=2, max_value=(1 << 15) - 2),
+    return_stack_depth=return_stack_depths(with_room_for_bytes=2),
+)
+def test_exit(emulator, return_stack, return_address, return_stack_depth):
     # Arrange
+    return_stack.set_depth_in_bytes(return_stack_depth)
     return_stack.push_word(return_address)
     # Act
     do_test_word(emulator, "forth.EXIT")
     # Assert
     assert return_address == get_IP()
-    assert not len(return_stack)
+    assert len(return_stack) == return_stack_depth
 
 
-@given(return_address=integers(min_value=2, max_value=(1 << 15) - 2), mode=ram_modes)
-def test_exit_to_ram_mode(emulator, return_stack, return_address, mode):
+@given(
+    return_address=integers(min_value=2, max_value=(1 << 15) - 2),
+    mode=ram_modes,
+    return_stack_depth=return_stack_depths(with_room_for_bytes=5),
+)
+def test_exit_to_ram_mode(
+    emulator, return_stack, return_address, mode, return_stack_depth
+):
     # Arrange
+    return_stack.set_depth_in_bytes(return_stack_depth)
     return_stack.push_word(return_address)
     return_stack.push_byte(mode)
     return_stack.push_word(asm.symbol("forth.RESTORE-MODE"))
@@ -115,4 +172,4 @@ def test_exit_to_ram_mode(emulator, return_stack, return_address, mode):
     # Assert
     assert mode == get_mode()
     assert return_address == get_IP()
-    assert not len(return_stack)
+    assert len(return_stack) == return_stack_depth

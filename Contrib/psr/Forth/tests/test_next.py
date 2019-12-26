@@ -2,14 +2,15 @@
 
 import struct
 
+import pytest
+from hypothesis import assume, given
+from hypothesis.strategies import integers, shared
+
 import asm
 import dev
-import pytest
 from forth import _next as next
 from forth import variables
 from gtemu import RAM, ROM
-from hypothesis import assume, given
-from hypothesis.strategies import integers, shared
 from utilities import (
     do_test_word,
     even,

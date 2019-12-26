@@ -1,10 +1,11 @@
 """Tests for DOCOL, EXIT and company"""
 
+from hypothesis import assume, given
+from hypothesis.strategies import integers, just, lists, one_of
+
 import asm
 from forth import variables
 from gtemu import RAM
-from hypothesis import assume, given
-from hypothesis.strategies import integers, just, lists, one_of
 from utilities import (
     do_test_word,
     get_IP,

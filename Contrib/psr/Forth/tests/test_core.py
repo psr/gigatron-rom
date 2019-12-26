@@ -1,7 +1,8 @@
 """Tests for core words"""
-from forth import variables
 from hypothesis import given
 from hypothesis.strategies import integers, lists
+
+from forth import variables
 from utilities import do_test_word
 
 max_data_stack_size = (variables.data_stack_empty - variables.data_stack_full) // 2

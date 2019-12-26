@@ -2,7 +2,7 @@
 
 from asm import *
 
-from . import _core, _docol_exit, _next
+from . import _core, _docol_exit, _memory, _next
 from ._next import next3_rom_tail
 
 
@@ -46,6 +46,7 @@ def emit_core_words():
     _docol_exit.restore_mode()
     _docol_exit.exit()
     _docol_exit.docol_ram_ram()
+    _memory.char_at()
     ####
     _start_page()
     # Stack manipulation words

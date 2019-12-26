@@ -6832,10 +6832,29 @@ forth.DOCOL:  145c 80f6  adda $f6
               1470 1413  ld   $13,y       ;NEXT
               1471 e00e  jmp  y,$0e
               1472 00f6  ld   $f6
-              1473 0200  nop
-              1474 0200  nop
-              1475 0200  nop
-              * 141 times
+forth.core.C@:
+              1473 80f7  adda $f7
+              1474 1400  ld   $00,y
+              1475 111c  ld   [$1c],x
+              1476 0d00  ld   [y,x]
+              1477 c224  st   [$24]
+              1478 de00  st   [y,x++]
+              1479 0d00  ld   [y,x]
+              147a 1600  ld   ac,y
+              147b 1124  ld   [$24],x
+              147c 0d00  ld   [y,x]
+              147d 1400  ld   $00,y
+              147e 111c  ld   [$1c],x
+              147f de00  st   [y,x++]
+              1480 0000  ld   $00
+              1481 ce00  st   [y,x]
+              1482 1413  ld   $13,y       ;NEXT
+              1483 e00f  jmp  y,$0f
+              1484 00f7  ld   $f7
+              1485 0200  nop
+              1486 0200  nop
+              1487 0200  nop
+              * 123 times
 forth.restart-or-quit:
               1500 fd30  bra  [$30]
               1501 f802  ble  .quit

@@ -9,7 +9,7 @@ gcl0x
 
 {
         --------------------------
-        ### COMMODORE BASIC ###
+        ### CBM BASIC ###
 
          3839 BYTES FREE
 
@@ -698,8 +698,7 @@ _TMPZP=$00003E
  #$23 #$20 #$ef #$0b #$a5 #$69 #$38 #$e5 #$5d #$aa #$a5 #$6a #$e5 #$5e #$20 #$45
  #$1e #$a9 #$2e #$a0 #$23 #$20 #$ef #$0b #$20 #$44 #$07 #$4c #$71 #$05 #$20 #$42
  #$59 #$54 #$45 #$53 #$20 #$46 #$52 #$45 #$45 #$0d #$00 #$23 #$23 #$23 #$20 #$43
- #$4f #$4d #$4d #$4f #$44 #$4f #$52 #$45 #$20 #$42 #$41 #$53 #$49 #$43 #$20 #$23
- #$23 #$23 #$0d #$0d #$00
+ #$42 #$4d #$20 #$42 #$41 #$53 #$49 #$43 #$20 #$23 #$23 #$23 #$0d #$0d #$00
 { ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^   Insert BASIC image here   ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ }
 
 {-----------------------------------------------------------------------+
@@ -897,9 +896,9 @@ _Newline=*
   }
   [do
     i 22+ j=                    {j looks 11 entries ahead of i}
-    i, \sysArgs7.               {Swap scanlines}
-    j, i.
-    \sysArgs7, j.
+    peek \sysArgs7.             {Swap scanlines}
+    i, j.
+    \sysArgs7, i.
     <i++ <i++                   {Advance to next entry in video table}
     <i, 218^ if<>0loop]         {Until all done}
 
@@ -1219,12 +1218,12 @@ _SaveChar=$30fe                 {vCPU adds 2 and wraps to $3000}
     \Buffer i= \sysArgs0:       {Buffer start}
     $01 \sysArgs2.              {Init bit mask}
     <j, \sysArgs3.              {Number of bits to send}
-    \SYS_SendSerial1_v3_80 \sysFn:
+    \SYS_SendSerial1_v3_80 _sysFn=
     80!!                        {SYS call to send bits to serial port}
     [if<>0 3 \serialRaw.]       {Not a great hack: induce a break error}
     0 <j.                       {Reset bit counter}
   ]
-  \SYS_Run6502_v4_80 \sysFn:
+  \SYS_Run6502_v4_80 _sysFn=
   80!!                          {Re-enter 6502 mode}
   loop
 ]

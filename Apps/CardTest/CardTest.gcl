@@ -1,84 +1,16 @@
 
 {-----------------------------------------------------------------------+
 |                                                                       |
-|       CardTest                                                        |
+|       List                                                            |
 |                                                                       |
 |       !!! Work in progress !!!                                        |
 |                                                                       |
-|       The goal is to connect to a FAT32-formatted SDC/MMC card        |
-|       over the SPI interface, and then list its root directory.       |
-|       If there is a BOOT.GT1 file, load and execute it.               |
+|       List directory contents including date, size and volume ID.     |
+|                                                                       |
+|       Goal is to make this a command that runs under GTOS and         |
+|       returns to the prompt                                           |
 |                                                                       |
 +-----------------------------------------------------------------------}
-
-{
-  XXX  Support loading of segments in zero page
-        - Bricks        82.ef   110 bytes
-        - Tetronis      a0.ef    80 bytes
-        - Frogstroll    82.ef   110 bytes
-        Approach 1: Through page 1
-                Kludge but very simple.
-                Visual artifacts are transient, and only with certain files
-                We could also map it to a different page, e.g. one
-                that will be scrolled out anyway
-        Approach 2: Decoding after load
-                Faster loading, but 2nd pass needed
-                Can't hide visual artifacts, even for simple files
-        Approach 3: Reduce footprint with CALLI and move variables to $c0
-                Lots of work, but this is a good idea anyway
-  XXX  64K systems: put code in highest pages ($ffff and down)
-                --> Conflicts with Apple1 (WozMon)
-  XXX  32K systems: put code in bottom screen memory ($7f9f and down)
-        --> Conflicts with Apple1. So how about $800.$1000
-        16*160 = 2560 bytes
-        Con: It overwrites *** Gigatron 32K *** --> So be it
-        We can always copy that to the bottom of screen memory (silly)
-        Dynamically mak jump table at $f8: if you use it, ALLOC -8
-        $FE PrintChar, Newline, Open, LoadByte, ...
-  XXX  On the matter of scrolling: When to restore the video table?
-       Graphical games probably need it restored. Disk commands don't
-       need that.
-        Option 1: Signal somehow in the GT1 that we don't want to restore
-        Option 2: Start the terminal with cursor at top of screen
-                  This doesn't work if we type "DIR" first
-  XXX  DIR, CLS commands
-  XXX  TYPE command (passing of ARGS)
-  XXX  Name: GTOS, GTDOS, TTLDOS, UDOS, SDOS, MICRODOS, TINYDOS, PROMPT, ...
-  XXX  https://cdn.hackaday.io/images/1744261554112919559.png
-  XXX  LoadtGt1: better closing of sector
-  XXX  Compliancy: Byte addressing for V2 cards when CCS bit in CMD58 OCR is 0
-  XXX  Compliancy: MMC v3 card detection with CMD1
-  XXX  Compliancy: Don't set block size with CMD16 if CCS bit in OCS is 1
-  XXX  Compliancy: Reconsider pull-down resistors on MISO lines
-                   Some cards [30%?] [MMC?] have MISO in open collector during
-                   init" But if this is only during CMD0, we can live with it...
-  XXX  Compliancy: Follow cluster chain for directories as well
-  XXX  Speed: Transfer 256 bytes at once
-  XXX  Think about card detect and monitoring it (inserted = low)
-       Put we can always use the MOSI line for this, or check the
-       init status when opening a file
-  XXX  Figure out why Apple formats card with type 0x0b
-
-  References:
-
-        http://www.dejazzer.com/ee379/lecture_notes/lec12_sd_card.pdf
-        SPI and SD cards
-
-        https://electronics.stackexchange.com/questions/303745/sd-card-initialization-problem-cmd8-wrong-response
-        SD card initialization problem - CMD8 wrong response
-
-        http://www.rjhcoding.com/avrc-sd-interface-1.php
-        http://www.rjhcoding.com/avrc-sd-interface-2.php
-        http://www.rjhcoding.com/avrc-sd-interface-3.php
-        http://www.rjhcoding.com/avrc-sd-interface-4.php
-        Interfacing an SD Card Part 1-4
-
-        https://www.pjrc.com/tech/8051/ide/fat32.html
-        Understanding FAT32 Filesystems
-
-        https://bits4device.wordpress.com/2017/12/16/sd-crc7-crc16-implementation/
-        CRC definition
-}
 
 gcl0x
 
@@ -196,7 +128,7 @@ $500 Address=                   {512 bytes memory for one sector}
 ] CMD0=
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $59                                    |
+|} >_vLR++ [ret] {      RAM page $59                                    |
 +-----------------------------------------------------------------------}
 *=$59a0
 
@@ -274,7 +206,7 @@ $500 Address=                   {512 bytes memory for one sector}
 ] CMD8=
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $5a                                    |
+|} >_vLR++ [ret] {      RAM page $5a                                    |
 +-----------------------------------------------------------------------}
 *=$5aa0
 
@@ -310,7 +242,7 @@ $500 Address=                   {512 bytes memory for one sector}
 ] CMD55=
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $5b                                    |
+|} >_vLR++ [ret] {      RAM page $5b                                    |
 +-----------------------------------------------------------------------}
 *=$5ba0
 
@@ -348,7 +280,7 @@ $500 Address=                   {512 bytes memory for one sector}
 ] CMD16=
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $5c                                    |
+|} >_vLR++ [ret] {      RAM page $5c                                    |
 +-----------------------------------------------------------------------}
 *=$5ca0
 
@@ -385,7 +317,7 @@ $500 Address=                   {512 bytes memory for one sector}
 ] CMD17=
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $5d                                    |
+|} >_vLR++ [ret] {      RAM page $5d                                    |
 +-----------------------------------------------------------------------}
 *=$5da0
 
@@ -407,14 +339,14 @@ $500 Address=                   {512 bytes memory for one sector}
 { EnableCard }
 [def
   \SYS_ExpanderControl_v4_40    {SYS function}
-  _sysFn= $8078 40!             {Enable SPI0, keep MOSI high, bank=1}
+  _sysFn= $8078 40!!            {Enable SPI0, keep MOSI high, bank=1}
   ret
 ] EnableCard=
 
 { DisableCard }
 [def
   \SYS_ExpanderControl_v4_40    {SYS function}
-  _sysFn= $807c 40!             {Disable SPI0, keep MOSI high, bank=1}
+  _sysFn= $807c 40!!            {Disable SPI0, keep MOSI high, bank=1}
   ret
 ] DisableCard=
 
@@ -424,13 +356,13 @@ $500 Address=                   {512 bytes memory for one sector}
   \sysArgs6 _sysArgs0=          {Begin}
   1+        _sysArgs2=          {End}
   \SYS_SpiExchangeBytes_v4_134  {SYS function}
-  _sysFn= 134!                  {Exchanges a single byte}
+  _sysFn= 134!!                 {Exchanges a single byte}
   \sysArgs6,                    {Reply byte}
   ret
 ] SendOnesToCard=
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $5e                                    |
+|} >_vLR++ [ret] {      RAM page $5e                                    |
 +-----------------------------------------------------------------------}
 *=$5ea0
 
@@ -455,7 +387,7 @@ $500 Address=                   {512 bytes memory for one sector}
 ] UpdateCrc16=
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $5f                                    |
+|} >_vLR++ [ret] {      RAM page $5f                                    |
 +-----------------------------------------------------------------------}
 *=$5fa0
 
@@ -475,7 +407,7 @@ $500 Address=                   {512 bytes memory for one sector}
   Buffer  _sysArgs0=            {Begin}
   8+      _sysArgs2=            {End and overwrite exchange buffer}
   \SYS_SpiExchangeBytes_v4_134  {SYS function}
-  _sysFn= 134!
+  _sysFn= 134!!
 
   pop ret
 ] SendCommandToCard=
@@ -503,13 +435,13 @@ $500 Address=                   {512 bytes memory for one sector}
 
   {32 PrintChar!                 {Space}}
   \sysArgs6, CardReply=         {Store reply from card}
-  {PrintByte!                    {Print hex value}}
+  PrintByte!                    {Print hex value}
   CardReply                     {As return value}
   pop ret
 ] WaitForCardReply=
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $60                                    |
+|} >_vLR++ [ret] {      RAM page $60                                    |
 +-----------------------------------------------------------------------}
 *=$60a0
 
@@ -525,6 +457,7 @@ $500 Address=                   {512 bytes memory for one sector}
     \frameCount, 60- if<0loop]  {No more than 1 second}
   CMD8!                         {Detect version 1.X or later}
   [do
+    { TODO: "In SPI mode CMD1 and ACMD41 have the same behavior" }
     CMD55! ACMD41!              {Query condition}
     CardReply if<>0             {Until the card is initialised}
     \frameCount, 120- if<0loop] {No more than 2 seconds}
@@ -561,7 +494,7 @@ $500 Address=                   {512 bytes memory for one sector}
 ] ReadVolumeId=
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $61                                    |
+|} >_vLR++ [ret] {      RAM page $61                                    |
 +-----------------------------------------------------------------------}
 *=$61a0
 
@@ -594,7 +527,7 @@ $500 Address=                   {512 bytes memory for one sector}
 ] ReadMBR=
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $62                                    |
+|} >_vLR++ [ret] {      RAM page $62                                    |
 +-----------------------------------------------------------------------}
 *=$62a0
 
@@ -644,7 +577,7 @@ $500 Address=                   {512 bytes memory for one sector}
 ] {InitFat32=}
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $63                                    |
+|} >_vLR++ [ret] {      RAM page $63                                    |
 +-----------------------------------------------------------------------}
 *=$63a0
 InitFat32=
@@ -695,7 +628,7 @@ InitFat32=
 ] ReadSector=
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $64                                    |
+|} >_vLR++ [ret] {      RAM page $64                                    |
 +-----------------------------------------------------------------------}
 *=$64a0
 
@@ -748,7 +681,7 @@ InitFat32=
 ] ReadDirectory=
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $65                                    |
+|} >_vLR++ [ret] {      RAM page $65                                    |
 +-----------------------------------------------------------------------}
 *=$65a0
 
@@ -797,7 +730,7 @@ InitFat32=
 ] ClusterToSector=
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $66                                    |
+|} >_vLR++ [ret] {      RAM page $66                                    |
 +-----------------------------------------------------------------------}
 *=$66a0
 
@@ -849,7 +782,7 @@ InitFat32=
 ] {AddOffset=}
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $67                                    |
+|} >_vLR++ [ret] {      RAM page $67                                    |
 +-----------------------------------------------------------------------}
 *=$67a0
 AddOffset=
@@ -899,7 +832,7 @@ AddOffset=
 ] PrintWord=
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $68                                    |
+|} >_vLR++ [ret] {      RAM page $68                                    |
 +-----------------------------------------------------------------------}
 *=$68a0
 
@@ -943,7 +876,7 @@ AddOffset=
 ] PrintHexDigit=
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $69                                    |
+|} >_vLR++ [ret] {      RAM page $69                                    |
 +-----------------------------------------------------------------------}
 *=$69a0
 
@@ -982,7 +915,7 @@ AddOffset=
 ] PrintVolumeLabel=
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $6a                                    |
+|} >_vLR++ [ret] {      RAM page $6a                                    |
 +-----------------------------------------------------------------------}
 *=$6aa0
 
@@ -1002,11 +935,11 @@ AddOffset=
 
   \SYS_LSRW1_48 _sysFn=         {Prepare 1-bit right shift}
   p 17+ peek                    {Select year, origin is 1980}
-  48! 20- [if<0 100+]
+  48!! 20- [if<0 100+]
   PrintTwoDecimals!
 
   \SYS_LSRW5_50 _sysFn=         {Prepare 5-bit shift right}
-  p 16+ deek 50! 15&            {Select month 1-12}
+  p 16+ deek 50!! 15&           {Select month 1-12}
   PrintTwoDecimals!
 
   p 16+ peek 31&                {Select day 1-31}
@@ -1016,7 +949,7 @@ AddOffset=
 ] PrintDate=
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $6b                                    |
+|} >_vLR++ [ret] {      RAM page $6b                                    |
 +-----------------------------------------------------------------------}
 *=$6ba0
 
@@ -1054,7 +987,7 @@ AddOffset=
 ] PrintName=
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $6c                                    |
+|} >_vLR++ [ret] {      RAM page $6c                                    |
 +-----------------------------------------------------------------------}
 *=$6ca0
 
@@ -1081,7 +1014,7 @@ AddOffset=
 ] PrintDigit=
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $6d                                    |
+|} >_vLR++ [ret] {      RAM page $6d                                    |
 +-----------------------------------------------------------------------}
 *=$6da0
 
@@ -1095,7 +1028,7 @@ AddOffset=
   \sysArgs2.                    {Set all-zero output pattern}
   [do
     \SYS_VDrawBits_134          {SYS call to draw 8 pixels vertically}
-    _sysFn= 134!
+    _sysFn= 134!!
     <_sysArgs4++                {Step 1 pixel right}
     \sysArgs4, 160^             {Test for end of line}
     if<>0loop]
@@ -1111,7 +1044,7 @@ AddOffset=
 ] Newline=
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $6e                                    |
+|} >_vLR++ [ret] {      RAM page $6e                                    |
 +-----------------------------------------------------------------------}
 *=$6ea0
 
@@ -1135,14 +1068,14 @@ AddOffset=
   \SYS_VDrawBits_134 _sysFn=    {Prepare SYS calls}
   5 [do i=                      {Loop to draw 5 vertical slices of 8 pixels}
     j 0? \sysArgs2.             {Get byte from ROM using `LUP 0' instruction}
-    134!                        {Invoke SYS function to draw 8 vertical pixels}
+    134!!                       {Invoke SYS function to draw 8 vertical pixels}
     <j++ <_sysArgs4++           {Advance to next slice in ROM and on screen}
     i 1- if>0loop]              {Looping}
   ret
 ] PrintChar=
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $6f                                    |
+|} >_vLR++ [ret] {      RAM page $6f                                    |
 +-----------------------------------------------------------------------}
 *=$6fa0
 
@@ -1179,7 +1112,7 @@ AddOffset=
 ] PrintDirectory=
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $70                                    |
+|} >_vLR++ [ret] {      RAM page $70                                    |
 +-----------------------------------------------------------------------}
 *=$70a0
 
@@ -1210,7 +1143,7 @@ AddOffset=
 ] PrintSize=
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $71                                    |
+|} >_vLR++ [ret] {      RAM page $71                                    |
 +-----------------------------------------------------------------------}
 *=$71a0
 
@@ -1243,7 +1176,7 @@ AddOffset=
 ] {ValueToDecimal=}
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $72                                    |
+|} >_vLR++ [ret] {      RAM page $72                                    |
 +-----------------------------------------------------------------------}
 *=$72a0
 ValueToDecimal=
@@ -1257,7 +1190,7 @@ ValueToDecimal=
 +-----------------------------------------------------------------------}
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $73                                    |
+|} >_vLR++ [ret] {      RAM page $73                                    |
 +-----------------------------------------------------------------------}
 *=$73a0
 
@@ -1305,7 +1238,7 @@ ValueToDecimal=
 ] LoadGt1=
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $74                                    |
+|} >_vLR++ [ret] {      RAM page $74                                    |
 +-----------------------------------------------------------------------}
 *=$74a0
 
@@ -1336,7 +1269,7 @@ ValueToDecimal=
 ] Execute=
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $75                                    |
+|} >_vLR++ [ret] {      RAM page $75                                    |
 +-----------------------------------------------------------------------}
 *=$75a0
 
@@ -1359,7 +1292,7 @@ ValueToDecimal=
 ] NextSector=
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $76                                    |
+|} >_vLR++ [ret] {      RAM page $76                                    |
 +-----------------------------------------------------------------------}
 *=$76a0
 
@@ -1395,7 +1328,7 @@ ValueToDecimal=
 ] ReadClusterChain=
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $77                                    |
+|} >_vLR++ [ret] {      RAM page $77                                    |
 +-----------------------------------------------------------------------}
 *=$77a0
 
@@ -1436,7 +1369,7 @@ ValueToDecimal=
 ] NextCluster=
 
 {-----------------------------------------------------------------------+
-|}>_vLR++ [ret]{        RAM page $78                                    |
+|} >_vLR++ [ret] {      RAM page $78                                    |
 +-----------------------------------------------------------------------}
 *=$78a0
 

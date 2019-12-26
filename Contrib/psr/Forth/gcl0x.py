@@ -1,10 +1,3 @@
-#!/usr/bin/env python
-from __future__ import (
-    absolute_import,
-    division,
-    print_function,
-    unicode_literals,
-)
 
 # XXX Change to Python3
 # XXX Backquoted words should have precedence over grouping
@@ -191,7 +184,8 @@ class Program:
           else:
             self.warning('CALLI is an experimental feature')
             self.emitOp('CALLI_DEVROM').emit(lo(con)); con = hi(con)
-        elif op == '?':    self.emitOp('LUP')
+        elif op == '?':    self.emitOp('LUP');          #self.depr('i?', 'i??')
+        elif op == '??':   self.emitOp('LUP')
         elif op == '# ':   self.emitOp(con); con = None # Silent truncation
         elif op == '#< ':  self.emitOp(con); con = None
         elif op == '#> ':  con = hi(con); assert self.segStart != self.vPC # XXX Conflict
@@ -357,7 +351,7 @@ class Program:
     else:
       d = '`' # And symbol becomes a backquote
     for c in d:
-      comment = '%04x %s' % (self.vPC, repr(c).lstrip('u'))
+      comment = '%04x %s' % (self.vPC, repr(c))
       self.emit(ord(c), comment=comment)
 
   def emitDef(self):
@@ -431,7 +425,7 @@ class Program:
       if var not in self.vars:
         self.vars[var] = zpByte(2)
       address = self.vars[var]
-    comment = '%04x %s' % (prev(self.vPC, 1), repr(var).lstrip('u'))
+    comment = '%04x %s' % (prev(self.vPC, 1), repr(var))
     comment += '%+d' % offset if offset else ''
     byte = address + offset
     if byte < -128 or byte >= 256:

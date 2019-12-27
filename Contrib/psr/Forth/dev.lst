@@ -6973,10 +6973,30 @@ forth.core.C@:
               1482 1413  ld   $13,y       ;NEXT
               1483 e00f  jmp  y,$0f
               1484 00f7  ld   $f7
-              1485 0200  nop
-              1486 0200  nop
-              1487 0200  nop
-              * 123 times
+forth.core.C!:
+              1485 80f6  adda $f6
+              1486 1400  ld   $00,y       ;Pop 2 byte address to temp (SP moves by 4)
+              1487 011c  ld   [$1c]
+              1488 1200  ld   ac,x
+              1489 8004  adda $04
+              148a c21c  st   [$1c]
+              148b 0d00  ld   [y,x]
+              148c c224  st   [$24]
+              148d de00  st   [y,x++]
+              148e 0d00  ld   [y,x]
+              148f c225  st   [$25]
+              1490 de00  st   [y,x++]
+              1491 0d00  ld   [y,x]       ;Load low-byte of char - top byte ignored
+              1492 1124  ld   [$24],x
+              1493 1525  ld   [$25],y
+              1494 ce00  st   [y,x]       ;Write
+              1495 1413  ld   $13,y       ;NEXT
+              1496 e00e  jmp  y,$0e
+              1497 00f6  ld   $f6
+              1498 0200  nop
+              1499 0200  nop
+              149a 0200  nop
+              * 104 times
 forth.restart-or-quit:
               1500 fd30  bra  [$30]
               1501 f802  ble  .quit

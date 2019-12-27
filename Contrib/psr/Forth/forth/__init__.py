@@ -47,6 +47,7 @@ def emit_core_words():
     _docol_exit.exit()
     _docol_exit.docol_ram_ram()
     _memory.char_at()
+    _memory.char_set()
     ####
     _start_page()
     # Stack manipulation words

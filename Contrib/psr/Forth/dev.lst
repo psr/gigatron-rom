@@ -899,13 +899,13 @@ vBlankStart:  0104 c21f  st   [$1f]       942   st([videoSync0])                
                                           1042  beq('vBlankFirst#75')           #73
               014c f052  beq  vBlankFirst#75
                                           1043
-              014d 0055  ld   $55         1044  runVcpu(186-74-extra,           #74 Application cycles (scan line 0)
+                                          1044  runVcpu(186-74-extra,           #74 Application cycles (scan line 0)
+                                          1045      '---D line 0 no timeout',
+              014d 0055  ld   $55         1046      returnTo='vBlankFirst#186')
               014e c21e  st   [$1e]
               014f 1505  ld   [$05],y
               0150 e0ff  jmp  y,$ff
               0151 0023  ld   $23
-                                          1045      '---D line 0 no timeout',
-                                          1046      returnTo='vBlankFirst#186')
                                           1047
                                           1048  label('vBlankFirst#75')
 vBlankFirst#75:
@@ -1312,12 +1312,12 @@ videoF:       02ec 0120  ld   [$20]       1405  ld([videoSync1])                
                                           1416  #
                                           1417  # Alternative for pixel burst: faster application mode
                                           1418  label('nopixels')
-nopixels:     02f6 00ff  ld   $ff         1419  runVcpu(200-38, 'ABCD line 40-520',
+                                          1419  runVcpu(200-38, 'ABCD line 40-520',
+nopixels:     02f6 00ff  ld   $ff         1420    returnTo=0x1ff)               #38 Application interpreter (black scanlines)
               02f7 c21e  st   [$1e]
               02f8 1505  ld   [$05],y
               02f9 e0ff  jmp  y,$ff
               02fa 003c  ld   $3c
-                                          1420    returnTo=0x1ff)               #38 Application interpreter (black scanlines)
                                           1421
                                           1422  #-----------------------------------------------------------------------
                                           1423  #
@@ -6604,13 +6604,13 @@ vBlankFirst#78:
                                           5185  bne('vBlankFirst#82')           #80
               129c eca3  bne  vBlankFirst#82
               129d 0116  ld   [$16]       5186  ld([vPC])                       #81
-              129e 0055  ld   $55         5187  runVcpu(186-82-extra,           #82 Application cycles (scan line 0)
+                                          5187  runVcpu(186-82-extra,           #82 Application cycles (scan line 0)
+                                          5188      '---D line 0 timeout but no irq',
+              129e 0055  ld   $55         5189      returnTo='vBlankFirst#186')
               129f c21e  st   [$1e]
               12a0 1505  ld   [$05],y
               12a1 e0ff  jmp  y,$ff
               12a2 001f  ld   $1f
-                                          5188      '---D line 0 timeout but no irq',
-                                          5189      returnTo='vBlankFirst#186')
                                           5190
                                           5191  label('vBlankFirst#82')
 vBlankFirst#82:
@@ -6632,13 +6632,13 @@ vBlankFirst#82:
               12b2 c219  st   [$19]       5207  st([vAC+1])                     #97
               12b3 0002  ld   $02         5208  ld(hi('ENTER'))                 #98 Set vCpuSelect to ENTER (=regular vCPU)
               12b4 c205  st   [$05]       5209  st([vCpuSelect])                #99
-              12b5 0055  ld   $55         5210  runVcpu(186-100-extra,          #100 Application cycles (scan line 0)
+                                          5210  runVcpu(186-100-extra,          #100 Application cycles (scan line 0)
+                                          5211      '---D line 0 timeout with irq',
+              12b5 0055  ld   $55         5212      returnTo='vBlankFirst#186')
               12b6 c21e  st   [$1e]
               12b7 1505  ld   [$05],y
               12b8 e0ff  jmp  y,$ff
               12b9 0016  ld   $16
-                                          5211      '---D line 0 timeout with irq',
-                                          5212      returnTo='vBlankFirst#186')
                                           5213
                                           5214  # vIRQ sequence WITH interpreter switch
                                           5215  label('vRTI#18')

@@ -33,7 +33,7 @@ task Virtualenv {
         get-item '.venv' -ErrorAction Stop > $null
     }
     catch {
-        python3 -m venv '.\.venv'
+        py -3.6 -m venv '.\.venv'
     }
 }
 

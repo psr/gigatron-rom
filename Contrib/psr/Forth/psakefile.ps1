@@ -53,7 +53,7 @@ task Extension -depends Packages {
 
 
 task ROM {
-    .\.venv\Scripts\python.exe .\dev.py Main=MainMenu\MainMenu.gcl Reset=Reset.gcl
+    .\.venv\Scripts\python.exe .\dev.py Main=MainMenu\MainMenu.gcl Boot=CardBoot.gcl Reset=Reset.gcl
     if ($LASTEXITCODE -ne 0 ) {
         throw "Rom failed";
     }

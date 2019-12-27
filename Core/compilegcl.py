@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #-----------------------------------------------------------------------
 #
 #  compilegcl.py -- Compile GCL source to GT1 object file
@@ -69,7 +69,7 @@ if program.needPatch:
   patchArea = 0x5b86 # Somewhere after the ROMv1 Loader's buffer
   print('Apply patch $%04x' % patchArea)
   data = data[:-1] # Remove terminating zero
-  data += ''.join(chr(byte) for byte in [
+  data += bytes([
     patchArea>>8, patchArea&255, 6,   # Patch segment, 6 bytes at $5b80
     0x11, address&255, address>>8,    # LDWI address
     0x2b, 0x1a,                       # STW  vLR
@@ -81,8 +81,8 @@ if program.needPatch:
 
 # Final two bytes are execution address
 print('Execute at $%04x' % address)
-data += chr(address>>8)
-data += chr(address&255)
+data.append(address>>8)
+data.append(address&255)
 
 #-----------------------------------------------------------------------
 #       Write out GT1 file

@@ -14,6 +14,7 @@ $FILES = @(
     # Upstream                      # Our code
     @('Core/v6502.json',            'Core/v6502.json'),
     @('Apps/MainMenu/',             'MainMenu'),
+    @('Apps/CardTest/CardBoot.gcl', 'CardBoot.gcl'),
     @('Core/Reset.gcl',             'Reset.gcl'),
     @('Core/asm.py',                'asm.py'),
     @('Core/dev.py',                'dev.py'),

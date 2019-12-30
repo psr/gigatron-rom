@@ -6993,10 +6993,46 @@ forth.core.C!:
               1495 1413  ld   $13,y       ;NEXT
               1496 e00e  jmp  y,$0e
               1497 00f6  ld   $f6
-              1498 0200  nop
-              1499 0200  nop
-              149a 0200  nop
-              * 104 times
+forth.core.1+:
+              1498 80f9  adda $f9
+              1499 1400  ld   $00,y
+              149a 111c  ld   [$1c],x
+              149b 0d00  ld   [y,x]
+              149c 8001  adda $01
+              149d eca5  bne  .done
+              149e de00  st   [y,x++]
+              149f 0d00  ld   [y,x]
+              14a0 8001  adda $01
+              14a1 ce00  st   [y,x]
+              14a2 1413  ld   $13,y       ;NEXT
+              14a3 e00e  jmp  y,$0e
+              14a4 00f9  ld   $f9
+.done:        14a5 1413  ld   $13,y       ;NEXT
+              14a6 e00f  jmp  y,$0f
+              14a7 00fb  ld   $fb
+forth.core.1-:
+              14a8 80f9  adda $f9
+              14a9 1400  ld   $00,y
+              14aa 111c  ld   [$1c],x
+              14ab 0d00  ld   [y,x]
+              14ac f0b2  beq  .low-byte-was-zero
+              14ad a001  suba $01
+              14ae ce00  st   [y,x]
+              14af 1413  ld   $13,y       ;NEXT
+              14b0 e00f  jmp  y,$0f
+              14b1 00fb  ld   $fb
+.low-byte-was-zero:
+              14b2 de00  st   [y,x++]
+              14b3 0d00  ld   [y,x]
+              14b4 a001  suba $01
+              14b5 ce00  st   [y,x]
+              14b6 1413  ld   $13,y       ;NEXT
+              14b7 e00e  jmp  y,$0e
+              14b8 00f9  ld   $f9
+              14b9 0200  nop
+              14ba 0200  nop
+              14bb 0200  nop
+              * 71 times
 forth.restart-or-quit:
               1500 fd30  bra  [$30]
               1501 f802  ble  .quit

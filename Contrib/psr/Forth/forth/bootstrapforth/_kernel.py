@@ -141,7 +141,7 @@ def _colon(state):
     )
 
 
-@kernel.word("COMPILE,", immediate=True)
+@kernel.word("COMPILE,")
 def _compile_comma(state):
     state.current_definition.append(state.data_stack.pop())
 
@@ -187,19 +187,14 @@ def COUNT(state):
 def _find_compilation(state, name):
     try:
         entry = state.compilation_dictionary[name]
-        if not entry.is_immediate:
-            state.data_stack.append(entry.execution_token)
-            state.data_stack.append(-1)
-            return
     except KeyError:
-        pass
-    # Not found, or found, but immediate
-    entry = state.dictionary[name]
-    if not entry.is_immediate:
-        raise KeyError
-    # Found immediate in the runtime dictionary
+        # Not found
+        entry = state.dictionary[name]
+        if not entry.is_immediate:
+            raise KeyError
+        # Found immediate in the runtime dictionary
     state.data_stack.append(entry.execution_token)
-    state.data_stack.append(1)
+    state.data_stack.append(1 if entry.is_immediate else -1)
 
 
 def _find_interpretation(state, name):

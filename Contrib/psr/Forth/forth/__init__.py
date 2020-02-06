@@ -2,7 +2,14 @@
 
 from asm import *
 
-from . import _arithmetic, _core, _docol_exit, _memory, _next
+from . import (
+    _arithmetic,
+    _core,
+    _docol_exit,
+    _literal,
+    _memory,
+    _next,
+)
 from ._next import move_ip
 
 
@@ -50,6 +57,8 @@ def emit_core_words():
     _memory.char_set()
     _arithmetic.increment()
     _arithmetic.decrement()
+    _literal.lit_rom_mode()
+    _literal.char_lit_rom_mode()
     ####
     _start_page()
     # Stack manipulation words

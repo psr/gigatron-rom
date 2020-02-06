@@ -7031,10 +7031,41 @@ forth.core.1-:
               14ba 1413  ld   $13,y       ;NEXT
               14bb e00e  jmp  y,$0e
               14bc 00f9  ld   $f9
-              14bd 0200  nop
-              14be 0200  nop
-              14bf 0200  nop
-              * 67 times
+forth.internal.LIT:
+              14bd 80f5  adda $f5
+              14be 00f5  ld   $f5         ;Store cost
+              14bf c224  st   [$24]
+              14c0 011c  ld   [$1c]       ;Decrement Data stack pointer
+              14c1 a002  suba $02
+              14c2 1200  ld   ac,x
+              14c3 c21c  st   [$1c]
+              14c4 1534  ld   [$34],y     ;Jump to the code in the thread
+              14c5 0006  ld   $06         ;We're going to shift the IP by 6
+              14c6 0200  nop
+              14c7 e133  jmp  y,[$33]
+              14c8 1400  ld   $00,y
+forth.internal.C-LIT:
+              14c9 80f3  adda $f3
+              14ca 00f3  ld   $f3         ;Store cost
+              14cb c224  st   [$24]
+              14cc 011c  ld   [$1c]       ;Decrement Data stack pointer and store high byte of 0
+              14cd a001  suba $01
+              14ce 1200  ld   ac,x
+              14cf 0000  ld   $00
+              14d0 c600  st   [x]
+              14d1 011c  ld   [$1c]
+              14d2 a002  suba $02
+              14d3 1200  ld   ac,x
+              14d4 c21c  st   [$1c]
+              14d5 1534  ld   [$34],y     ;Jump to the code in the thread
+              14d6 0005  ld   $05         ;We're going to shift the IP by 5
+              14d7 0200  nop
+              14d8 e133  jmp  y,[$33]
+              14d9 1400  ld   $00,y
+              14da 0200  nop
+              14db 0200  nop
+              14dc 0200  nop
+              * 38 times
 forth.restart-or-quit:
               1500 fd30  bra  [$30]
               1501 f802  ble  .quit

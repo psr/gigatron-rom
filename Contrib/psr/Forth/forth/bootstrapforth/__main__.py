@@ -4,7 +4,6 @@ import pathlib
 import sys
 
 from ._compiler import bootstrap_compiler
-from ._dictionary import Flags
 from ._kernel import dictionary as kernel_dictionary
 from ._runtime import Interpreter
 

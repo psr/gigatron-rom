@@ -1,6 +1,6 @@
 """Native code Forth implementation for the Gigatron"""
 
-from asm import *
+from asm import C, adda, align, label, nop, pc, st
 
 from . import (
     _arithmetic,
@@ -73,3 +73,6 @@ def emit_core_words():
     # This can probably be removed later
     label("forth.NOP")
     _docol_exit.make_thread()
+
+
+__all__ = ["move_ip", "emit_core_words", "emit_entry_page"]

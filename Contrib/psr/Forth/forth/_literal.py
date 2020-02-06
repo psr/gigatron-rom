@@ -1,5 +1,5 @@
 """Implementation of Literals"""
-from asm import *
+from asm import AC, C, X, Y, adda, jmp, label, ld, nop, st, suba
 
 from ._next import cost_of_move_ip
 from .variables import IP_hi, IP_lo, data_stack_pointer, tmp0

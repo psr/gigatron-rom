@@ -40,5 +40,4 @@
     POSTPONE [
     ['] EXIT COMPILE,
     HIDDEN
-    EXIT
 ; IMMEDIATE

@@ -1,7 +1,7 @@
 """A minimal Forth "compiler" which is just sufficient to bring up a full runtime"""
 
 from ._dictionary import Flags
-from ._kernel import *
+from ._kernel import EXIT, branch, docol, lit, zero_branch
 from ._runtime import ExecutionToken, ThreadExecutionToken
 
 # The following bootstrap compiler only understands

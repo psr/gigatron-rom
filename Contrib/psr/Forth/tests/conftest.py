@@ -7,7 +7,7 @@ from gtemu import RAM, Emulator  # isort:skip
 from forth import variables  # isort:skip
 
 pytest.register_assert_rewrite("utilities")
-import utilities  # isort:skip
+import utilities  # noqa: E402 isort:skip
 
 
 @pytest.fixture

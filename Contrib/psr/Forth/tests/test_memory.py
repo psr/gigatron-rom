@@ -1,8 +1,6 @@
 """"Test for memory access words"""
-from hypothesis import assume, given
-from hypothesis.strategies import integers
+from hypothesis import given
 
-from forth import variables
 from gtemu import RAM
 from strategies import addresses, characters, data_stack_depths
 from utilities import do_test_word

@@ -1,6 +1,6 @@
 """Words for performing arithmetic"""
 
-from asm import *
+from asm import X, Xpp, Y, adda, beq, bne, label, ld, lo, st, suba
 
 from ._utilities import NEXT, add_cost_of_next
 from .variables import data_stack_page, data_stack_pointer

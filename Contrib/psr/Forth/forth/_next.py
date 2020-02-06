@@ -1,8 +1,29 @@
-from asm import *
+from asm import (
+    AC,
+    C,
+    X,
+    Xpp,
+    Y,
+    adda,
+    beq,
+    bgt,
+    ble,
+    blt,
+    bne,
+    bra,
+    hi,
+    jmp,
+    label,
+    ld,
+    lo,
+    nop,
+    pc,
+    st,
+    suba,
+)
 
 from ._utilities import REENTER, add_cost_of_reenter, cost_of_reenter
 from .variables import (
-    IP,
     IP_hi,
     IP_lo,
     W,

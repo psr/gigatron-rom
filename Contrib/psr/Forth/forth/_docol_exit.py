@@ -1,5 +1,19 @@
 """Implementations of DOCOL and EXIT"""
-from asm import *
+from asm import (
+    C,
+    X,
+    Xpp,
+    Y,
+    adda,
+    beq,
+    hi,
+    jmp,
+    label,
+    ld,
+    lo,
+    st,
+    suba,
+)
 
 from ._utilities import (
     NEXT,
@@ -7,7 +21,18 @@ from ._utilities import (
     add_cost_of_next,
     add_cost_of_reenter,
 )
-from .variables import *
+from .variables import (
+    IP_hi,
+    IP_lo,
+    W,
+    W_hi,
+    W_lo,
+    mode,
+    return_stack_page,
+    return_stack_pointer,
+    tmp0,
+    tmp1,
+)
 
 
 def _push_ip_to_return_stack():

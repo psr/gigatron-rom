@@ -1,4 +1,4 @@
-from asm import *
+from asm import AC, C, X, Xpp, Y, adda, label, ld, st, suba
 
 from ._utilities import NEXT, add_cost_of_next
 from .variables import (
@@ -9,9 +9,6 @@ from .variables import (
     tmp2,
     tmp3,
     tmp4,
-    tmp5,
-    tmp6,
-    tmp7,
 )
 
 
@@ -147,7 +144,7 @@ def two_swap():
         st([copy_to])
     ld([X])  # 14 = 4 + 3 * 3 + 1
     st([tmp3])
-    ld([data_stack_pointer], X)  #  16
+    ld([data_stack_pointer], X)  # 16
     for copy_from, copy_to in zip([tmp0, tmp1, tmp2, tmp3], [tmp4, tmp0, tmp1, tmp2]):
         ld([X])
         st([copy_to])

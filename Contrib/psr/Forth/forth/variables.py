@@ -21,18 +21,17 @@ with _interface_file.open() as fp:
         }
     )
 
+tmp0 = sysArgs0  # noqa: F821
+tmp1 = sysArgs1  # noqa: F821
+tmp2 = sysArgs2  # noqa: F821
+tmp3 = sysArgs3  # noqa: F821
+tmp4 = sysArgs4  # noqa: F821
+tmp5 = sysArgs5  # noqa: F821
+tmp6 = sysArgs6  # noqa: F821
+tmp7 = sysArgs7  # noqa: F821
 
-tmp0 = sysArgs0
-tmp1 = sysArgs1
-tmp2 = sysArgs2
-tmp3 = sysArgs3
-tmp4 = sysArgs4
-tmp5 = sysArgs5
-tmp6 = sysArgs6
-tmp7 = sysArgs7
 
-
-data_stack_pointer = vSP
+data_stack_pointer = vSP  # noqa: F821
 data_stack_empty = 0x100
 data_stack_full = 129
 data_stack_page = 0

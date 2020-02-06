@@ -2,7 +2,6 @@
 
 import collections.abc
 import enum
-import functools
 
 from ._runtime import ExecutionToken
 

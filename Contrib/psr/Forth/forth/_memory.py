@@ -1,15 +1,8 @@
 """Words for manipulating memory"""
-from asm import *
+from asm import AC, C, X, Xpp, Y, adda, label, ld, st
 
 from ._utilities import NEXT, add_cost_of_next
-from .variables import (
-    data_stack_page,
-    data_stack_pointer,
-    tmp0,
-    tmp1,
-    tmp2,
-    tmp3,
-)
+from .variables import data_stack_page, data_stack_pointer, tmp0, tmp1
 
 
 def char_at():

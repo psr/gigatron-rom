@@ -1,11 +1,12 @@
 """Wrapper for the gtemu emulator"""
 
+import itertools
 import sys
 
 import _gtemu
 
 assert "asm" not in sys.modules, "gtemu needs to load before anything else touches asm"
-import asm  # isort:skip
+import asm  # noqa: E402 isort:skip
 
 
 BLANK_RAM = bytearray([0 for _ in range(1 << 15)])
@@ -70,7 +71,7 @@ class Emulator(object):
     @next_instruction.setter
     def next_instruction(self, address):
         """Set program execution to proceed from `address`
-        
+
         This sets the PC to address + 1, having loaded the instruction at address,
         as if we had just executed address - 1.
         """
@@ -98,7 +99,7 @@ class Emulator(object):
 
     def run_to(self, address, max_instructions=1000):
         """Run the emulator until it is about to execute the instruction at `address`
-        
+
         Due to the pipeline, this means that for the previous instruction PC was `address`,
         and therefore we have loaded the instruction.
 
@@ -172,7 +173,7 @@ asm.enableListing = _stub
 asm.disableListing = _stub
 sys.argv = ["dev.py"]
 try:
-    import dev
+    import dev  # noqa: F401  - Imported for a side effect
 finally:
     asm.disableListing = _original_disableListing
     asm.enableListing = _original_enableListing

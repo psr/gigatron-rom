@@ -1,6 +1,5 @@
 """Tests for literals"""
-import pytest
-from hypothesis import assume, given
+from hypothesis import given
 
 import asm
 import dev
@@ -37,7 +36,7 @@ def test_rom_mode_literal(emulator, data_stack, data_stack_depth, data):
 
 
 @given(data=characters, data_stack_depth=data_stack_depths(with_room_for_values=1))
-def test_rom_mode_literal(emulator, data_stack, data_stack_depth, data):
+def test_rom_mode_char_literal(emulator, data_stack, data_stack_depth, data):
     # Arrange
     data_stack.set_depth_in_bytes(data_stack_depth)
     set_IP(WORD_START)

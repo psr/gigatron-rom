@@ -1,8 +1,5 @@
-from hypothesis import assume, example, given
-from hypothesis.strategies import integers
+from hypothesis import example, given
 
-from forth import variables
-from gtemu import RAM
 from strategies import data_stack_depths, numbers
 from utilities import do_test_word
 

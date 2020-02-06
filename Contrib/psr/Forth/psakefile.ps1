@@ -5,7 +5,7 @@ $fileExcludes = 'asm.py', 'dev.py', 'font_vX.py', 'gcl0x.py'
 $filesToFormat = get-childitem -Exclude $dirExcludes -Directory | % { get-childitem -path $_ -Recurse -Include '*.py' }
 $filesToFormat += get-childitem -Name '*.py' -Exclude $fileExcludes
 
-task default -depends isort, Blacken, Test, ROM
+task default -depends isort, Blacken, Flake8, Test, ROM
 
 task isort {
     & 'isort' $filesToFormat
@@ -18,6 +18,13 @@ task Blacken {
     & 'black' $filesToFormat
     if ($LASTEXITCODE -ne 0 ) {
         throw "Black failed";
+    }
+}
+
+task Flake8 {
+    & '.\.venv\Scripts\flake8.exe' 'forth' 'tests'
+    if ($LASTEXITCODE -ne 0 ) {
+        throw "Flake8 failed";
     }
 }
 
@@ -37,8 +44,12 @@ task Virtualenv {
     }
 }
 
+task Upgrade-Packages -depends Virtualenv {
+    .\.venv\Scripts\python -m pip install --upgrade pip cffi ipython pytest hypothesis flake8
+}
+
 task Packages -depends Virtualenv {
-    .\.venv\Scripts\pip install cffi ipython pytest hypothesis
+    .\.venv\Scripts\pip install cffi ipython pytest hypothesis flake8
     if ($LASTEXITCODE -ne 0 ) {
         throw "Packages failed"
     }

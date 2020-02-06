@@ -1,4 +1,4 @@
-from hypothesis.strategies import integers, shared
+from hypothesis.strategies import integers
 
 from forth import variables
 

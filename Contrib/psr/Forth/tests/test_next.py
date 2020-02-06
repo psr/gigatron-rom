@@ -9,7 +9,6 @@ from hypothesis.strategies import integers, shared
 import asm
 import dev
 from forth import _next as next
-from forth import variables
 from gtemu import RAM, ROM
 from utilities import (
     do_test_word,

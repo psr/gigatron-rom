@@ -4,7 +4,7 @@ import struct
 import asm
 import dev
 from forth import variables
-from gtemu import RAM, ROM
+from gtemu import RAM
 
 
 def even(num):

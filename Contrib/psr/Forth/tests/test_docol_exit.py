@@ -1,7 +1,7 @@
 """Tests for DOCOL, EXIT and company"""
 
 from hypothesis import assume, given
-from hypothesis.strategies import integers, just, lists, one_of
+from hypothesis.strategies import integers, just, one_of
 
 import asm
 from forth import variables
@@ -10,7 +10,6 @@ from utilities import (
     do_test_word,
     get_IP,
     get_mode,
-    get_W,
     set_IP,
     set_mode,
     set_W,
@@ -46,7 +45,7 @@ def return_stack_depths(*, with_room_for_bytes=0):
 )
 def test_docol_ram(emulator, return_stack, ip, mode, return_stack_depth):
     """Test the docol implementation for RAM mode
-    
+
     On entry:
     IP holds the RAM address after the one we've just come from
     W holds the address of our NOP instruction
@@ -55,7 +54,7 @@ def test_docol_ram(emulator, return_stack, ip, mode, return_stack_depth):
     On exit:
     IP holds the first address of the thread
     mode holds the address of NEXT3-ROM-Mode
-    The return stack holds: 
+    The return stack holds:
         Top: The address of restore-mode (little-endian)
         2:   The previous mode
         3:   The old ip (little endian)
@@ -113,7 +112,7 @@ def test_docol_ram_ram(emulator, return_stack, ip, target, return_stack_depth):
 )
 def test_docol_rom(emulator, return_stack, ip, return_stack_depth):
     """Test the docol implementation for RAM mode
-    
+
     On entry:
     IP holds the ROM address after the one we've just come from
     W holds the address of our NOP instruction

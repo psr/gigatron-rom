@@ -75,7 +75,7 @@ class _GigatronStack(object):
 
     def push_word(self, value):
         assert -(1 << 15) <= value < (1 << 16)
-        self._push([value & 0xFF, value >> 8])
+        self._push([value & 0xFF, (value >> 8) & 0xFF])
 
     def pop_byte(self):
         """Returns an int in the range 0-255

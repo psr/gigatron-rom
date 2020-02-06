@@ -141,7 +141,7 @@ def restore_mode():
     label("forth.RESTORE-MODE")
     # Hand compiled thread with no exit
     st(lo("forth.DO-RESTORE-MODE"), [Y, Xpp])
-    jmp(Y, "forth.next3.rom-mode-tail")
+    jmp(Y, "forth.move-ip")
     st(hi("forth.DO-RESTORE-MODE"), [Y, Xpp])
 
 
@@ -171,8 +171,8 @@ def make_thread(*words):
     docol()
     for word in words:
         st(lo(word), [Y, Xpp])
-        jmp(Y, "forth.next3.rom-mode-tail")
+        jmp(Y, "forth.move-ip")
         st(hi(word), [Y, Xpp])
     st(lo("forth.EXIT"), [Y, Xpp])
-    jmp(Y, "forth.next3.rom-mode-tail")
+    jmp(Y, "forth.move-ip")
     st(hi("forth.EXIT"), [Y, Xpp])

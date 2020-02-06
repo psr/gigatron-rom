@@ -140,28 +140,43 @@ def next3_rom_head():
     """Start the process of next3"""
     label("forth.next3")
     label("forth.next3.rom-mode")
-    adda(-cost_of_next3_rom / 2)  # 1
-    label("forth.next3.fast-entry")
-    ld(W, X)  # 2
-    ld([IP_hi], Y)  # 3
-    jmp(Y, [IP_lo])  # 4
-    ld(0x00, Y)  # 5
+    adda(-(cost_of_next3_rom // 2))  # 1
+    ld(-(cost_of_next3_rom // 2))  # 2
+    st([tmp0])  # 3
+    ld(W, X)  # 4
+    ld(3)  # We're going to shift the IP by 3
+    ld([IP_hi], Y)  # 6
+    nop()  # 7
+    jmp(Y, [IP_lo])  # 8
+    ld(0x00, Y)  # 9
+
+
+cost_of_move_ip = 5
+cost_of_next3_rom = 9 + 3 + cost_of_move_ip
 
 
 # Three instructions in the word
 
 
-def next3_rom_tail():
-    """Page-Zero code to finish next3"""
+def move_ip():
+    """Page-Zero code to move the IP by the amount contained in AC
+
+    This routine is used by the ROM mode next3, and also by literal, branch and zero_branch.
+    As these routines all have different lengths, it uses a variable (tmp0) to tell it what length to return
+
+    It always jumps to forth.next1.reenter.odd, and it has an odd length itself code calling it must have an even length
+    """
     assert pc() >> 8 == 0
-    label("forth.next3.rom-mode-tail")
-    ld([IP_lo])  # 9
-    adda(3)  # 10
-    st([IP_lo])  # 11
-    REENTER(11)
+    label("forth.move-ip")
+    adda([IP_lo])  # 1
+    st([IP_lo])  # 2
+    ld(hi("forth.next1.reenter"), Y)  # 3
+    C("REENTER")
+    jmp(Y, lo("forth.next1.reenter.odd"))  # 4
+    ld([tmp0])  # 5
 
 
-cost_of_next3_rom = 11 + cost_of_reenter
+assert cost_of_move_ip == 5
 
 
 def next3_ram_rom():

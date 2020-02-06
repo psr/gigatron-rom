@@ -3,7 +3,7 @@
 from asm import *
 
 from . import _arithmetic, _core, _docol_exit, _memory, _next
-from ._next import next3_rom_tail
+from ._next import move_ip
 
 
 def emit_entry_page(vticks, vreturn):

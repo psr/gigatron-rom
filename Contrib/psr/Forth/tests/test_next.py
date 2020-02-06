@@ -388,7 +388,7 @@ def test_next3_rom(emulator):
     set_IP(WORD_START)
     ROM[WORD_START : WORD_START + 3] = [
         b"\xdc\x42",  # st $42,[y, x++]
-        [0xE0, asm.symbol("forth.next3.rom-mode-tail")],  # jmp [y,]
+        [0xE0, asm.symbol("forth.move-ip")],  # jmp [y,]
         b"\xdc\x82",  # $82,[y, x++]
     ]
 

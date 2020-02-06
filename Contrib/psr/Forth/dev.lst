@@ -522,13 +522,12 @@ SYS_Reset_88: 005e 00f8  ld   $f8         646   ld(romTypeValue)                
               0079 00ea  ld   $ea         675   ld(-44//2)                      #42
                                           676
                                           677   import forth
-forth.next3.rom-mode-tail:
-              007a 0133  ld   [$33]       678   forth.next3_rom_tail()
-              007b 8003  adda $03
-              007c c233  st   [$33]
-              007d 1413  ld   $13,y       ;REENTER
-              007e e005  jmp  y,$05
-              007f 00f9  ld   $f9
+forth.move-ip:
+              007a 8133  adda [$33]       678   forth.move_ip()
+              007b c233  st   [$33]
+              007c 1413  ld   $13,y       ;REENTER
+              007d e006  jmp  y,$06
+              007e 0124  ld   [$24]
                                           679
                                           680   #-----------------------------------------------------------------------
                                           681   # Placeholders for future SYS functions. This works as a kind of jump
@@ -547,7 +546,7 @@ forth.next3.rom-mode-tail:
                                           694   # byte when setting sysFn: LDI+STW (4 bytes) instead of LDWI+STW (5 bytes)
                                           695   #-----------------------------------------------------------------------
                                           696
-                                          697   align(0x80, size=0x80)
+              007f 0200  nop              697   align(0x80, size=0x80)
                                           698   assert pc() == 0x80
                                           699
               0080 1403  ld   $03,y       700   ld(hi('REENTER'),Y)             #15 slot 0x80
@@ -6805,7 +6804,7 @@ forth.DO-DOCOL-RAM:
               1332 0135  ld   [$35]
               1333 a005  suba $05
               1334 d235  st   [$35],x
-              1335 dc4b  st   $4b,[y,x++]
+              1335 dc4f  st   $4f,[y,x++]
               1336 dc14  st   $14,[y,x++]
               1337 0132  ld   [$32]
               1338 de00  st   [y,x++]
@@ -6834,205 +6833,208 @@ forth.restart-or-quit:
               1403 e01c  jmp  y,$1c
 forth.next3:
 forth.next3.rom-mode:
-              1404 80f9  adda $f9
-forth.next3.fast-entry:
-              1405 1030  ld   $30,x
-              1406 1534  ld   [$34],y
-              1407 e133  jmp  y,[$33]
-              1408 1400  ld   $00,y
+              1404 80f8  adda $f8
+              1405 00f8  ld   $f8
+              1406 c224  st   [$24]
+              1407 1030  ld   $30,x
+              1408 0003  ld   $03
+              1409 1534  ld   [$34],y
+              140a 0200  nop
+              140b e133  jmp  y,[$33]
+              140c 1400  ld   $00,y
 forth.next3.ram-rom-mode:
-              1409 80f6  adda $f6
-              140a 1534  ld   [$34],y     ;W <- [IP]
-              140b 1133  ld   [$33],x
-              140c 0d00  ld   [y,x]
-              140d c230  st   [$30]
-              140e 0133  ld   [$33]
-              140f 8001  adda $01
-              1410 1200  ld   ac,x
-              1411 0d00  ld   [y,x]
-              1412 c231  st   [$31]       ;IP <- IP + 2
-              1413 0133  ld   [$33]
-              1414 8002  adda $02
-              1415 f01a  beq  .page-boundary
-              1416 c233  st   [$33]
-              1417 1413  ld   $13,y       ;REENTER
-              1418 e006  jmp  y,$06
-              1419 00f8  ld   $f8
+              140d 80f6  adda $f6
+              140e 1534  ld   [$34],y     ;W <- [IP]
+              140f 1133  ld   [$33],x
+              1410 0d00  ld   [y,x]
+              1411 c230  st   [$30]
+              1412 0133  ld   [$33]
+              1413 8001  adda $01
+              1414 1200  ld   ac,x
+              1415 0d00  ld   [y,x]
+              1416 c231  st   [$31]       ;IP <- IP + 2
+              1417 0133  ld   [$33]
+              1418 8002  adda $02
+              1419 f01e  beq  .page-boundary
+              141a c233  st   [$33]
+              141b 1413  ld   $13,y       ;REENTER
+              141c e006  jmp  y,$06
+              141d 00f8  ld   $f8
 .page-boundary:
-              141a 0134  ld   [$34]
-              141b 8001  adda $01
-              141c c234  st   [$34]
-              141d 1413  ld   $13,y       ;REENTER
-              141e e005  jmp  y,$05
-              141f 00f6  ld   $f6
+              141e 0134  ld   [$34]
+              141f 8001  adda $01
+              1420 c234  st   [$34]
+              1421 1413  ld   $13,y       ;REENTER
+              1422 e005  jmp  y,$05
+              1423 00f6  ld   $f6
 forth.next3.ram-ram-mode:
-              1420 80f4  adda $f4
-              1421 1534  ld   [$34],y     ;[tmp] <- [IP]
-              1422 1133  ld   [$33],x
-              1423 0d00  ld   [y,x]
-              1424 de00  st   [y,x++]
-              1425 c224  st   [$24]
-              1426 0d00  ld   [y,x]
-              1427 c225  st   [$25]
-              1428 1600  ld   ac,y        ;[W] <- [tmp]
-              1429 1124  ld   [$24],x
+              1424 80f4  adda $f4
+              1425 1534  ld   [$34],y     ;[tmp] <- [IP]
+              1426 1133  ld   [$33],x
+              1427 0d00  ld   [y,x]
+              1428 de00  st   [y,x++]
+              1429 c224  st   [$24]
               142a 0d00  ld   [y,x]
-              142b c230  st   [$30]
-              142c de00  st   [y,x++]
-              142d 0d00  ld   [y,x]
-              142e c231  st   [$31]
-              142f 0133  ld   [$33]       ;IP <- IP + 2
-              1430 8002  adda $02
-              1431 ec39  bne  .not-page-boundary
-              1432 c233  st   [$33]
-              1433 0134  ld   [$34]
-              1434 8001  adda $01
-              1435 c234  st   [$34]
-              1436 1413  ld   $13,y       ;REENTER
-              1437 e006  jmp  y,$06
-              1438 00f4  ld   $f4
+              142b c225  st   [$25]
+              142c 1600  ld   ac,y        ;[W] <- [tmp]
+              142d 1124  ld   [$24],x
+              142e 0d00  ld   [y,x]
+              142f c230  st   [$30]
+              1430 de00  st   [y,x++]
+              1431 0d00  ld   [y,x]
+              1432 c231  st   [$31]
+              1433 0133  ld   [$33]       ;IP <- IP + 2
+              1434 8002  adda $02
+              1435 ec3d  bne  .not-page-boundary
+              1436 c233  st   [$33]
+              1437 0134  ld   [$34]
+              1438 8001  adda $01
+              1439 c234  st   [$34]
+              143a 1413  ld   $13,y       ;REENTER
+              143b e006  jmp  y,$06
+              143c 00f4  ld   $f4
 .not-page-boundary:
-              1439 1413  ld   $13,y       ;REENTER
-              143a e005  jmp  y,$05
-              143b 00f5  ld   $f5
+              143d 1413  ld   $13,y       ;REENTER
+              143e e005  jmp  y,$05
+              143f 00f5  ld   $f5
 forth.DO-RESTORE-MODE:
-              143c 80f9  adda $f9
-              143d 147f  ld   $7f,y
-              143e 1135  ld   [$35],x
-              143f 0135  ld   [$35]
-              1440 8001  adda $01
-              1441 c235  st   [$35]
-              1442 0d00  ld   [y,x]
-              1443 c232  st   [$32]
-              1444 1400  ld   $00,y
-              1445 1030  ld   $30,x
-              1446 dc4e  st   $4e,[y,x++]
-              1447 dc14  st   $14,[y,x++]
-              1448 1413  ld   $13,y       ;REENTER
-              1449 e006  jmp  y,$06
-              144a 00f9  ld   $f9
+              1440 80f9  adda $f9
+              1441 147f  ld   $7f,y
+              1442 1135  ld   [$35],x
+              1443 0135  ld   [$35]
+              1444 8001  adda $01
+              1445 c235  st   [$35]
+              1446 0d00  ld   [y,x]
+              1447 c232  st   [$32]
+              1448 1400  ld   $00,y
+              1449 1030  ld   $30,x
+              144a dc52  st   $52,[y,x++]
+              144b dc14  st   $14,[y,x++]
+              144c 1413  ld   $13,y       ;REENTER
+              144d e006  jmp  y,$06
+              144e 00f9  ld   $f9
 forth.RESTORE-MODE:
-              144b dc3c  st   $3c,[y,x++]
-              144c e07a  jmp  y,$7a
-              144d dc14  st   $14,[y,x++]
-forth.EXIT:   144e 80f9  adda $f9
-              144f 147f  ld   $7f,y
-              1450 1135  ld   [$35],x
-              1451 0d00  ld   [y,x]
-              1452 c233  st   [$33]
-              1453 0135  ld   [$35]
-              1454 9001  adda $01,x
-              1455 8002  adda $02
-              1456 c235  st   [$35]
-              1457 0d00  ld   [y,x]
-              1458 c234  st   [$34]
-              1459 1413  ld   $13,y       ;NEXT
-              145a e00f  jmp  y,$0f
-              145b 00f9  ld   $f9
-forth.DOCOL:  145c 80f6  adda $f6
-              145d 147f  ld   $7f,y
-              145e 0135  ld   [$35]       ;Y holds the page of the return stack
+              144f dc40  st   $40,[y,x++]
+              1450 e07a  jmp  y,$7a
+              1451 dc14  st   $14,[y,x++]
+forth.EXIT:   1452 80f9  adda $f9
+              1453 147f  ld   $7f,y
+              1454 1135  ld   [$35],x
+              1455 0d00  ld   [y,x]
+              1456 c233  st   [$33]
+              1457 0135  ld   [$35]
+              1458 9001  adda $01,x
+              1459 8002  adda $02
+              145a c235  st   [$35]
+              145b 0d00  ld   [y,x]
+              145c c234  st   [$34]
+              145d 1413  ld   $13,y       ;NEXT
+              145e e00f  jmp  y,$0f
+              145f 00f9  ld   $f9
+forth.DOCOL:  1460 80f6  adda $f6
+              1461 147f  ld   $7f,y
+              1462 0135  ld   [$35]       ;Y holds the page of the return stack
                                           ;Push [IP] to Return stack
-              145f a002  suba $02
-              1460 d235  st   [$35],x
-              1461 0133  ld   [$33]
-              1462 de00  st   [y,x++]
-              1463 0134  ld   [$34]
-              1464 ce00  st   [y,x]
-              1465 0124  ld   [$24]
-              1466 8002  adda $02
-              1467 c233  st   [$33]
-              1468 f06e  beq  .page-boundary#docol
-              1469 0125  ld   [$25]
-              146a c234  st   [$34]
-              146b 1413  ld   $13,y       ;NEXT
-              146c e00f  jmp  y,$0f
-              146d 00f7  ld   $f7
+              1463 a002  suba $02
+              1464 d235  st   [$35],x
+              1465 0133  ld   [$33]
+              1466 de00  st   [y,x++]
+              1467 0134  ld   [$34]
+              1468 ce00  st   [y,x]
+              1469 0124  ld   [$24]
+              146a 8002  adda $02
+              146b c233  st   [$33]
+              146c f072  beq  .page-boundary#docol
+              146d 0125  ld   [$25]
+              146e c234  st   [$34]
+              146f 1413  ld   $13,y       ;NEXT
+              1470 e00f  jmp  y,$0f
+              1471 00f7  ld   $f7
 .page-boundary#docol:
-              146e 8001  adda $01
-              146f c234  st   [$34]
-              1470 1413  ld   $13,y       ;NEXT
-              1471 e00e  jmp  y,$0e
-              1472 00f6  ld   $f6
+              1472 8001  adda $01
+              1473 c234  st   [$34]
+              1474 1413  ld   $13,y       ;NEXT
+              1475 e00e  jmp  y,$0e
+              1476 00f6  ld   $f6
 forth.core.C@:
-              1473 80f7  adda $f7
-              1474 1400  ld   $00,y
-              1475 111c  ld   [$1c],x
-              1476 0d00  ld   [y,x]
-              1477 c224  st   [$24]
-              1478 de00  st   [y,x++]
-              1479 0d00  ld   [y,x]
-              147a 1600  ld   ac,y
-              147b 1124  ld   [$24],x
-              147c 0d00  ld   [y,x]
-              147d 1400  ld   $00,y
-              147e 111c  ld   [$1c],x
-              147f de00  st   [y,x++]
-              1480 0000  ld   $00
-              1481 ce00  st   [y,x]
-              1482 1413  ld   $13,y       ;NEXT
-              1483 e00f  jmp  y,$0f
-              1484 00f7  ld   $f7
+              1477 80f7  adda $f7
+              1478 1400  ld   $00,y
+              1479 111c  ld   [$1c],x
+              147a 0d00  ld   [y,x]
+              147b c224  st   [$24]
+              147c de00  st   [y,x++]
+              147d 0d00  ld   [y,x]
+              147e 1600  ld   ac,y
+              147f 1124  ld   [$24],x
+              1480 0d00  ld   [y,x]
+              1481 1400  ld   $00,y
+              1482 111c  ld   [$1c],x
+              1483 de00  st   [y,x++]
+              1484 0000  ld   $00
+              1485 ce00  st   [y,x]
+              1486 1413  ld   $13,y       ;NEXT
+              1487 e00f  jmp  y,$0f
+              1488 00f7  ld   $f7
 forth.core.C!:
-              1485 80f6  adda $f6
-              1486 1400  ld   $00,y       ;Pop 2 byte address to temp (SP moves by 4)
-              1487 011c  ld   [$1c]
-              1488 1200  ld   ac,x
-              1489 8004  adda $04
-              148a c21c  st   [$1c]
-              148b 0d00  ld   [y,x]
-              148c c224  st   [$24]
-              148d de00  st   [y,x++]
-              148e 0d00  ld   [y,x]
-              148f c225  st   [$25]
-              1490 de00  st   [y,x++]
-              1491 0d00  ld   [y,x]       ;Load low-byte of char - top byte ignored
-              1492 1124  ld   [$24],x
-              1493 1525  ld   [$25],y
-              1494 ce00  st   [y,x]       ;Write
-              1495 1413  ld   $13,y       ;NEXT
-              1496 e00e  jmp  y,$0e
-              1497 00f6  ld   $f6
+              1489 80f6  adda $f6
+              148a 1400  ld   $00,y       ;Pop 2 byte address to temp (SP moves by 4)
+              148b 011c  ld   [$1c]
+              148c 1200  ld   ac,x
+              148d 8004  adda $04
+              148e c21c  st   [$1c]
+              148f 0d00  ld   [y,x]
+              1490 c224  st   [$24]
+              1491 de00  st   [y,x++]
+              1492 0d00  ld   [y,x]
+              1493 c225  st   [$25]
+              1494 de00  st   [y,x++]
+              1495 0d00  ld   [y,x]       ;Load low-byte of char - top byte ignored
+              1496 1124  ld   [$24],x
+              1497 1525  ld   [$25],y
+              1498 ce00  st   [y,x]       ;Write
+              1499 1413  ld   $13,y       ;NEXT
+              149a e00e  jmp  y,$0e
+              149b 00f6  ld   $f6
 forth.core.1+:
-              1498 80f9  adda $f9
-              1499 1400  ld   $00,y
-              149a 111c  ld   [$1c],x
-              149b 0d00  ld   [y,x]
-              149c 8001  adda $01
-              149d eca5  bne  .done
-              149e de00  st   [y,x++]
+              149c 80f9  adda $f9
+              149d 1400  ld   $00,y
+              149e 111c  ld   [$1c],x
               149f 0d00  ld   [y,x]
               14a0 8001  adda $01
-              14a1 ce00  st   [y,x]
-              14a2 1413  ld   $13,y       ;NEXT
-              14a3 e00e  jmp  y,$0e
-              14a4 00f9  ld   $f9
-.done:        14a5 1413  ld   $13,y       ;NEXT
-              14a6 e00f  jmp  y,$0f
-              14a7 00fb  ld   $fb
+              14a1 eca9  bne  .done
+              14a2 de00  st   [y,x++]
+              14a3 0d00  ld   [y,x]
+              14a4 8001  adda $01
+              14a5 ce00  st   [y,x]
+              14a6 1413  ld   $13,y       ;NEXT
+              14a7 e00e  jmp  y,$0e
+              14a8 00f9  ld   $f9
+.done:        14a9 1413  ld   $13,y       ;NEXT
+              14aa e00f  jmp  y,$0f
+              14ab 00fb  ld   $fb
 forth.core.1-:
-              14a8 80f9  adda $f9
-              14a9 1400  ld   $00,y
-              14aa 111c  ld   [$1c],x
-              14ab 0d00  ld   [y,x]
-              14ac f0b2  beq  .low-byte-was-zero
-              14ad a001  suba $01
-              14ae ce00  st   [y,x]
-              14af 1413  ld   $13,y       ;NEXT
-              14b0 e00f  jmp  y,$0f
-              14b1 00fb  ld   $fb
+              14ac 80f9  adda $f9
+              14ad 1400  ld   $00,y
+              14ae 111c  ld   [$1c],x
+              14af 0d00  ld   [y,x]
+              14b0 f0b6  beq  .low-byte-was-zero
+              14b1 a001  suba $01
+              14b2 ce00  st   [y,x]
+              14b3 1413  ld   $13,y       ;NEXT
+              14b4 e00f  jmp  y,$0f
+              14b5 00fb  ld   $fb
 .low-byte-was-zero:
-              14b2 de00  st   [y,x++]
-              14b3 0d00  ld   [y,x]
-              14b4 a001  suba $01
-              14b5 ce00  st   [y,x]
-              14b6 1413  ld   $13,y       ;NEXT
-              14b7 e00e  jmp  y,$0e
-              14b8 00f9  ld   $f9
-              14b9 0200  nop
-              14ba 0200  nop
-              14bb 0200  nop
-              * 71 times
+              14b6 de00  st   [y,x++]
+              14b7 0d00  ld   [y,x]
+              14b8 a001  suba $01
+              14b9 ce00  st   [y,x]
+              14ba 1413  ld   $13,y       ;NEXT
+              14bb e00e  jmp  y,$0e
+              14bc 00f9  ld   $f9
+              14bd 0200  nop
+              14be 0200  nop
+              14bf 0200  nop
+              * 67 times
 forth.restart-or-quit:
               1500 fd30  bra  [$30]
               1501 f802  ble  .quit
@@ -7215,7 +7217,7 @@ forth.NOP:    15a6 80f3  adda $f3
               15ab 1413  ld   $13,y
               15ac e023  jmp  y,$23
               15ad 147f  ld   $7f,y
-              15ae dc4e  st   $4e,[y,x++]
+              15ae dc52  st   $52,[y,x++]
               15af e07a  jmp  y,$7a
               15b0 dc14  st   $14,[y,x++]
                                           5308  # --- Page boundary ---

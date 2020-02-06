@@ -675,7 +675,7 @@ jmp(Y,'NEXTY')                  #41
 ld(-44//2)                      #42
 
 import forth
-forth.next3_rom_tail()
+forth.move_ip()
 
 #-----------------------------------------------------------------------
 # Placeholders for future SYS functions. This works as a kind of jump

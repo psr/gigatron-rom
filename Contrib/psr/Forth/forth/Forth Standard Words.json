@@ -1,0 +1,2177 @@
+{
+    "!": {
+        "Reference": "6.1.0010",
+        "Pronounciation": "store",
+        "Word List": "CORE"
+    },
+    "#": {
+        "Reference": "6.1.0030",
+        "Pronounciation": "number-sign",
+        "Word List": "CORE"
+    },
+    "#>": {
+        "Reference": "6.1.0040",
+        "Pronounciation": "number-sign-greater",
+        "Word List": "CORE"
+    },
+    "#S": {
+        "Reference": "6.1.0050",
+        "Pronounciation": "number-sign-s",
+        "Word List": "CORE"
+    },
+    "'": {
+        "Reference": "6.1.0070",
+        "Pronounciation": "tick",
+        "Word List": "CORE"
+    },
+    "(": {
+        "Reference": "11.6.1.0080",
+        "Pronounciation": "paren",
+        "Word List": "FILE"
+    },
+    "(LOCAL)": {
+        "Reference": "13.6.1.0086",
+        "Pronounciation": "paren-local-paren",
+        "Word List": "LOCAL"
+    },
+    "*": {
+        "Reference": "6.1.0090",
+        "Pronounciation": "star",
+        "Word List": "CORE"
+    },
+    "*/": {
+        "Reference": "6.1.0100",
+        "Pronounciation": "star-slash",
+        "Word List": "CORE"
+    },
+    "*/MOD": {
+        "Reference": "6.1.0110",
+        "Pronounciation": "star-slash-mod",
+        "Word List": "CORE"
+    },
+    "+": {
+        "Reference": "6.1.0120",
+        "Pronounciation": "plus",
+        "Word List": "CORE"
+    },
+    "+!": {
+        "Reference": "6.1.0130",
+        "Pronounciation": "plus-store",
+        "Word List": "CORE"
+    },
+    "+FIELD": {
+        "Reference": "10.6.2.0135",
+        "Pronounciation": "plus-field",
+        "Word List": "FACILITY EXT"
+    },
+    "+LOOP": {
+        "Reference": "6.1.0140",
+        "Pronounciation": "plus-loop",
+        "Word List": "CORE"
+    },
+    "+X/STRING": {
+        "Reference": "18.6.2.0145",
+        "Pronounciation": "plus-x-string",
+        "Word List": "XCHAR EXT"
+    },
+    ",": {
+        "Reference": "6.1.0150",
+        "Pronounciation": "comma",
+        "Word List": "CORE"
+    },
+    "-": {
+        "Reference": "6.1.0160",
+        "Pronounciation": "minus",
+        "Word List": "CORE"
+    },
+    "-TRAILING": {
+        "Reference": "17.6.1.0170",
+        "Pronounciation": "dash-trailing",
+        "Word List": "STRING"
+    },
+    "-TRAILING-GARBAGE": {
+        "Reference": "18.6.2.0175",
+        "Pronounciation": "minus-trailing-garbage",
+        "Word List": "XCHAR EXT"
+    },
+    ".": {
+        "Reference": "6.1.0180",
+        "Pronounciation": "dot",
+        "Word List": "CORE"
+    },
+    ".\"": {
+        "Reference": "6.1.0190",
+        "Pronounciation": "dot-quote",
+        "Word List": "CORE"
+    },
+    ".(": {
+        "Reference": "6.2.0200",
+        "Pronounciation": "dot-paren",
+        "Word List": "CORE EXT"
+    },
+    ".R": {
+        "Reference": "6.2.0210",
+        "Pronounciation": "dot-r",
+        "Word List": "CORE EXT"
+    },
+    ".S": {
+        "Reference": "15.6.1.0220",
+        "Pronounciation": "dot-s",
+        "Word List": "TOOLS"
+    },
+    "/": {
+        "Reference": "6.1.0230",
+        "Pronounciation": "slash",
+        "Word List": "CORE"
+    },
+    "/MOD": {
+        "Reference": "6.1.0240",
+        "Pronounciation": "slash-mod",
+        "Word List": "CORE"
+    },
+    "/STRING": {
+        "Reference": "17.6.1.0245",
+        "Pronounciation": "slash-string",
+        "Word List": "STRING"
+    },
+    "0<": {
+        "Reference": "6.1.0250",
+        "Pronounciation": "zero-less",
+        "Word List": "CORE"
+    },
+    "0<>": {
+        "Reference": "6.2.0260",
+        "Pronounciation": "zero-not-equals",
+        "Word List": "CORE EXT"
+    },
+    "0=": {
+        "Reference": "6.1.0270",
+        "Pronounciation": "zero-equals",
+        "Word List": "CORE"
+    },
+    "0>": {
+        "Reference": "6.2.0280",
+        "Pronounciation": "zero-greater",
+        "Word List": "CORE EXT"
+    },
+    "1+": {
+        "Reference": "6.1.0290",
+        "Pronounciation": "one-plus",
+        "Word List": "CORE"
+    },
+    "1-": {
+        "Reference": "6.1.0300",
+        "Pronounciation": "one-minus",
+        "Word List": "CORE"
+    },
+    "2!": {
+        "Reference": "6.1.0310",
+        "Pronounciation": "two-store",
+        "Word List": "CORE"
+    },
+    "2*": {
+        "Reference": "6.1.0320",
+        "Pronounciation": "two-star",
+        "Word List": "CORE"
+    },
+    "2/": {
+        "Reference": "6.1.0330",
+        "Pronounciation": "two-slash",
+        "Word List": "CORE"
+    },
+    "2>R": {
+        "Reference": "6.2.0340",
+        "Pronounciation": "two-to-r",
+        "Word List": "CORE EXT"
+    },
+    "2@": {
+        "Reference": "6.1.0350",
+        "Pronounciation": "two-fetch",
+        "Word List": "CORE"
+    },
+    "2CONSTANT": {
+        "Reference": "8.6.1.0360",
+        "Pronounciation": "two-constant",
+        "Word List": "DOUBLE"
+    },
+    "2DROP": {
+        "Reference": "6.1.0370",
+        "Pronounciation": "two-drop",
+        "Word List": "CORE"
+    },
+    "2DUP": {
+        "Reference": "6.1.0380",
+        "Pronounciation": "two-dupe",
+        "Word List": "CORE"
+    },
+    "2LITERAL": {
+        "Reference": "8.6.1.0390",
+        "Pronounciation": "two-literal",
+        "Word List": "DOUBLE"
+    },
+    "2OVER": {
+        "Reference": "6.1.0400",
+        "Pronounciation": "two-over",
+        "Word List": "CORE"
+    },
+    "2R>": {
+        "Reference": "6.2.0410",
+        "Pronounciation": "two-r-from",
+        "Word List": "CORE EXT"
+    },
+    "2R@": {
+        "Reference": "6.2.0415",
+        "Pronounciation": "two-r-fetch",
+        "Word List": "CORE EXT"
+    },
+    "2ROT": {
+        "Reference": "8.6.2.0420",
+        "Pronounciation": "two-rote",
+        "Word List": "DOUBLE EXT"
+    },
+    "2SWAP": {
+        "Reference": "6.1.0430",
+        "Pronounciation": "two-swap",
+        "Word List": "CORE"
+    },
+    "2VALUE": {
+        "Reference": "8.6.2.0435",
+        "Pronounciation": "two-value",
+        "Word List": "DOUBLE EXT"
+    },
+    "2VARIABLE": {
+        "Reference": "8.6.1.0440",
+        "Pronounciation": "two-variable",
+        "Word List": "DOUBLE"
+    },
+    ":": {
+        "Reference": "6.1.0450",
+        "Pronounciation": "colon",
+        "Word List": "CORE"
+    },
+    ":NONAME": {
+        "Reference": "6.2.0455",
+        "Pronounciation": "colon-no-name",
+        "Word List": "CORE EXT"
+    },
+    ";": {
+        "Reference": "6.1.0460",
+        "Pronounciation": "semicolon",
+        "Word List": "CORE"
+    },
+    ";CODE": {
+        "Reference": "15.6.2.0470",
+        "Pronounciation": "semicolon-code",
+        "Word List": "TOOLS EXT"
+    },
+    "<": {
+        "Reference": "6.1.0480",
+        "Pronounciation": "less-than",
+        "Word List": "CORE"
+    },
+    "<#": {
+        "Reference": "6.1.0490",
+        "Pronounciation": "less-number-sign",
+        "Word List": "CORE"
+    },
+    "<>": {
+        "Reference": "6.2.0500",
+        "Pronounciation": "not-equals",
+        "Word List": "CORE EXT"
+    },
+    "=": {
+        "Reference": "6.1.0530",
+        "Pronounciation": "equals",
+        "Word List": "CORE"
+    },
+    ">": {
+        "Reference": "6.1.0540",
+        "Pronounciation": "greater-than",
+        "Word List": "CORE"
+    },
+    ">BODY": {
+        "Reference": "6.1.0550",
+        "Pronounciation": "to-body",
+        "Word List": "CORE"
+    },
+    ">FLOAT": {
+        "Reference": "12.6.1.0558",
+        "Pronounciation": "to-float",
+        "Word List": "FLOATING"
+    },
+    ">IN": {
+        "Reference": "6.1.0560",
+        "Pronounciation": "to-in",
+        "Word List": "CORE"
+    },
+    ">NUMBER": {
+        "Reference": "6.1.0570",
+        "Pronounciation": "to-number",
+        "Word List": "CORE"
+    },
+    ">R": {
+        "Reference": "6.1.0580",
+        "Pronounciation": "to-r",
+        "Word List": "CORE"
+    },
+    "?": {
+        "Reference": "15.6.1.0600",
+        "Pronounciation": "question",
+        "Word List": "TOOLS"
+    },
+    "?DO": {
+        "Reference": "6.2.0620",
+        "Pronounciation": "question-do",
+        "Word List": "CORE EXT"
+    },
+    "?DUP": {
+        "Reference": "6.1.0630",
+        "Pronounciation": "question-dupe",
+        "Word List": "CORE"
+    },
+    "@": {
+        "Reference": "6.1.0650",
+        "Pronounciation": "fetch",
+        "Word List": "CORE"
+    },
+    "ABORT": {
+        "Reference": "9.6.2.0670",
+        "Pronounciation": "EXCEPTION",
+        "Word List": "EXT"
+    },
+    "ABORT\"": {
+        "Reference": "9.6.2.0680",
+        "Pronounciation": "abort-quote",
+        "Word List": "EXCEPTION EXT"
+    },
+    "ABS": {
+        "Reference": "6.1.0690",
+        "Pronounciation": "abs",
+        "Word List": "CORE"
+    },
+    "ACCEPT": {
+        "Reference": "6.1.0695",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "ACTION-OF": {
+        "Reference": "6.2.0698",
+        "Pronounciation": "",
+        "Word List": "CORE EXT"
+    },
+    "AGAIN": {
+        "Reference": "6.2.0700",
+        "Pronounciation": "",
+        "Word List": "CORE EXT"
+    },
+    "AHEAD": {
+        "Reference": "15.6.2.0702",
+        "Pronounciation": "",
+        "Word List": "TOOLS EXT"
+    },
+    "ALIGN": {
+        "Reference": "6.1.0705",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "ALIGNED": {
+        "Reference": "6.1.0706",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "ALLOCATE": {
+        "Reference": "14.6.1.0707",
+        "Pronounciation": "",
+        "Word List": "MEMORY"
+    },
+    "ALLOT": {
+        "Reference": "6.1.0710",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "ALSO": {
+        "Reference": "16.6.2.0715",
+        "Pronounciation": "",
+        "Word List": "SEARCH EXT"
+    },
+    "AND": {
+        "Reference": "6.1.0720",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "ASSEMBLER": {
+        "Reference": "15.6.2.0740",
+        "Pronounciation": "",
+        "Word List": "TOOLS EXT"
+    },
+    "AT-XY": {
+        "Reference": "10.6.1.0742",
+        "Pronounciation": "at-x-y",
+        "Word List": "FACILITY"
+    },
+    "BASE": {
+        "Reference": "6.1.0750",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "BEGIN": {
+        "Reference": "6.1.0760",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "BEGIN-STRUCTURE": {
+        "Reference": "10.6.2.0763",
+        "Pronounciation": "",
+        "Word List": "FACILITY EXT"
+    },
+    "BIN": {
+        "Reference": "11.6.1.0765",
+        "Pronounciation": "",
+        "Word List": "FILE"
+    },
+    "BL": {
+        "Reference": "6.1.0770",
+        "Pronounciation": "b-l",
+        "Word List": "CORE"
+    },
+    "BLANK": {
+        "Reference": "17.6.1.0780",
+        "Pronounciation": "",
+        "Word List": "STRING"
+    },
+    "BLK": {
+        "Reference": "7.6.1.0790",
+        "Pronounciation": "b-l-k",
+        "Word List": "BLOCK"
+    },
+    "BLOCK": {
+        "Reference": "7.6.1.0800",
+        "Pronounciation": "",
+        "Word List": "BLOCK"
+    },
+    "BUFFER": {
+        "Reference": "7.6.1.0820",
+        "Pronounciation": "",
+        "Word List": "BLOCK"
+    },
+    "BUFFER:": {
+        "Reference": "6.2.0825",
+        "Pronounciation": "buffer-colon",
+        "Word List": "CORE EXT"
+    },
+    "BYE": {
+        "Reference": "15.6.2.0830",
+        "Pronounciation": "",
+        "Word List": "TOOLS EXT"
+    },
+    "C!": {
+        "Reference": "6.1.0850",
+        "Pronounciation": "c-store",
+        "Word List": "CORE"
+    },
+    "C\"": {
+        "Reference": "6.2.0855",
+        "Pronounciation": "c-quote",
+        "Word List": "CORE EXT"
+    },
+    "C,": {
+        "Reference": "6.1.0860",
+        "Pronounciation": "c-comma",
+        "Word List": "CORE"
+    },
+    "C@": {
+        "Reference": "6.1.0870",
+        "Pronounciation": "c-fetch",
+        "Word List": "CORE"
+    },
+    "CASE": {
+        "Reference": "6.2.0873",
+        "Pronounciation": "",
+        "Word List": "CORE EXT"
+    },
+    "CATCH": {
+        "Reference": "9.6.1.0875",
+        "Pronounciation": "",
+        "Word List": "EXCEPTION"
+    },
+    "CELL+": {
+        "Reference": "6.1.0880",
+        "Pronounciation": "cell-plus",
+        "Word List": "CORE"
+    },
+    "CELLS": {
+        "Reference": "6.1.0890",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "CFIELD:": {
+        "Reference": "10.6.2.0893",
+        "Pronounciation": "c-field-colon",
+        "Word List": "FACILITY EXT"
+    },
+    "CHAR": {
+        "Reference": "18.6.2.0895",
+        "Pronounciation": "",
+        "Word List": "XCHAR EXT"
+    },
+    "CHAR+": {
+        "Reference": "6.1.0897",
+        "Pronounciation": "char-plus",
+        "Word List": "CORE"
+    },
+    "CHARS": {
+        "Reference": "6.1.0898",
+        "Pronounciation": "chars",
+        "Word List": "CORE"
+    },
+    "CLOSE-FILE": {
+        "Reference": "11.6.1.0900",
+        "Pronounciation": "",
+        "Word List": "FILE"
+    },
+    "CMOVE": {
+        "Reference": "17.6.1.0910",
+        "Pronounciation": "c-move",
+        "Word List": "STRING"
+    },
+    "CMOVE>": {
+        "Reference": "17.6.1.0920",
+        "Pronounciation": "c-move-up",
+        "Word List": "STRING"
+    },
+    "CODE": {
+        "Reference": "15.6.2.0930",
+        "Pronounciation": "",
+        "Word List": "TOOLS EXT"
+    },
+    "COMPARE": {
+        "Reference": "17.6.1.0935",
+        "Pronounciation": "",
+        "Word List": "STRING"
+    },
+    "COMPILE,": {
+        "Reference": "6.2.0945",
+        "Pronounciation": "compile-comma",
+        "Word List": "CORE EXT"
+    },
+    "CONSTANT": {
+        "Reference": "6.1.0950",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "COUNT": {
+        "Reference": "6.1.0980",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "CR": {
+        "Reference": "6.1.0990",
+        "Pronounciation": "c-r",
+        "Word List": "CORE"
+    },
+    "CREATE": {
+        "Reference": "6.1.1000",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "CREATE-FILE": {
+        "Reference": "11.6.1.1010",
+        "Pronounciation": "",
+        "Word List": "FILE"
+    },
+    "CS-PICK": {
+        "Reference": "15.6.2.1015",
+        "Pronounciation": "c-s-pick",
+        "Word List": "TOOLS EXT"
+    },
+    "CS-ROLL": {
+        "Reference": "15.6.2.1020",
+        "Pronounciation": "c-s-roll",
+        "Word List": "TOOLS EXT"
+    },
+    "D+": {
+        "Reference": "8.6.1.1040",
+        "Pronounciation": "d-plus",
+        "Word List": "DOUBLE"
+    },
+    "D-": {
+        "Reference": "8.6.1.1050",
+        "Pronounciation": "d-minus",
+        "Word List": "DOUBLE"
+    },
+    "D.": {
+        "Reference": "8.6.1.1060",
+        "Pronounciation": "d-dot",
+        "Word List": "DOUBLE"
+    },
+    "D.R": {
+        "Reference": "8.6.1.1070",
+        "Pronounciation": "d-dot-r",
+        "Word List": "DOUBLE"
+    },
+    "D0<": {
+        "Reference": "8.6.1.1075",
+        "Pronounciation": "d-zero-less",
+        "Word List": "DOUBLE"
+    },
+    "D0=": {
+        "Reference": "8.6.1.1080",
+        "Pronounciation": "d-zero-equals",
+        "Word List": "DOUBLE"
+    },
+    "D2*": {
+        "Reference": "8.6.1.1090",
+        "Pronounciation": "d-two-star",
+        "Word List": "DOUBLE"
+    },
+    "D2/": {
+        "Reference": "8.6.1.1100",
+        "Pronounciation": "d-two-slash",
+        "Word List": "DOUBLE"
+    },
+    "D<": {
+        "Reference": "8.6.1.1110",
+        "Pronounciation": "d-less-than",
+        "Word List": "DOUBLE"
+    },
+    "D=": {
+        "Reference": "8.6.1.1120",
+        "Pronounciation": "d-equals",
+        "Word List": "DOUBLE"
+    },
+    "D>F": {
+        "Reference": "12.6.1.1130",
+        "Pronounciation": "d-to-f",
+        "Word List": "FLOATING"
+    },
+    "D>S": {
+        "Reference": "8.6.1.1140",
+        "Pronounciation": "d-to-s",
+        "Word List": "DOUBLE"
+    },
+    "DABS": {
+        "Reference": "8.6.1.1160",
+        "Pronounciation": "d-abs",
+        "Word List": "DOUBLE"
+    },
+    "DECIMAL": {
+        "Reference": "6.1.1170",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "DEFER": {
+        "Reference": "6.2.1173",
+        "Pronounciation": "",
+        "Word List": "CORE EXT"
+    },
+    "DEFER!": {
+        "Reference": "6.2.1175",
+        "Pronounciation": "defer-store",
+        "Word List": "CORE EXT"
+    },
+    "DEFER@": {
+        "Reference": "6.2.1177",
+        "Pronounciation": "defer-fetch",
+        "Word List": "CORE EXT"
+    },
+    "DEFINITIONS": {
+        "Reference": "16.6.1.1180",
+        "Pronounciation": "",
+        "Word List": "SEARCH"
+    },
+    "DELETE-FILE": {
+        "Reference": "11.6.1.1190",
+        "Pronounciation": "",
+        "Word List": "FILE"
+    },
+    "DEPTH": {
+        "Reference": "6.1.1200",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "DF!": {
+        "Reference": "12.6.2.1203",
+        "Pronounciation": "d-f-store",
+        "Word List": "FLOATING EXT"
+    },
+    "DF@": {
+        "Reference": "12.6.2.1204",
+        "Pronounciation": "d-f-fetch",
+        "Word List": "FLOATING EXT"
+    },
+    "DFALIGN": {
+        "Reference": "12.6.2.1205",
+        "Pronounciation": "d-f-align",
+        "Word List": "FLOATING EXT"
+    },
+    "DFALIGNED": {
+        "Reference": "12.6.2.1207",
+        "Pronounciation": "d-f-aligned",
+        "Word List": "FLOATING EXT"
+    },
+    "DFFIELD:": {
+        "Reference": "12.6.2.1207.40",
+        "Pronounciation": "d-f-field-colon",
+        "Word List": "FLOATING EXT"
+    },
+    "DFLOAT+": {
+        "Reference": "12.6.2.1208",
+        "Pronounciation": "d-float-plus",
+        "Word List": "FLOATING EXT"
+    },
+    "DFLOATS": {
+        "Reference": "12.6.2.1209",
+        "Pronounciation": "d-floats",
+        "Word List": "FLOATING EXT"
+    },
+    "DMAX": {
+        "Reference": "8.6.1.1210",
+        "Pronounciation": "d-max",
+        "Word List": "DOUBLE"
+    },
+    "DMIN": {
+        "Reference": "8.6.1.1220",
+        "Pronounciation": "d-min",
+        "Word List": "DOUBLE"
+    },
+    "DNEGATE": {
+        "Reference": "8.6.1.1230",
+        "Pronounciation": "d-negate",
+        "Word List": "DOUBLE"
+    },
+    "DO": {
+        "Reference": "6.1.1240",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "DOES>": {
+        "Reference": "6.1.1250",
+        "Pronounciation": "does",
+        "Word List": "CORE"
+    },
+    "DROP": {
+        "Reference": "6.1.1260",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "DU<": {
+        "Reference": "8.6.2.1270",
+        "Pronounciation": "d-u-less",
+        "Word List": "DOUBLE EXT"
+    },
+    "DUMP": {
+        "Reference": "15.6.1.1280",
+        "Pronounciation": "",
+        "Word List": "TOOLS"
+    },
+    "DUP": {
+        "Reference": "6.1.1290",
+        "Pronounciation": "dupe",
+        "Word List": "CORE"
+    },
+    "EDITOR": {
+        "Reference": "15.6.2.1300",
+        "Pronounciation": "",
+        "Word List": "TOOLS EXT"
+    },
+    "EKEY": {
+        "Reference": "10.6.2.1305",
+        "Pronounciation": "e-key",
+        "Word List": "FACILITY EXT"
+    },
+    "EKEY>CHAR": {
+        "Reference": "10.6.2.1306",
+        "Pronounciation": "e-key-to-char",
+        "Word List": "FACILITY EXT"
+    },
+    "EKEY>FKEY": {
+        "Reference": "10.6.2.1306.40",
+        "Pronounciation": "e-key-to-f-key",
+        "Word List": "FACILITY EXT"
+    },
+    "EKEY>XCHAR": {
+        "Reference": "18.6.2.1306.60",
+        "Pronounciation": "e-key-to-x-char",
+        "Word List": "XCHAR EXT"
+    },
+    "EKEY?": {
+        "Reference": "10.6.2.1307",
+        "Pronounciation": "e-key-question",
+        "Word List": "FACILITY EXT"
+    },
+    "ELSE": {
+        "Reference": "6.1.1310",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "EMIT": {
+        "Reference": "6.1.1320",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "EMIT?": {
+        "Reference": "10.6.2.1325",
+        "Pronounciation": "emit-question",
+        "Word List": "FACILITY EXT"
+    },
+    "EMPTY-BUFFERS": {
+        "Reference": "7.6.2.1330",
+        "Pronounciation": "",
+        "Word List": "BLOCK EXT"
+    },
+    "END-STRUCTURE": {
+        "Reference": "10.6.2.1336",
+        "Pronounciation": "",
+        "Word List": "FACILITY EXT"
+    },
+    "ENDCASE": {
+        "Reference": "6.2.1342",
+        "Pronounciation": "end-case",
+        "Word List": "CORE EXT"
+    },
+    "ENDOF": {
+        "Reference": "6.2.1343",
+        "Pronounciation": "end-of",
+        "Word List": "CORE EXT"
+    },
+    "ENVIRONMENT?": {
+        "Reference": "6.1.1345",
+        "Pronounciation": "environment-query",
+        "Word List": "CORE"
+    },
+    "ERASE": {
+        "Reference": "6.2.1350",
+        "Pronounciation": "",
+        "Word List": "CORE EXT"
+    },
+    "EVALUATE": {
+        "Reference": "7.6.1.1360",
+        "Pronounciation": "",
+        "Word List": "BLOCK"
+    },
+    "EXECUTE": {
+        "Reference": "6.1.1370",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "EXIT": {
+        "Reference": "6.1.1380",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "F!": {
+        "Reference": "12.6.1.1400",
+        "Pronounciation": "f-store",
+        "Word List": "FLOATING"
+    },
+    "F*": {
+        "Reference": "12.6.1.1410",
+        "Pronounciation": "f-star",
+        "Word List": "FLOATING"
+    },
+    "F**": {
+        "Reference": "12.6.2.1415",
+        "Pronounciation": "f-star-star",
+        "Word List": "FLOATING EXT"
+    },
+    "F+": {
+        "Reference": "12.6.1.1420",
+        "Pronounciation": "f-plus",
+        "Word List": "FLOATING"
+    },
+    "F-": {
+        "Reference": "12.6.1.1425",
+        "Pronounciation": "f-minus",
+        "Word List": "FLOATING"
+    },
+    "F.": {
+        "Reference": "12.6.2.1427",
+        "Pronounciation": "f-dot",
+        "Word List": "FLOATING EXT"
+    },
+    "F/": {
+        "Reference": "12.6.1.1430",
+        "Pronounciation": "f-slash",
+        "Word List": "FLOATING"
+    },
+    "F0<": {
+        "Reference": "12.6.1.1440",
+        "Pronounciation": "f-zero-less-than",
+        "Word List": "FLOATING"
+    },
+    "F0=": {
+        "Reference": "12.6.1.1450",
+        "Pronounciation": "f-zero-equals",
+        "Word List": "FLOATING"
+    },
+    "F<": {
+        "Reference": "12.6.1.1460",
+        "Pronounciation": "f-less-than",
+        "Word List": "FLOATING"
+    },
+    "F>D": {
+        "Reference": "12.6.1.1470",
+        "Pronounciation": "f-to-d",
+        "Word List": "FLOATING"
+    },
+    "F>S": {
+        "Reference": "12.6.2.1471",
+        "Pronounciation": "F\tto\tS",
+        "Word List": "FLOATING EXT"
+    },
+    "F@": {
+        "Reference": "12.6.1.1472",
+        "Pronounciation": "f-fetch",
+        "Word List": "FLOATING"
+    },
+    "FABS": {
+        "Reference": "12.6.2.1474",
+        "Pronounciation": "f-abs",
+        "Word List": "FLOATING EXT"
+    },
+    "FACOS": {
+        "Reference": "12.6.2.1476",
+        "Pronounciation": "f-a-cos",
+        "Word List": "FLOATING EXT"
+    },
+    "FACOSH": {
+        "Reference": "12.6.2.1477",
+        "Pronounciation": "f-a-cosh",
+        "Word List": "FLOATING EXT"
+    },
+    "FALIGN": {
+        "Reference": "12.6.1.1479",
+        "Pronounciation": "f-align",
+        "Word List": "FLOATING"
+    },
+    "FALIGNED": {
+        "Reference": "12.6.1.1483",
+        "Pronounciation": "f-aligned",
+        "Word List": "FLOATING"
+    },
+    "FALOG": {
+        "Reference": "12.6.2.1484",
+        "Pronounciation": "f-a-log",
+        "Word List": "FLOATING EXT"
+    },
+    "FALSE": {
+        "Reference": "6.2.1485",
+        "Pronounciation": "",
+        "Word List": "CORE EXT"
+    },
+    "FASIN": {
+        "Reference": "12.6.2.1486",
+        "Pronounciation": "f-a-sine",
+        "Word List": "FLOATING EXT"
+    },
+    "FASINH": {
+        "Reference": "12.6.2.1487",
+        "Pronounciation": "f-a-cinch",
+        "Word List": "FLOATING EXT"
+    },
+    "FATAN": {
+        "Reference": "12.6.2.1488",
+        "Pronounciation": "f-a-tan",
+        "Word List": "FLOATING EXT"
+    },
+    "FATAN2": {
+        "Reference": "12.6.2.1489",
+        "Pronounciation": "f-a-tan-two",
+        "Word List": "FLOATING EXT"
+    },
+    "FATANH": {
+        "Reference": "12.6.2.1491",
+        "Pronounciation": "f-a-tan-h",
+        "Word List": "FLOATING EXT"
+    },
+    "FCONSTANT": {
+        "Reference": "12.6.1.1492",
+        "Pronounciation": "f-constant",
+        "Word List": "FLOATING"
+    },
+    "FCOS": {
+        "Reference": "12.6.2.1493",
+        "Pronounciation": "f-cos",
+        "Word List": "FLOATING EXT"
+    },
+    "FCOSH": {
+        "Reference": "12.6.2.1494",
+        "Pronounciation": "f-cosh",
+        "Word List": "FLOATING EXT"
+    },
+    "FDEPTH": {
+        "Reference": "12.6.1.1497",
+        "Pronounciation": "f-depth",
+        "Word List": "FLOATING"
+    },
+    "FDROP": {
+        "Reference": "12.6.1.1500",
+        "Pronounciation": "f-drop",
+        "Word List": "FLOATING"
+    },
+    "FDUP": {
+        "Reference": "12.6.1.1510",
+        "Pronounciation": "f-dupe",
+        "Word List": "FLOATING"
+    },
+    "FE.": {
+        "Reference": "12.6.2.1513",
+        "Pronounciation": "f-e-dot",
+        "Word List": "FLOATING EXT"
+    },
+    "FEXP": {
+        "Reference": "12.6.2.1515",
+        "Pronounciation": "f-e-x-p",
+        "Word List": "FLOATING EXT"
+    },
+    "FEXPM1": {
+        "Reference": "12.6.2.1516",
+        "Pronounciation": "f-e-x-p-m-one",
+        "Word List": "FLOATING EXT"
+    },
+    "FFIELD:": {
+        "Reference": "12.6.2.1517",
+        "Pronounciation": "f-field-colon",
+        "Word List": "FLOATING EXT"
+    },
+    "FIELD:": {
+        "Reference": "10.6.2.1518",
+        "Pronounciation": "field-colon",
+        "Word List": "FACILITY EXT"
+    },
+    "FILE-POSITION": {
+        "Reference": "11.6.1.1520",
+        "Pronounciation": "",
+        "Word List": "FILE"
+    },
+    "FILE-SIZE": {
+        "Reference": "11.6.1.1522",
+        "Pronounciation": "",
+        "Word List": "FILE"
+    },
+    "FILE-STATUS": {
+        "Reference": "11.6.2.1524",
+        "Pronounciation": "",
+        "Word List": "FILE EXT"
+    },
+    "FILL": {
+        "Reference": "6.1.1540",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "FIND": {
+        "Reference": "16.6.1.1550",
+        "Pronounciation": "",
+        "Word List": "SEARCH"
+    },
+    "FLITERAL": {
+        "Reference": "12.6.1.1552",
+        "Pronounciation": "f-literal",
+        "Word List": "FLOATING"
+    },
+    "FLN": {
+        "Reference": "12.6.2.1553",
+        "Pronounciation": "f-l-n",
+        "Word List": "FLOATING EXT"
+    },
+    "FLNP1": {
+        "Reference": "12.6.2.1554",
+        "Pronounciation": "f-l-n-p-one",
+        "Word List": "FLOATING EXT"
+    },
+    "FLOAT+": {
+        "Reference": "12.6.1.1555",
+        "Pronounciation": "float-plus",
+        "Word List": "FLOATING"
+    },
+    "FLOATS": {
+        "Reference": "12.6.1.1556",
+        "Pronounciation": "",
+        "Word List": "FLOATING"
+    },
+    "FLOG": {
+        "Reference": "12.6.2.1557",
+        "Pronounciation": "f-log",
+        "Word List": "FLOATING EXT"
+    },
+    "FLOOR": {
+        "Reference": "12.6.1.1558",
+        "Pronounciation": "",
+        "Word List": "FLOATING"
+    },
+    "FLUSH": {
+        "Reference": "7.6.1.1559",
+        "Pronounciation": "",
+        "Word List": "BLOCK"
+    },
+    "FLUSH-FILE": {
+        "Reference": "11.6.2.1560",
+        "Pronounciation": "",
+        "Word List": "FILE EXT"
+    },
+    "FM/MOD": {
+        "Reference": "6.1.1561",
+        "Pronounciation": "f-m-slash-mod",
+        "Word List": "CORE"
+    },
+    "FMAX": {
+        "Reference": "12.6.1.1562",
+        "Pronounciation": "f-max",
+        "Word List": "FLOATING"
+    },
+    "FMIN": {
+        "Reference": "12.6.1.1565",
+        "Pronounciation": "f-min",
+        "Word List": "FLOATING"
+    },
+    "FNEGATE": {
+        "Reference": "12.6.1.1567",
+        "Pronounciation": "f-negate",
+        "Word List": "FLOATING"
+    },
+    "FORGET": {
+        "Reference": "15.6.2.1580",
+        "Pronounciation": "",
+        "Word List": "TOOLS EXT"
+    },
+    "FORTH": {
+        "Reference": "16.6.2.1590",
+        "Pronounciation": "",
+        "Word List": "SEARCH EXT"
+    },
+    "FORTH-WORDLIST": {
+        "Reference": "16.6.1.1595",
+        "Pronounciation": "",
+        "Word List": "SEARCH"
+    },
+    "FOVER": {
+        "Reference": "12.6.1.1600",
+        "Pronounciation": "f-over",
+        "Word List": "FLOATING"
+    },
+    "FREE": {
+        "Reference": "14.6.1.1605",
+        "Pronounciation": "",
+        "Word List": "MEMORY"
+    },
+    "FROT": {
+        "Reference": "12.6.1.1610",
+        "Pronounciation": "f-rote",
+        "Word List": "FLOATING"
+    },
+    "FROUND": {
+        "Reference": "12.6.1.1612",
+        "Pronounciation": "f-round",
+        "Word List": "FLOATING"
+    },
+    "FS.": {
+        "Reference": "12.6.2.1613",
+        "Pronounciation": "f-s-dot",
+        "Word List": "FLOATING EXT"
+    },
+    "FSIN": {
+        "Reference": "12.6.2.1614",
+        "Pronounciation": "f-sine",
+        "Word List": "FLOATING EXT"
+    },
+    "FSINCOS": {
+        "Reference": "12.6.2.1616",
+        "Pronounciation": "f-sine-cos",
+        "Word List": "FLOATING EXT"
+    },
+    "FSINH": {
+        "Reference": "12.6.2.1617",
+        "Pronounciation": "f-cinch",
+        "Word List": "FLOATING EXT"
+    },
+    "FSQRT": {
+        "Reference": "12.6.2.1618",
+        "Pronounciation": "f-square-root",
+        "Word List": "FLOATING EXT"
+    },
+    "FSWAP": {
+        "Reference": "12.6.1.1620",
+        "Pronounciation": "f-swap",
+        "Word List": "FLOATING"
+    },
+    "FTAN": {
+        "Reference": "12.6.2.1625",
+        "Pronounciation": "f-tan",
+        "Word List": "FLOATING EXT"
+    },
+    "FTANH": {
+        "Reference": "12.6.2.1626",
+        "Pronounciation": "f-tan-h",
+        "Word List": "FLOATING EXT"
+    },
+    "FTRUNC": {
+        "Reference": "12.6.2.1627",
+        "Pronounciation": "f-trunc",
+        "Word List": "FLOATING EXT"
+    },
+    "FVALUE": {
+        "Reference": "12.6.2.1628",
+        "Pronounciation": "f-value",
+        "Word List": "FLOATING EXT"
+    },
+    "FVARIABLE": {
+        "Reference": "12.6.1.1630",
+        "Pronounciation": "f-variable",
+        "Word List": "FLOATING"
+    },
+    "F~": {
+        "Reference": "12.6.2.1640",
+        "Pronounciation": "f-proximate",
+        "Word List": "FLOATING EXT"
+    },
+    "GET-CURRENT": {
+        "Reference": "16.6.1.1643",
+        "Pronounciation": "",
+        "Word List": "SEARCH"
+    },
+    "GET-ORDER": {
+        "Reference": "16.6.1.1647",
+        "Pronounciation": "",
+        "Word List": "SEARCH"
+    },
+    "HERE": {
+        "Reference": "6.1.1650",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "HEX": {
+        "Reference": "6.2.1660",
+        "Pronounciation": "",
+        "Word List": "CORE EXT"
+    },
+    "HOLD": {
+        "Reference": "6.1.1670",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "HOLDS": {
+        "Reference": "6.2.1675",
+        "Pronounciation": "",
+        "Word List": "CORE EXT"
+    },
+    "I": {
+        "Reference": "6.1.1680",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "IF": {
+        "Reference": "6.1.1700",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "IMMEDIATE": {
+        "Reference": "6.1.1710",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "INCLUDE": {
+        "Reference": "11.6.2.1714",
+        "Pronounciation": "",
+        "Word List": "FILE EXT"
+    },
+    "INCLUDE-FILE": {
+        "Reference": "11.6.1.1717",
+        "Pronounciation": "",
+        "Word List": "FILE"
+    },
+    "INCLUDED": {
+        "Reference": "11.6.1.1718",
+        "Pronounciation": "",
+        "Word List": "FILE"
+    },
+    "INVERT": {
+        "Reference": "6.1.1720",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "IS": {
+        "Reference": "6.2.1725",
+        "Pronounciation": "",
+        "Word List": "CORE EXT"
+    },
+    "J": {
+        "Reference": "6.1.1730",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "K-ALT-MASK": {
+        "Reference": "10.6.2.1740.01",
+        "Pronounciation": "",
+        "Word List": "FACILITY EXT"
+    },
+    "K-CTRL-MASK": {
+        "Reference": "10.6.2.1740.02",
+        "Pronounciation": "",
+        "Word List": "FACILITY EXT"
+    },
+    "K-DELETE": {
+        "Reference": "10.6.2.1740.03",
+        "Pronounciation": "",
+        "Word List": "FACILITY EXT"
+    },
+    "K-DOWN": {
+        "Reference": "10.6.2.1740.04",
+        "Pronounciation": "",
+        "Word List": "FACILITY EXT"
+    },
+    "K-END": {
+        "Reference": "10.6.2.1740.05",
+        "Pronounciation": "",
+        "Word List": "FACILITY EXT"
+    },
+    "K-F1": {
+        "Reference": "10.6.2.1740.06",
+        "Pronounciation": "k-f-1",
+        "Word List": "FACILITY EXT"
+    },
+    "K-F10": {
+        "Reference": "10.6.2.1740.07",
+        "Pronounciation": "k-f-10",
+        "Word List": "FACILITY EXT"
+    },
+    "K-F11": {
+        "Reference": "10.6.2.1740.08",
+        "Pronounciation": "k-f-11",
+        "Word List": "FACILITY EXT"
+    },
+    "K-F12": {
+        "Reference": "10.6.2.1740.09",
+        "Pronounciation": "k-f-12",
+        "Word List": "FACILITY EXT"
+    },
+    "K-F2": {
+        "Reference": "10.6.2.1740.10",
+        "Pronounciation": "k-f-2",
+        "Word List": "FACILITY EXT"
+    },
+    "K-F3": {
+        "Reference": "10.6.2.1740.11",
+        "Pronounciation": "k-f-3",
+        "Word List": "FACILITY EXT"
+    },
+    "K-F4": {
+        "Reference": "10.6.2.1740.12",
+        "Pronounciation": "k-f-4",
+        "Word List": "FACILITY EXT"
+    },
+    "K-F5": {
+        "Reference": "10.6.2.1740.13",
+        "Pronounciation": "k-f-5",
+        "Word List": "FACILITY EXT"
+    },
+    "K-F6": {
+        "Reference": "10.6.2.1740.14",
+        "Pronounciation": "k-f-6",
+        "Word List": "FACILITY EXT"
+    },
+    "K-F7": {
+        "Reference": "10.6.2.1740.15",
+        "Pronounciation": "k-f-7",
+        "Word List": "FACILITY EXT"
+    },
+    "K-F8": {
+        "Reference": "10.6.2.1740.16",
+        "Pronounciation": "k-f-8",
+        "Word List": "FACILITY EXT"
+    },
+    "K-F9": {
+        "Reference": "10.6.2.1740.17",
+        "Pronounciation": "k-f-9",
+        "Word List": "FACILITY EXT"
+    },
+    "K-HOME": {
+        "Reference": "10.6.2.1740.18",
+        "Pronounciation": "",
+        "Word List": "FACILITY EXT"
+    },
+    "K-INSERT": {
+        "Reference": "10.6.2.1740.19",
+        "Pronounciation": "",
+        "Word List": "FACILITY EXT"
+    },
+    "K-LEFT": {
+        "Reference": "10.6.2.1740.20",
+        "Pronounciation": "",
+        "Word List": "FACILITY EXT"
+    },
+    "K-NEXT": {
+        "Reference": "10.6.2.1740.21",
+        "Pronounciation": "",
+        "Word List": "FACILITY EXT"
+    },
+    "K-PRIOR": {
+        "Reference": "10.6.2.1740.22",
+        "Pronounciation": "",
+        "Word List": "FACILITY EXT"
+    },
+    "K-RIGHT": {
+        "Reference": "10.6.2.1740.23",
+        "Pronounciation": "",
+        "Word List": "FACILITY EXT"
+    },
+    "K-SHIFT-MASK": {
+        "Reference": "10.6.2.1740.24",
+        "Pronounciation": "",
+        "Word List": "FACILITY EXT"
+    },
+    "K-UP": {
+        "Reference": "10.6.2.1740.25",
+        "Pronounciation": "",
+        "Word List": "FACILITY EXT"
+    },
+    "KEY": {
+        "Reference": "6.1.1750",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "KEY?": {
+        "Reference": "10.6.1.1755",
+        "Pronounciation": "key-question",
+        "Word List": "FACILITY"
+    },
+    "LEAVE": {
+        "Reference": "6.1.1760",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "LIST": {
+        "Reference": "7.6.2.1770",
+        "Pronounciation": "",
+        "Word List": "BLOCK EXT"
+    },
+    "LITERAL": {
+        "Reference": "6.1.1780",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "LOAD": {
+        "Reference": "7.6.1.1790",
+        "Pronounciation": "",
+        "Word List": "BLOCK"
+    },
+    "LOCALS|": {
+        "Reference": "13.6.2.1795",
+        "Pronounciation": "locals-bar",
+        "Word List": "LOCAL EXT"
+    },
+    "LOOP": {
+        "Reference": "6.1.1800",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "LSHIFT": {
+        "Reference": "6.1.1805",
+        "Pronounciation": "l-shift",
+        "Word List": "CORE"
+    },
+    "M*": {
+        "Reference": "6.1.1810",
+        "Pronounciation": "m-star",
+        "Word List": "CORE"
+    },
+    "M*/": {
+        "Reference": "8.6.1.1820",
+        "Pronounciation": "m-star-slash",
+        "Word List": "DOUBLE"
+    },
+    "M+": {
+        "Reference": "8.6.1.1830",
+        "Pronounciation": "m-plus",
+        "Word List": "DOUBLE"
+    },
+    "MARKER": {
+        "Reference": "6.2.1850",
+        "Pronounciation": "",
+        "Word List": "CORE EXT"
+    },
+    "MAX": {
+        "Reference": "6.1.1870",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "MIN": {
+        "Reference": "6.1.1880",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "MOD": {
+        "Reference": "6.1.1890",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "MOVE": {
+        "Reference": "6.1.1900",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "MS": {
+        "Reference": "10.6.2.1905",
+        "Pronounciation": "",
+        "Word List": "FACILITY EXT"
+    },
+    "N>R": {
+        "Reference": "15.6.2.1908",
+        "Pronounciation": "n-to-r",
+        "Word List": "TOOLS EXT"
+    },
+    "NAME>COMPILE": {
+        "Reference": "15.6.2.1909.10",
+        "Pronounciation": "name-to-compile",
+        "Word List": "TOOLS EXT"
+    },
+    "NAME>INTERPRET": {
+        "Reference": "15.6.2.1909.20",
+        "Pronounciation": "name-to-interpret",
+        "Word List": "TOOLS EXT"
+    },
+    "NAME>STRING": {
+        "Reference": "15.6.2.1909.40",
+        "Pronounciation": "name-to-string",
+        "Word List": "TOOLS EXT"
+    },
+    "NEGATE": {
+        "Reference": "6.1.1910",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "NIP": {
+        "Reference": "6.2.1930",
+        "Pronounciation": "",
+        "Word List": "CORE EXT"
+    },
+    "NR>": {
+        "Reference": "15.6.2.1940",
+        "Pronounciation": "n-r-from",
+        "Word List": "TOOLS EXT"
+    },
+    "OF": {
+        "Reference": "6.2.1950",
+        "Pronounciation": "",
+        "Word List": "CORE EXT"
+    },
+    "ONLY": {
+        "Reference": "16.6.2.1965",
+        "Pronounciation": "",
+        "Word List": "SEARCH EXT"
+    },
+    "OPEN-FILE": {
+        "Reference": "11.6.1.1970",
+        "Pronounciation": "",
+        "Word List": "FILE"
+    },
+    "OR": {
+        "Reference": "6.1.1980",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "ORDER": {
+        "Reference": "16.6.2.1985",
+        "Pronounciation": "",
+        "Word List": "SEARCH EXT"
+    },
+    "OVER": {
+        "Reference": "6.1.1990",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "PAD": {
+        "Reference": "6.2.2000",
+        "Pronounciation": "",
+        "Word List": "CORE EXT"
+    },
+    "PAGE": {
+        "Reference": "10.6.1.2005",
+        "Pronounciation": "",
+        "Word List": "FACILITY"
+    },
+    "PARSE": {
+        "Reference": "18.6.2.2008",
+        "Pronounciation": "",
+        "Word List": "XCHAR EXT"
+    },
+    "PARSE-NAME": {
+        "Reference": "6.2.2020",
+        "Pronounciation": "",
+        "Word List": "CORE EXT"
+    },
+    "PICK": {
+        "Reference": "6.2.2030",
+        "Pronounciation": "",
+        "Word List": "CORE EXT"
+    },
+    "POSTPONE": {
+        "Reference": "6.1.2033",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "PRECISION": {
+        "Reference": "12.6.2.2035",
+        "Pronounciation": "",
+        "Word List": "FLOATING EXT"
+    },
+    "PREVIOUS": {
+        "Reference": "16.6.2.2037",
+        "Pronounciation": "",
+        "Word List": "SEARCH EXT"
+    },
+    "QUIT": {
+        "Reference": "6.1.2050",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "R/O": {
+        "Reference": "11.6.1.2054",
+        "Pronounciation": "r-o",
+        "Word List": "FILE"
+    },
+    "R/W": {
+        "Reference": "11.6.1.2056",
+        "Pronounciation": "r-w",
+        "Word List": "FILE"
+    },
+    "R>": {
+        "Reference": "6.1.2060",
+        "Pronounciation": "r-from",
+        "Word List": "CORE"
+    },
+    "R@": {
+        "Reference": "6.1.2070",
+        "Pronounciation": "r-fetch",
+        "Word List": "CORE"
+    },
+    "READ-FILE": {
+        "Reference": "11.6.1.2080",
+        "Pronounciation": "",
+        "Word List": "FILE"
+    },
+    "READ-LINE": {
+        "Reference": "11.6.1.2090",
+        "Pronounciation": "",
+        "Word List": "FILE"
+    },
+    "RECURSE": {
+        "Reference": "6.1.2120",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "REFILL": {
+        "Reference": "11.6.2.2125",
+        "Pronounciation": "",
+        "Word List": "FILE EXT"
+    },
+    "RENAME-FILE": {
+        "Reference": "11.6.2.2130",
+        "Pronounciation": "",
+        "Word List": "FILE EXT"
+    },
+    "REPEAT": {
+        "Reference": "6.1.2140",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "REPLACES": {
+        "Reference": "17.6.2.2141",
+        "Pronounciation": "",
+        "Word List": "STRING EXT"
+    },
+    "REPOSITION-FILE": {
+        "Reference": "11.6.1.2142",
+        "Pronounciation": "",
+        "Word List": "FILE"
+    },
+    "REPRESENT": {
+        "Reference": "12.6.1.2143",
+        "Pronounciation": "",
+        "Word List": "FLOATING"
+    },
+    "REQUIRE": {
+        "Reference": "11.6.2.2144.10",
+        "Pronounciation": "",
+        "Word List": "FILE EXT"
+    },
+    "REQUIRED": {
+        "Reference": "11.6.2.2144.50",
+        "Pronounciation": "",
+        "Word List": "FILE EXT"
+    },
+    "RESIZE": {
+        "Reference": "14.6.1.2145",
+        "Pronounciation": "",
+        "Word List": "MEMORY"
+    },
+    "RESIZE-FILE": {
+        "Reference": "11.6.1.2147",
+        "Pronounciation": "",
+        "Word List": "FILE"
+    },
+    "RESTORE-INPUT": {
+        "Reference": "6.2.2148",
+        "Pronounciation": "",
+        "Word List": "CORE EXT"
+    },
+    "ROLL": {
+        "Reference": "6.2.2150",
+        "Pronounciation": "",
+        "Word List": "CORE EXT"
+    },
+    "ROT": {
+        "Reference": "6.1.2160",
+        "Pronounciation": "rote",
+        "Word List": "CORE"
+    },
+    "RSHIFT": {
+        "Reference": "6.1.2162",
+        "Pronounciation": "r-shift",
+        "Word List": "CORE"
+    },
+    "S\"": {
+        "Reference": "11.6.1.2165",
+        "Pronounciation": "s-quote",
+        "Word List": "FILE"
+    },
+    "S>D": {
+        "Reference": "6.1.2170",
+        "Pronounciation": "s-to-d",
+        "Word List": "CORE"
+    },
+    "S>F": {
+        "Reference": "12.6.2.2175",
+        "Pronounciation": "S\tto\tF",
+        "Word List": "FLOATING EXT"
+    },
+    "SAVE-BUFFERS": {
+        "Reference": "7.6.1.2180",
+        "Pronounciation": "",
+        "Word List": "BLOCK"
+    },
+    "SAVE-INPUT": {
+        "Reference": "6.2.2182",
+        "Pronounciation": "",
+        "Word List": "CORE EXT"
+    },
+    "SCR": {
+        "Reference": "7.6.2.2190",
+        "Pronounciation": "s-c-r",
+        "Word List": "BLOCK EXT"
+    },
+    "SEARCH": {
+        "Reference": "17.6.1.2191",
+        "Pronounciation": "",
+        "Word List": "STRING"
+    },
+    "SEARCH-WORDLIST": {
+        "Reference": "16.6.1.2192",
+        "Pronounciation": "",
+        "Word List": "SEARCH"
+    },
+    "SEE": {
+        "Reference": "15.6.1.2194",
+        "Pronounciation": "",
+        "Word List": "TOOLS"
+    },
+    "SET-CURRENT": {
+        "Reference": "16.6.1.2195",
+        "Pronounciation": "",
+        "Word List": "SEARCH"
+    },
+    "SET-ORDER": {
+        "Reference": "16.6.1.2197",
+        "Pronounciation": "",
+        "Word List": "SEARCH"
+    },
+    "SET-PRECISION": {
+        "Reference": "12.6.2.2200",
+        "Pronounciation": "",
+        "Word List": "FLOATING EXT"
+    },
+    "SF!": {
+        "Reference": "12.6.2.2202",
+        "Pronounciation": "s-f-store",
+        "Word List": "FLOATING EXT"
+    },
+    "SF@": {
+        "Reference": "12.6.2.2203",
+        "Pronounciation": "s-f-fetch",
+        "Word List": "FLOATING EXT"
+    },
+    "SFALIGN": {
+        "Reference": "12.6.2.2204",
+        "Pronounciation": "s-f-align",
+        "Word List": "FLOATING EXT"
+    },
+    "SFALIGNED": {
+        "Reference": "12.6.2.2206",
+        "Pronounciation": "s-f-aligned",
+        "Word List": "FLOATING EXT"
+    },
+    "SFFIELD:": {
+        "Reference": "12.6.2.2206.40",
+        "Pronounciation": "s-f-field-colon",
+        "Word List": "FLOATING EXT"
+    },
+    "SFLOAT+": {
+        "Reference": "12.6.2.2207",
+        "Pronounciation": "s-float-plus",
+        "Word List": "FLOATING EXT"
+    },
+    "SFLOATS": {
+        "Reference": "12.6.2.2208",
+        "Pronounciation": "s-floats",
+        "Word List": "FLOATING EXT"
+    },
+    "SIGN": {
+        "Reference": "6.1.2210",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "SLITERAL": {
+        "Reference": "17.6.1.2212",
+        "Pronounciation": "",
+        "Word List": "STRING"
+    },
+    "SM/REM": {
+        "Reference": "6.1.2214",
+        "Pronounciation": "s-m-slash-rem",
+        "Word List": "CORE"
+    },
+    "SOURCE": {
+        "Reference": "6.1.2216",
+        "Pronounciation": "CORE",
+        "Word List": ""
+    },
+    "SOURCE-ID": {
+        "Reference": "11.6.1.2218",
+        "Pronounciation": "source-i-d",
+        "Word List": "FILE"
+    },
+    "SPACE": {
+        "Reference": "6.1.2220",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "SPACES": {
+        "Reference": "6.1.2230",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "STATE": {
+        "Reference": "15.6.2.2250",
+        "Pronounciation": "",
+        "Word List": "TOOLS EXT"
+    },
+    "SUBSTITUTE": {
+        "Reference": "17.6.2.2255",
+        "Pronounciation": "",
+        "Word List": "STRING EXT"
+    },
+    "SWAP": {
+        "Reference": "6.1.2260",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "SYNONYM": {
+        "Reference": "15.6.2.2264",
+        "Pronounciation": "",
+        "Word List": "TOOLS EXT"
+    },
+    "S\\\"": {
+        "Reference": "6.2.2266",
+        "Pronounciation": "s-backslash-quote",
+        "Word List": "CORE EXT"
+    },
+    "THEN": {
+        "Reference": "6.1.2270",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "THROW": {
+        "Reference": "9.6.1.2275",
+        "Pronounciation": "",
+        "Word List": "EXCEPTION"
+    },
+    "THRU": {
+        "Reference": "7.6.2.2280",
+        "Pronounciation": "",
+        "Word List": "BLOCK EXT"
+    },
+    "TIME&DATE": {
+        "Reference": "10.6.2.2292",
+        "Pronounciation": "time-and-date",
+        "Word List": "FACILITY EXT"
+    },
+    "TO": {
+        "Reference": "6.2.2295",
+        "Pronounciation": "",
+        "Word List": "CORE EXT"
+    },
+    "TRAVERSE-WORDLIST": {
+        "Reference": "15.6.2.2297",
+        "Pronounciation": "",
+        "Word List": "TOOLS EXT"
+    },
+    "TRUE": {
+        "Reference": "6.2.2298",
+        "Pronounciation": "",
+        "Word List": "CORE EXT"
+    },
+    "TUCK": {
+        "Reference": "6.2.2300",
+        "Pronounciation": "",
+        "Word List": "CORE EXT"
+    },
+    "TYPE": {
+        "Reference": "6.1.2310",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "U.": {
+        "Reference": "6.1.2320",
+        "Pronounciation": "u-dot",
+        "Word List": "CORE"
+    },
+    "U.R": {
+        "Reference": "6.2.2330",
+        "Pronounciation": "u-dot-r",
+        "Word List": "CORE EXT"
+    },
+    "U<": {
+        "Reference": "6.1.2340",
+        "Pronounciation": "u-less-than",
+        "Word List": "CORE"
+    },
+    "U>": {
+        "Reference": "6.2.2350",
+        "Pronounciation": "u-greater-than",
+        "Word List": "CORE EXT"
+    },
+    "UM*": {
+        "Reference": "6.1.2360",
+        "Pronounciation": "u-m-star",
+        "Word List": "CORE"
+    },
+    "UM/MOD": {
+        "Reference": "6.1.2370",
+        "Pronounciation": "u-m-slash-mod",
+        "Word List": "CORE"
+    },
+    "UNESCAPE": {
+        "Reference": "17.6.2.2375",
+        "Pronounciation": "",
+        "Word List": "STRING EXT"
+    },
+    "UNLOOP": {
+        "Reference": "6.1.2380",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "UNTIL": {
+        "Reference": "6.1.2390",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "UNUSED": {
+        "Reference": "6.2.2395",
+        "Pronounciation": "",
+        "Word List": "CORE EXT"
+    },
+    "UPDATE": {
+        "Reference": "7.6.1.2400",
+        "Pronounciation": "",
+        "Word List": "BLOCK"
+    },
+    "VALUE": {
+        "Reference": "6.2.2405",
+        "Pronounciation": "",
+        "Word List": "CORE EXT"
+    },
+    "VARIABLE": {
+        "Reference": "6.1.2410",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "W/O": {
+        "Reference": "11.6.1.2425",
+        "Pronounciation": "w-o",
+        "Word List": "FILE"
+    },
+    "WHILE": {
+        "Reference": "6.1.2430",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "WITHIN": {
+        "Reference": "6.2.2440",
+        "Pronounciation": "",
+        "Word List": "CORE EXT"
+    },
+    "WORD": {
+        "Reference": "6.1.2450",
+        "Pronounciation": "",
+        "Word List": "CORE"
+    },
+    "WORDLIST": {
+        "Reference": "16.6.1.2460",
+        "Pronounciation": "",
+        "Word List": "SEARCH"
+    },
+    "WORDS": {
+        "Reference": "15.6.1.2465",
+        "Pronounciation": "",
+        "Word List": "TOOLS"
+    },
+    "WRITE-FILE": {
+        "Reference": "11.6.1.2480",
+        "Pronounciation": "",
+        "Word List": "FILE"
+    },
+    "WRITE-LINE": {
+        "Reference": "11.6.1.2485",
+        "Pronounciation": "",
+        "Word List": "FILE"
+    },
+    "X-SIZE": {
+        "Reference": "18.6.1.2486.50",
+        "Pronounciation": "",
+        "Word List": "XCHAR"
+    },
+    "X-WIDTH": {
+        "Reference": "18.6.2.2486.70",
+        "Pronounciation": "",
+        "Word List": "XCHAR EXT"
+    },
+    "XC!+": {
+        "Reference": "18.6.1.2487.10",
+        "Pronounciation": "x-c-store-plus",
+        "Word List": "XCHAR"
+    },
+    "XC!+?": {
+        "Reference": "18.6.1.2487.15",
+        "Pronounciation": "x-c-store-plus-query",
+        "Word List": "XCHAR"
+    },
+    "XC,": {
+        "Reference": "18.6.1.2487.20",
+        "Pronounciation": "x-c-comma",
+        "Word List": "XCHAR"
+    },
+    "XC-SIZE": {
+        "Reference": "18.6.1.2487.25",
+        "Pronounciation": "x-c-size",
+        "Word List": "XCHAR"
+    },
+    "XC-WIDTH": {
+        "Reference": "18.6.2.2487.30",
+        "Pronounciation": "x-c-width",
+        "Word List": "XCHAR EXT"
+    },
+    "XC@+": {
+        "Reference": "18.6.1.2487.35",
+        "Pronounciation": "x-c-fetch-plus",
+        "Word List": "XCHAR"
+    },
+    "XCHAR+": {
+        "Reference": "18.6.1.2487.40",
+        "Pronounciation": "x-char-plus",
+        "Word List": "XCHAR"
+    },
+    "XCHAR-": {
+        "Reference": "18.6.2.2487.45",
+        "Pronounciation": "x-char-minus",
+        "Word List": "XCHAR EXT"
+    },
+    "XEMIT": {
+        "Reference": "18.6.1.2488.10",
+        "Pronounciation": "x-emit",
+        "Word List": "XCHAR"
+    },
+    "XHOLD": {
+        "Reference": "18.6.2.2488.20",
+        "Pronounciation": "x-hold",
+        "Word List": "XCHAR EXT"
+    },
+    "XKEY": {
+        "Reference": "18.6.1.2488.30",
+        "Pronounciation": "x-key",
+        "Word List": "XCHAR"
+    },
+    "XKEY?": {
+        "Reference": "18.6.1.2488.35",
+        "Pronounciation": "x-key-query",
+        "Word List": "XCHAR"
+    },
+    "XOR": {
+        "Reference": "6.1.2490",
+        "Pronounciation": "x-or",
+        "Word List": "CORE"
+    },
+    "X\\STRING-": {
+        "Reference": "18.6.2.2495",
+        "Pronounciation": "x-string-minus",
+        "Word List": "XCHAR EXT"
+    },
+    "[": {
+        "Reference": "6.1.2500",
+        "Pronounciation": "left-bracket",
+        "Word List": "CORE"
+    },
+    "[']": {
+        "Reference": "6.1.2510",
+        "Pronounciation": "bracket-tick",
+        "Word List": "CORE"
+    },
+    "[CHAR]": {
+        "Reference": "18.6.2.2520",
+        "Pronounciation": "bracket-char",
+        "Word List": "XCHAR EXT"
+    },
+    "[COMPILE]": {
+        "Reference": "6.2.2530",
+        "Pronounciation": "bracket-compile",
+        "Word List": "CORE EXT"
+    },
+    "[DEFINED]": {
+        "Reference": "15.6.2.2530.30",
+        "Pronounciation": "bracket-defined",
+        "Word List": "TOOLS EXT"
+    },
+    "[ELSE]": {
+        "Reference": "15.6.2.2531",
+        "Pronounciation": "bracket-else",
+        "Word List": "TOOLS EXT"
+    },
+    "[IF]": {
+        "Reference": "15.6.2.2532",
+        "Pronounciation": "bracket-if",
+        "Word List": "TOOLS EXT"
+    },
+    "[THEN]": {
+        "Reference": "15.6.2.2533",
+        "Pronounciation": "bracket-then",
+        "Word List": "TOOLS EXT"
+    },
+    "[UNDEFINED]": {
+        "Reference": "15.6.2.2534",
+        "Pronounciation": "bracket-undefined",
+        "Word List": "TOOLS EXT"
+    },
+    "\\": {
+        "Reference": "7.6.2.2535",
+        "Pronounciation": "backslash",
+        "Word List": "BLOCK EXT"
+    },
+    "]": {
+        "Reference": "6.1.2540",
+        "Pronounciation": "right-bracket",
+        "Word List": "CORE"
+    },
+    "{:": {
+        "Reference": "13.6.2.2550",
+        "Pronounciation": "brace-colon",
+        "Word List": "LOCAL EXT"
+    }
+}

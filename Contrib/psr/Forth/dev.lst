@@ -6917,7 +6917,8 @@ forth.RESTORE-MODE:
               144f dc40  st   $40,[y,x++]
               1450 e07a  jmp  y,$7a
               1451 dc14  st   $14,[y,x++]
-forth.EXIT:   1452 80f9  adda $f9
+forth.core.EXIT:
+              1452 80f9  adda $f9
               1453 147f  ld   $7f,y
               1454 1135  ld   [$35],x
               1455 0d00  ld   [y,x]

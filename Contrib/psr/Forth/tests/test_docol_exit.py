@@ -146,7 +146,7 @@ def test_exit(emulator, return_stack, return_address, return_stack_depth):
     return_stack.set_depth_in_bytes(return_stack_depth)
     return_stack.push_word(return_address)
     # Act
-    do_test_word(emulator, "forth.EXIT")
+    do_test_word(emulator, "forth.core.EXIT")
     # Assert
     assert return_address == get_IP()
     assert len(return_stack) == return_stack_depth
@@ -166,7 +166,7 @@ def test_exit_to_ram_mode(
     return_stack.push_byte(mode)
     return_stack.push_word(asm.symbol("forth.RESTORE-MODE"))
     # Act
-    do_test_word(emulator, "forth.EXIT")
+    do_test_word(emulator, "forth.core.EXIT")
     # Exit should have left restore-mode in IP, so next should DTRT
     do_test_word(emulator, "forth.next3.rom-mode")
     # Assert

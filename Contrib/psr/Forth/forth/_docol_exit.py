@@ -154,8 +154,8 @@ def do_restore_mode():
     st([mode])
     ld(0, Y)
     ld(W, X)
-    st(lo("forth.EXIT"), [Y, Xpp])
-    st(hi("forth.EXIT"), [Y, Xpp])  # 12
+    st(lo("forth.core.EXIT"), [Y, Xpp])
+    st(hi("forth.core.EXIT"), [Y, Xpp])  # 12
     REENTER(cost_of_do_restore_mode)
 
 
@@ -173,7 +173,7 @@ def restore_mode():
 def exit():
     """Word to exit from a thread
     """
-    label("forth.EXIT")
+    label("forth.core.EXIT")
     adda(-add_cost_of_next(cost_of_exit) / 2)
     ld(return_stack_page, Y)
     ld([return_stack_pointer], X)
@@ -198,6 +198,6 @@ def make_thread(*words):
         st(lo(word), [Y, Xpp])
         jmp(Y, "forth.move-ip")
         st(hi(word), [Y, Xpp])
-    st(lo("forth.EXIT"), [Y, Xpp])
+    st(lo("forth.core.EXIT"), [Y, Xpp])
     jmp(Y, "forth.move-ip")
-    st(hi("forth.EXIT"), [Y, Xpp])
+    st(hi("forth.core.EXIT"), [Y, Xpp])

@@ -1,3 +1,5 @@
+"""Kernel implementation of stack manipulation words"""
+
 from asm import AC, C, X, Xpp, Y, adda, label, ld, st, suba
 
 from ._utilities import NEXT, add_cost_of_next

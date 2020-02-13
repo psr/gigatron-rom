@@ -4,11 +4,11 @@ from asm import C, adda, align, label, nop, pc, st
 
 from . import (
     _arithmetic,
-    _core,
     _docol_exit,
     _literal,
     _memory,
     _next,
+    _stackmanipulation,
 )
 from ._next import move_ip
 
@@ -42,7 +42,7 @@ def _start_page():
 
 
 # TODO: find a neater way of packing these things
-def emit_core_words():
+def emit_kernel_words():
     #### Page
     _start_page()
     # Core stuff
@@ -62,13 +62,13 @@ def emit_core_words():
     ####
     _start_page()
     # Stack manipulation words
-    _core.drop()
-    _core.drop_two()
-    _core.swap()
-    _core.dup()
-    _core.over()
-    _core.rot()
-    _core.two_swap()
+    _stackmanipulation.drop()
+    _stackmanipulation.drop_two()
+    _stackmanipulation.swap()
+    _stackmanipulation.dup()
+    _stackmanipulation.over()
+    _stackmanipulation.rot()
+    _stackmanipulation.two_swap()
     # No-op thread used for testing DOCOL and EXIT
     # This can probably be removed later
     label("forth.NOP")

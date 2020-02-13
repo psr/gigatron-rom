@@ -5304,7 +5304,7 @@ nop()                           #47
 #-----------------------------------------------------------------------
 
 forth.emit_entry_page(vTicks, vReturn)
-forth.emit_core_words()
+forth.emit_kernel_words()
 # --- Page boundary ---
 start_of_forth_word_space = pc()  # Variable used in unit tests to locate test data
 align(0x100,0x100)

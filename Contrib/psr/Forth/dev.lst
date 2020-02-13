@@ -6822,7 +6822,7 @@ forth.DO-DOCOL-RAM:
               1344 1413  ld   $13,y       ;NEXT
               1345 e00e  jmp  y,$0e
               1346 00f3  ld   $f3
-              1347 0200  nop              5307  forth.emit_core_words()
+              1347 0200  nop              5307  forth.emit_kernel_words()
               1348 0200  nop
               1349 0200  nop
               * 185 times

@@ -73,6 +73,9 @@ def emit_core_words():
     # This can probably be removed later
     label("forth.NOP")
     _docol_exit.make_thread()
+    from . import _compiler
+
+    _compiler.compile_file("core.f")
 
 
 __all__ = ["move_ip", "emit_core_words", "emit_entry_page"]

@@ -18,3 +18,68 @@ There is a minimal compiler in _compiler.py which is used to process the first t
 
 Running this package with python3 -m bootstrapforth brings up an interactive interpreter
 """
+
+import copy
+import pathlib
+
+from ._compiler import bootstrap_compiler
+from ._dictionary import Dictionary
+from ._dictionary import Flags as DictionaryFlags
+from ._kernel import dictionary as kernel_dictionary
+from ._runtime import Interpreter, State
+
+# To bootstrap our Python Forth, we process the following files with the bootstrap compiler
+_BOOTSTRAP_BRINGUP_SEQUENCE = ["core1.f", "bootstrap.f"]
+
+# Adds definitions to the runtime that were provided by the compiler before
+_POST_BOOTSTRAP_SEQUENCE = ["core0.f", "../immediates.f"]
+
+# To load a more complete environment we start over again with the following sequence of files
+
+_PYTHON_FORTH_BRINGUP_SEQUENCE = [
+    "core1.f",
+    "core0.f",
+    "../immediates.f",
+    "bootstrap.f",  # TODO: a more complete environment!
+]
+
+
+_FORTH_ROOT = pathlib.Path(__file__).parent
+
+
+def _get_forth_file(name):
+    return open(_FORTH_ROOT / name, "r")
+
+
+bootstrap_dictionary = copy.copy(kernel_dictionary)
+for file in _BOOTSTRAP_BRINGUP_SEQUENCE:
+    with _get_forth_file(file) as f:
+        bootstrap_compiler(f, bootstrap_dictionary)
+
+# bootstrap_dictionary now includes a runable QUIT
+# which we can run to bring up a new interpreter. However it lacks
+# some words such as ['] ; \ ( which are were handled by the compiler before.
+# core0.f contains these definitions.
+
+for file in _POST_BOOTSTRAP_SEQUENCE:
+    with _get_forth_file(file) as f:
+        interpreter = Interpreter(bootstrap_dictionary, f)
+        interpreter.run(bootstrap_dictionary["QUIT"].execution_token)
+
+
+# Just for good measure, lets use the bootstrap interpreter to compile itself
+# into a new dictionary.  This proves that we can do this.
+
+python_forth_dictionary = copy.copy(kernel_dictionary)
+for file in _PYTHON_FORTH_BRINGUP_SEQUENCE:
+    with _get_forth_file(file) as f:
+        interpreter = Interpreter(bootstrap_dictionary, f, python_forth_dictionary)
+        interpreter.run(bootstrap_dictionary["QUIT"].execution_token)
+
+__all__ = [
+    "python_forth_dictionary",
+    "Interpreter",
+    "State",
+    "Dictionary",
+    "DictionaryFlags",
+]

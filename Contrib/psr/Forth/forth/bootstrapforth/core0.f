@@ -26,18 +26,3 @@
     DUP 0= UNTIL          \ continue until we reach matching close paren, depth 0
     DROP                  \ drop the depth counter
 ; IMMEDIATE
-
-: POSTPONE
-    WORD FIND DROP
-    [ WORD COMPILE, FIND DROP COMPILE, ]
-; IMMEDIATE
-
-: [']
-    WORD FIND DROP POSTPONE LITERAL
-; IMMEDIATE
-
-: ;
-    POSTPONE [
-    ['] EXIT COMPILE,
-    HIDDEN
-; IMMEDIATE

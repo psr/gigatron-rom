@@ -45,8 +45,5 @@ def test_zero_equal(emulator, data_stack, data_stack_depth, data):
     # Act
     do_test_word(emulator, "forth.core.0=")
     # Assert
-    if data == 0:
-        assert -1 == data_stack.pop_i16()
-    else:
-        assert 0 == data_stack.pop_i16()
+    assert (data == 0) == data_stack.pop_flag()
     assert data_stack_depth == len(data_stack)

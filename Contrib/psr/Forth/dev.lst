@@ -7293,12 +7293,30 @@ forth.core.ext.NIP:
               15bf dc52  st   $52,[y,x++] ;-> forth.core.EXIT
               15c0 e07a  jmp  y,$7a
               15c1 dc14  st   $14,[y,x++]
+forth.core.ext.0<>:
+              15c2 80f3  adda $f3
+              15c3 1413  ld   $13,y
+              15c4 e032  jmp  y,$32
+              15c5 147f  ld   $7f,y
+              15c6 80f6  adda $f6
+              15c7 1413  ld   $13,y
+              15c8 e023  jmp  y,$23
+              15c9 147f  ld   $7f,y
+              15ca dcbd  st   $bd,[y,x++] ;-> forth.core.0=
+              15cb e07a  jmp  y,$7a
+              15cc dc14  st   $14,[y,x++]
+              15cd dcbd  st   $bd,[y,x++] ;-> forth.core.0=
+              15ce e07a  jmp  y,$7a
+              15cf dc14  st   $14,[y,x++]
+              15d0 dc52  st   $52,[y,x++] ;-> forth.core.EXIT
+              15d1 e07a  jmp  y,$7a
+              15d2 dc14  st   $14,[y,x++]
                                           5308  # --- Page boundary ---
                                           5309  start_of_forth_word_space = pc()  # Variable used in unit tests to locate test data
-              15c2 0200  nop              5310  align(0x100,0x100)
-              15c3 0200  nop
-              15c4 0200  nop
-              * 61 times
+              15d3 0200  nop              5310  align(0x100,0x100)
+              15d4 0200  nop
+              15d5 0200  nop
+              * 44 times
               15ff 0200  nop              5310  align(0x100,0x100)
                                           5311
                                           5312  #-----------------------------------------------------------------------

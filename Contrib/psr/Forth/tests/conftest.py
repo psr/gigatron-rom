@@ -104,6 +104,15 @@ class _GigatronStack(object):
     def pop_i16(self):
         return struct.unpack("<h", self.pop_word())[0]
 
+    def pop_flag(self):
+        value = self.pop_u16()
+        if value == 0xFFFF:
+            return True
+        elif value == 0x0000:
+            return False
+        else:
+            raise AssertionError(f"Value {value:x} is not a valid flag value")
+
 
 @pytest.fixture
 def data_stack(emulator):

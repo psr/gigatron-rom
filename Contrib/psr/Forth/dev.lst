@@ -7032,41 +7032,64 @@ forth.core.1-:
               14ba 1413  ld   $13,y       ;NEXT
               14bb e00e  jmp  y,$0e
               14bc 00f9  ld   $f9
+forth.core.0=:
+              14bd a010  suba $10
+              14be 111c  ld   [$1c],x
+              14bf 0500  ld   [x]
+              14c0 ecc8  bne  .not-zero1
+              14c1 1400  ld   $00,y
+              14c2 de00  st   [y,x++]     ;Low byte is zero - advance to high-byte
+              14c3 0d00  ld   [y,x]
+              14c4 eccc  bne  .not-zero2
+              14c5 111c  ld   [$1c],x
+              14c6 fcce  bra  .write      ;Both bytes are 0 - replace with true flag
+              14c7 00ff  ld   $ff
+.not-zero1:   14c8 0200  nop
+              14c9 0200  nop
+              14ca 0200  nop
+              14cb 0200  nop
+.not-zero2:   14cc fcce  bra  .write
+              14cd 0000  ld   $00         ;One or both bytes are not zero - replace with false flag
+.write:       14ce de00  st   [y,x++]     ;Overwrite both bytes
+              14cf de00  st   [y,x++]
+              14d0 1413  ld   $13,y       ;NEXT
+              14d1 e00f  jmp  y,$0f
+              14d2 00f8  ld   $f8
 forth.internal.LIT:
-              14bd 80f5  adda $f5
-              14be 00f5  ld   $f5         ;Store cost
-              14bf c224  st   [$24]
-              14c0 011c  ld   [$1c]       ;Decrement Data stack pointer
-              14c1 a002  suba $02
-              14c2 1200  ld   ac,x
-              14c3 c21c  st   [$1c]
-              14c4 1534  ld   [$34],y     ;Jump to the code in the thread
-              14c5 0006  ld   $06         ;We're going to shift the IP by 6
-              14c6 0200  nop
-              14c7 e133  jmp  y,[$33]
-              14c8 1400  ld   $00,y
-forth.internal.C-LIT:
-              14c9 80f3  adda $f3
-              14ca 00f3  ld   $f3         ;Store cost
-              14cb c224  st   [$24]
-              14cc 011c  ld   [$1c]       ;Decrement Data stack pointer and store high byte of 0
-              14cd a001  suba $01
-              14ce 1200  ld   ac,x
-              14cf 0000  ld   $00
-              14d0 c600  st   [x]
-              14d1 011c  ld   [$1c]
-              14d2 a002  suba $02
-              14d3 1200  ld   ac,x
-              14d4 c21c  st   [$1c]
-              14d5 1534  ld   [$34],y     ;Jump to the code in the thread
-              14d6 0005  ld   $05         ;We're going to shift the IP by 5
-              14d7 0200  nop
-              14d8 e133  jmp  y,[$33]
-              14d9 1400  ld   $00,y
-              14da 0200  nop
-              14db 0200  nop
+              14d3 80f5  adda $f5
+              14d4 00f5  ld   $f5         ;Store cost
+              14d5 c224  st   [$24]
+              14d6 011c  ld   [$1c]       ;Decrement Data stack pointer
+              14d7 a002  suba $02
+              14d8 1200  ld   ac,x
+              14d9 c21c  st   [$1c]
+              14da 1534  ld   [$34],y     ;Jump to the code in the thread
+              14db 0006  ld   $06         ;We're going to shift the IP by 6
               14dc 0200  nop
-              * 38 times
+              14dd e133  jmp  y,[$33]
+              14de 1400  ld   $00,y
+forth.internal.C-LIT:
+              14df 80f3  adda $f3
+              14e0 00f3  ld   $f3         ;Store cost
+              14e1 c224  st   [$24]
+              14e2 011c  ld   [$1c]       ;Decrement Data stack pointer and store high byte of 0
+              14e3 a001  suba $01
+              14e4 1200  ld   ac,x
+              14e5 0000  ld   $00
+              14e6 c600  st   [x]
+              14e7 011c  ld   [$1c]
+              14e8 a002  suba $02
+              14e9 1200  ld   ac,x
+              14ea c21c  st   [$1c]
+              14eb 1534  ld   [$34],y     ;Jump to the code in the thread
+              14ec 0005  ld   $05         ;We're going to shift the IP by 5
+              14ed 0200  nop
+              14ee e133  jmp  y,[$33]
+              14ef 1400  ld   $00,y
+              14f0 0200  nop
+              14f1 0200  nop
+              14f2 0200  nop
+              * 16 times
 forth.restart-or-quit:
               1500 fd30  bra  [$30]
               1501 f802  ble  .quit

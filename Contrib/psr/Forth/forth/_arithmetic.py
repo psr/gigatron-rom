@@ -1,6 +1,21 @@
 """Words for performing arithmetic"""
 
-from asm import X, Xpp, Y, adda, beq, bne, label, ld, lo, st, suba
+from asm import (
+    C,
+    X,
+    Xpp,
+    Y,
+    adda,
+    beq,
+    bne,
+    bra,
+    label,
+    ld,
+    lo,
+    st,
+    suba,
+    wait,
+)
 
 from ._utilities import NEXT, add_cost_of_next
 from .variables import data_stack_page, data_stack_pointer
@@ -58,3 +73,42 @@ cost_of_decrement__two_words_written = 10
 cost_of_decrement = max(
     cost_of_decrement__one_word_written, cost_of_decrement__two_words_written
 )
+
+
+def zero_equal():
+    """Logical not ( x -- flag )
+
+    flag is true if and only if x is equal to zero.
+    """
+    label("forth.core.0=")
+    suba(add_cost_of_next(cost_of_zero_equal))  # 1
+    ld([data_stack_pointer], X)
+    ld([X])
+    bne(".not-zero1")
+    ld(data_stack_page, Y)  # 5
+
+    st([Y, Xpp])  # 6
+    C("Low byte is zero - advance to high-byte")
+    ld([Y, X])
+    bne(".not-zero2")
+    ld([data_stack_pointer], X)  # 9
+
+    bra(".write")  # 10
+    C("Both bytes are 0 - replace with true flag")
+    ld(0xFF)  # 11
+
+    label(".not-zero1")
+    wait(9 - 5)  # 6, 7, 8, 9
+    label(".not-zero2")
+    bra(".write")  # 10
+    ld(0x00)  # 11
+    C("One or both bytes are not zero - replace with false flag")
+
+    label(".write")
+    st([Y, Xpp])  # 12
+    C("Overwrite both bytes")
+    st([Y, Xpp])  # 13
+    NEXT(cost_of_zero_equal)
+
+
+cost_of_zero_equal = 13

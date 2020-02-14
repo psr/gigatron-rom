@@ -57,6 +57,7 @@ def emit_kernel_words():
     _memory.char_set()
     _arithmetic.increment()
     _arithmetic.decrement()
+    _arithmetic.zero_equal()
     _literal.lit_rom_mode()
     _literal.char_lit_rom_mode()
     ####

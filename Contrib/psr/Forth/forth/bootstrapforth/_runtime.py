@@ -32,14 +32,21 @@ class ThreadExecutionToken(ExecutionToken):
 
 
 class Interpreter:
-    def __init__(self, dictionary, input, compilation_dictionary=None):
+    def __init__(
+        self,
+        interpreter_dictionary,
+        input,
+        target_dictionary=None,
+        search_dictionaries=None,
+    ):
         self.data_stack = []
         self.return_stack = []
         self.input = input
-        self.dictionary = dictionary
-        self.compilation_dictionary = (
-            compilation_dictionary if compilation_dictionary is not None else dictionary
-        )
+        self.interpreter_dictionary = interpreter_dictionary
+        self.target_dictionary = target_dictionary or interpreter_dictionary
+        self.search_dictionaries = search_dictionaries or [
+            target_dictionary or interpreter_dictionary
+        ]
         self.latest = None
         self.current_thread = []
         self.thread_index = 0

@@ -94,7 +94,7 @@ def LITERAL(state):
 # Recompile QUIT into the interpreter_dictionary
 with open(pathlib.Path(__file__).parent / "bootstrapforth" / "bootstrap.f") as f:
     interpreter = Interpreter(
-        python_forth_dictionary, f, compilation_dictionary=interpreter_dictionary
+        python_forth_dictionary, f, target_dictionary=interpreter_dictionary
     )
     interpreter.run(python_forth_dictionary["QUIT"].execution_token)
     quit = interpreter_dictionary["QUIT"].execution_token
@@ -103,7 +103,7 @@ with open(pathlib.Path(__file__).parent / "bootstrapforth" / "bootstrap.f") as f
 with open(pathlib.Path(__file__).parent / "immediates.f") as f:
     interpreter_dictionary.define("EXIT", "forth.core.EXIT")
     interpreter = Interpreter(
-        python_forth_dictionary, f, compilation_dictionary=interpreter_dictionary
+        python_forth_dictionary, f, target_dictionary=interpreter_dictionary
     )
     interpreter.run(python_forth_dictionary["QUIT"].execution_token)
 
@@ -111,7 +111,7 @@ with open(pathlib.Path(__file__).parent / "immediates.f") as f:
 @interpreter_dictionary.word(":")
 def _colon(state):
     """Start a colon definition"""
-    state.dictionary["WORD"].execution_token(state)
+    state.interpreter_dictionary["WORD"].execution_token(state)
     name = state.data_stack.pop()
     state.state = State.Compiling
     word_label = _get_label(name)
@@ -125,7 +125,7 @@ def _colon(state):
         address += 4  # Always skip first four bytes - avoiding ram-mode entrypoint
     else:
         docol_rom_only()
-    state.compilation_dictionary.define(
+    state.target_dictionary.define(
         name, (word_label, address), flags=DictionaryFlags.Hidden
     )
 
@@ -133,6 +133,6 @@ def _colon(state):
 def compile_file(path):
     with open(pathlib.Path(__file__).parent / path) as f:
         interpreter = Interpreter(
-            interpreter_dictionary, f, compilation_dictionary=gigatron_forth_dictionary
+            interpreter_dictionary, f, target_dictionary=gigatron_forth_dictionary
         )
         interpreter.run(quit)

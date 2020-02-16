@@ -127,7 +127,7 @@ def _set(state):
 
 @kernel.word()
 def HIDDEN(state):
-    state.compilation_dictionary.latest.flags ^= Flags.Hidden
+    state.target_dictionary.latest.flags ^= Flags.Hidden
 
 
 @kernel.word(":")
@@ -136,7 +136,7 @@ def _colon(state):
     _skip_while(state, str.isspace)
     name = _parse(state, str.isspace)
     state.state = State.Compiling
-    state.compilation_dictionary.define(
+    state.target_dictionary.define(
         name, ThreadExecutionToken(name, docol, definition), flags=Flags.Hidden
     )
 
@@ -185,16 +185,18 @@ def COUNT(state):
 
 
 def _find_compilation(state, name):
-    try:
-        entry = state.compilation_dictionary[name]
-        if not entry.is_immediate:
-            state.data_stack.append(entry.execution_token)
-            state.data_stack.append(-1)
-            return
-    except KeyError:
-        pass
+    """Find a word in compilation mode"""
+    for search_dictionary in state.search_dictionaries:
+        try:
+            entry = search_dictionary[name]
+            if not entry.is_immediate:
+                state.data_stack.append(entry.execution_token)
+                state.data_stack.append(-1)
+                return
+        except KeyError:
+            pass
     # Not found, or found, but immediate
-    entry = state.dictionary[name]
+    entry = state.interpreter_dictionary[name]
     if not entry.is_immediate:
         raise KeyError
     # Found immediate in the runtime dictionary
@@ -203,7 +205,7 @@ def _find_compilation(state, name):
 
 
 def _find_interpretation(state, name):
-    entry = state.dictionary[name]
+    entry = state.interpreter_dictionary[name]
     state.data_stack.append(entry.execution_token)
     state.data_stack.append(1 if entry.is_immediate else -1)
 
@@ -329,7 +331,7 @@ def UNTIL(state):
 
 @kernel.word()
 def IMMEDIATE(state):
-    state.compilation_dictionary.latest.flags |= Flags.Immediate
+    state.target_dictionary.latest.flags |= Flags.Immediate
 
 
 @kernel.word()

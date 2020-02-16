@@ -7086,237 +7086,275 @@ forth.internal.C-LIT:
               14ed 0200  nop
               14ee e133  jmp  y,[$33]
               14ef 1400  ld   $00,y
-              14f0 0200  nop
-              14f1 0200  nop
-              14f2 0200  nop
-              * 16 times
+forth.internal.BRANCH-rom-mode:
+              14f0 80f7  adda $f7
+              14f1 00f8  ld   $f8         ;Store cost
+              14f2 c224  st   [$24]
+              14f3 1030  ld   $30,x       ;X <- W
+              14f4 1534  ld   [$34],y     ;Jump to the code in the thread
+              14f5 e133  jmp  y,[$33]
+              14f6 1400  ld   $00,y
+              14f7 0200  nop
+              14f8 0200  nop
+              14f9 0200  nop
+              * 9 times
 forth.restart-or-quit:
               1500 fd30  bra  [$30]
               1501 f802  ble  .quit
 .quit:        1502 1413  ld   $13,y       ;jmp forth.exit.from-failed-test
               1503 e01c  jmp  y,$1c
+forth.internal.?BRANCH-rom-mode:
+              1504 80f0  adda $f0
+              1505 111c  ld   [$1c],x
+              1506 011c  ld   [$1c]
+              1507 8002  adda $02
+              1508 c21c  st   [$1c]
+              1509 0500  ld   [x]
+              150a ec17  bne  .?BRANCH.not-zero1
+              150b 00f3  ld   $f3
+              150c 1400  ld   $00,y
+              150d de00  st   [y,x++]
+              150e 0d00  ld   [y,x]
+              150f ec18  bne  .?BRANCH.not-zero2
+              1510 00f1  ld   $f1
+              1511 00f2  ld   $f2         ;Store cost
+              1512 c224  st   [$24]
+.enter-thread:
+              1513 1030  ld   $30,x       ;X <- W
+              1514 1534  ld   [$34],y     ;Jump to the code in the thread
+              1515 e133  jmp  y,[$33]
+              1516 1400  ld   $00,y
+.?BRANCH.not-zero1:
+              1517 0200  nop
+.?BRANCH.not-zero2:
+              1518 c224  st   [$24]       ;Store cost
+              1519 0002  ld   $02
+              151a 8133  adda [$33]
+              151b c233  st   [$33]
+              151c fc13  bra  .enter-thread
+              151d 0003  ld   $03         ;IP will move a further 3
 forth.core.DROP:
-              1504 80fc  adda $fc
-              1505 011c  ld   [$1c]
-              1506 8002  adda $02
-              1507 c21c  st   [$1c]
-              1508 1413  ld   $13,y       ;NEXT
-              1509 e00e  jmp  y,$0e
-              150a 00fc  ld   $fc
+              151e 80fc  adda $fc
+              151f 011c  ld   [$1c]
+              1520 8002  adda $02
+              1521 c21c  st   [$1c]
+              1522 1413  ld   $13,y       ;NEXT
+              1523 e00e  jmp  y,$0e
+              1524 00fc  ld   $fc
 forth.core.2DROP:
-              150b 80fc  adda $fc
-              150c 011c  ld   [$1c]
-              150d 8004  adda $04
-              150e c21c  st   [$1c]
-              150f 1413  ld   $13,y       ;NEXT
-              1510 e00e  jmp  y,$0e
-              1511 00fc  ld   $fc
+              1525 80fc  adda $fc
+              1526 011c  ld   [$1c]
+              1527 8004  adda $04
+              1528 c21c  st   [$1c]
+              1529 1413  ld   $13,y       ;NEXT
+              152a e00e  jmp  y,$0e
+              152b 00fc  ld   $fc
 forth.core.SWAP:
-              1512 80f0  adda $f0         ;Copy top 4 bytes of stack to tmp
-              1513 111c  ld   [$1c],x
-              1514 0500  ld   [x]
-              1515 c224  st   [$24]
-              1516 011c  ld   [$1c]
-              1517 8001  adda $01
-              1518 1200  ld   ac,x
-              1519 0500  ld   [x]
-              151a c225  st   [$25]
-              151b 011c  ld   [$1c]
-              151c 8002  adda $02
-              151d 1200  ld   ac,x
-              151e 0500  ld   [x]
-              151f c226  st   [$26]
-              1520 011c  ld   [$1c]
-              1521 8003  adda $03
-              1522 1200  ld   ac,x
-              1523 0500  ld   [x]
-              1524 c227  st   [$27]
-              1525 1400  ld   $00,y       ;Copy back to stack in order
-              1526 111c  ld   [$1c],x
-              1527 0126  ld   [$26]
-              1528 de00  st   [y,x++]
-              1529 0127  ld   [$27]
-              152a de00  st   [y,x++]
-              152b 0124  ld   [$24]
-              152c de00  st   [y,x++]
-              152d 0125  ld   [$25]
-              152e de00  st   [y,x++]
-              152f 1413  ld   $13,y       ;NEXT
-              1530 e00f  jmp  y,$0f
-              1531 00f0  ld   $f0
-forth.core.DUP:
-              1532 80f6  adda $f6
-              1533 111c  ld   [$1c],x
-              1534 0500  ld   [x]
-              1535 c224  st   [$24]
-              1536 011c  ld   [$1c]
-              1537 9001  adda $01,x
+              152c 80f0  adda $f0         ;Copy top 4 bytes of stack to tmp
+              152d 111c  ld   [$1c],x
+              152e 0500  ld   [x]
+              152f c224  st   [$24]
+              1530 011c  ld   [$1c]
+              1531 8001  adda $01
+              1532 1200  ld   ac,x
+              1533 0500  ld   [x]
+              1534 c225  st   [$25]
+              1535 011c  ld   [$1c]
+              1536 8002  adda $02
+              1537 1200  ld   ac,x
               1538 0500  ld   [x]
-              1539 c225  st   [$25]
-              153a 1400  ld   $00,y
-              153b 011c  ld   [$1c]
-              153c a002  suba $02
-              153d d21c  st   [$1c],x
-              153e 0124  ld   [$24]
-              153f de00  st   [y,x++]
-              1540 0125  ld   [$25]
-              1541 ce00  st   [y,x]
-              1542 1413  ld   $13,y       ;NEXT
-              1543 e00e  jmp  y,$0e
-              1544 00f6  ld   $f6
+              1539 c226  st   [$26]
+              153a 011c  ld   [$1c]
+              153b 8003  adda $03
+              153c 1200  ld   ac,x
+              153d 0500  ld   [x]
+              153e c227  st   [$27]
+              153f 1400  ld   $00,y       ;Copy back to stack in order
+              1540 111c  ld   [$1c],x
+              1541 0126  ld   [$26]
+              1542 de00  st   [y,x++]
+              1543 0127  ld   [$27]
+              1544 de00  st   [y,x++]
+              1545 0124  ld   [$24]
+              1546 de00  st   [y,x++]
+              1547 0125  ld   [$25]
+              1548 de00  st   [y,x++]
+              1549 1413  ld   $13,y       ;NEXT
+              154a e00f  jmp  y,$0f
+              154b 00f0  ld   $f0
+forth.core.DUP:
+              154c 80f6  adda $f6
+              154d 111c  ld   [$1c],x
+              154e 0500  ld   [x]
+              154f c224  st   [$24]
+              1550 011c  ld   [$1c]
+              1551 9001  adda $01,x
+              1552 0500  ld   [x]
+              1553 c225  st   [$25]
+              1554 1400  ld   $00,y
+              1555 011c  ld   [$1c]
+              1556 a002  suba $02
+              1557 d21c  st   [$1c],x
+              1558 0124  ld   [$24]
+              1559 de00  st   [y,x++]
+              155a 0125  ld   [$25]
+              155b ce00  st   [y,x]
+              155c 1413  ld   $13,y       ;NEXT
+              155d e00e  jmp  y,$0e
+              155e 00f6  ld   $f6
 forth.core.OVER:
-              1545 80f6  adda $f6
-              1546 011c  ld   [$1c]
-              1547 9002  adda $02,x
-              1548 0500  ld   [x]
-              1549 c224  st   [$24]
-              154a 011c  ld   [$1c]
-              154b 9003  adda $03,x
-              154c 0500  ld   [x]
-              154d c225  st   [$25]
-              154e 1400  ld   $00,y
-              154f 011c  ld   [$1c]
-              1550 a002  suba $02
-              1551 d21c  st   [$1c],x
-              1552 0124  ld   [$24]
-              1553 de00  st   [y,x++]
-              1554 0125  ld   [$25]
-              1555 ce00  st   [y,x]
-              1556 1413  ld   $13,y       ;NEXT
-              1557 e00f  jmp  y,$0f
-              1558 00f6  ld   $f6
+              155f 80f6  adda $f6
+              1560 011c  ld   [$1c]
+              1561 9002  adda $02,x
+              1562 0500  ld   [x]
+              1563 c224  st   [$24]
+              1564 011c  ld   [$1c]
+              1565 9003  adda $03,x
+              1566 0500  ld   [x]
+              1567 c225  st   [$25]
+              1568 1400  ld   $00,y
+              1569 011c  ld   [$1c]
+              156a a002  suba $02
+              156b d21c  st   [$1c],x
+              156c 0124  ld   [$24]
+              156d de00  st   [y,x++]
+              156e 0125  ld   [$25]
+              156f ce00  st   [y,x]
+              1570 1413  ld   $13,y       ;NEXT
+              1571 e00f  jmp  y,$0f
+              1572 00f6  ld   $f6
 forth.core.ROT:
-              1559 80ef  adda $ef
-              155a 1400  ld   $00,y
-              155b 011c  ld   [$1c]
-              155c 9004  adda $04,x
-              155d 0500  ld   [x]
-              155e c224  st   [$24]
-              155f 011c  ld   [$1c]
-              1560 9005  adda $05,x
-              1561 0500  ld   [x]
-              1562 c225  st   [$25]
-              1563 111c  ld   [$1c],x
-              1564 0500  ld   [x]
-              1565 c226  st   [$26]
-              1566 0124  ld   [$24]
-              1567 de00  st   [y,x++]
-              1568 0500  ld   [x]
-              1569 c224  st   [$24]
-              156a 0125  ld   [$25]
-              156b de00  st   [y,x++]
-              156c 0500  ld   [x]
-              156d c225  st   [$25]
-              156e 0126  ld   [$26]
-              156f de00  st   [y,x++]
-              1570 0500  ld   [x]
-              1571 c226  st   [$26]
-              1572 0124  ld   [$24]
-              1573 de00  st   [y,x++]
-              1574 0125  ld   [$25]
-              1575 de00  st   [y,x++]
-              1576 0126  ld   [$26]
-              1577 de00  st   [y,x++]
-              1578 1413  ld   $13,y       ;NEXT
-              1579 e00f  jmp  y,$0f
-              157a 00ef  ld   $ef
-forth.core.2SWAP:
-              157b 80ea  adda $ea
-              157c 1400  ld   $00,y
-              157d 011c  ld   [$1c]
-              157e 9004  adda $04,x
-              157f 0500  ld   [x]
-              1580 de00  st   [y,x++]
-              1581 c224  st   [$24]
+              1573 80ef  adda $ef
+              1574 1400  ld   $00,y
+              1575 011c  ld   [$1c]
+              1576 9004  adda $04,x
+              1577 0500  ld   [x]
+              1578 c224  st   [$24]
+              1579 011c  ld   [$1c]
+              157a 9005  adda $05,x
+              157b 0500  ld   [x]
+              157c c225  st   [$25]
+              157d 111c  ld   [$1c],x
+              157e 0500  ld   [x]
+              157f c226  st   [$26]
+              1580 0124  ld   [$24]
+              1581 de00  st   [y,x++]
               1582 0500  ld   [x]
-              1583 de00  st   [y,x++]
-              1584 c225  st   [$25]
-              1585 0500  ld   [x]
-              1586 de00  st   [y,x++]
-              1587 c226  st   [$26]
-              1588 0500  ld   [x]
-              1589 c227  st   [$27]
-              158a 111c  ld   [$1c],x
-              158b 0500  ld   [x]
-              158c c228  st   [$28]
-              158d 0124  ld   [$24]
-              158e de00  st   [y,x++]
-              158f 0500  ld   [x]
-              1590 c224  st   [$24]
-              1591 0125  ld   [$25]
-              1592 de00  st   [y,x++]
-              1593 0500  ld   [x]
-              1594 c225  st   [$25]
-              1595 0126  ld   [$26]
-              1596 de00  st   [y,x++]
-              1597 0500  ld   [x]
-              1598 c226  st   [$26]
-              1599 0127  ld   [$27]
+              1583 c224  st   [$24]
+              1584 0125  ld   [$25]
+              1585 de00  st   [y,x++]
+              1586 0500  ld   [x]
+              1587 c225  st   [$25]
+              1588 0126  ld   [$26]
+              1589 de00  st   [y,x++]
+              158a 0500  ld   [x]
+              158b c226  st   [$26]
+              158c 0124  ld   [$24]
+              158d de00  st   [y,x++]
+              158e 0125  ld   [$25]
+              158f de00  st   [y,x++]
+              1590 0126  ld   [$26]
+              1591 de00  st   [y,x++]
+              1592 1413  ld   $13,y       ;NEXT
+              1593 e00f  jmp  y,$0f
+              1594 00ef  ld   $ef
+forth.core.2SWAP:
+              1595 80ea  adda $ea
+              1596 1400  ld   $00,y
+              1597 011c  ld   [$1c]
+              1598 9004  adda $04,x
+              1599 0500  ld   [x]
               159a de00  st   [y,x++]
-              159b 0128  ld   [$28]
-              159c de00  st   [y,x++]
-              159d 0124  ld   [$24]
-              159e de00  st   [y,x++]
-              159f 0125  ld   [$25]
+              159b c224  st   [$24]
+              159c 0500  ld   [x]
+              159d de00  st   [y,x++]
+              159e c225  st   [$25]
+              159f 0500  ld   [x]
               15a0 de00  st   [y,x++]
-              15a1 0126  ld   [$26]
-              15a2 de00  st   [y,x++]
-              15a3 1413  ld   $13,y       ;NEXT
-              15a4 e00e  jmp  y,$0e
-              15a5 00ea  ld   $ea
-forth.NOP:    15a6 80f3  adda $f3
-              15a7 1413  ld   $13,y
-              15a8 e032  jmp  y,$32
-              15a9 147f  ld   $7f,y
-              15aa 80f6  adda $f6
-              15ab 1413  ld   $13,y
-              15ac e023  jmp  y,$23
-              15ad 147f  ld   $7f,y
-              15ae dc52  st   $52,[y,x++]
-              15af e07a  jmp  y,$7a
-              15b0 dc14  st   $14,[y,x++]
+              15a1 c226  st   [$26]
+              15a2 0500  ld   [x]
+              15a3 c227  st   [$27]
+              15a4 111c  ld   [$1c],x
+              15a5 0500  ld   [x]
+              15a6 c228  st   [$28]
+              15a7 0124  ld   [$24]
+              15a8 de00  st   [y,x++]
+              15a9 0500  ld   [x]
+              15aa c224  st   [$24]
+              15ab 0125  ld   [$25]
+              15ac de00  st   [y,x++]
+              15ad 0500  ld   [x]
+              15ae c225  st   [$25]
+              15af 0126  ld   [$26]
+              15b0 de00  st   [y,x++]
+              15b1 0500  ld   [x]
+              15b2 c226  st   [$26]
+              15b3 0127  ld   [$27]
+              15b4 de00  st   [y,x++]
+              15b5 0128  ld   [$28]
+              15b6 de00  st   [y,x++]
+              15b7 0124  ld   [$24]
+              15b8 de00  st   [y,x++]
+              15b9 0125  ld   [$25]
+              15ba de00  st   [y,x++]
+              15bb 0126  ld   [$26]
+              15bc de00  st   [y,x++]
+              15bd 1413  ld   $13,y       ;NEXT
+              15be e00e  jmp  y,$0e
+              15bf 00ea  ld   $ea
+forth.NOP:    15c0 80f3  adda $f3
+              15c1 1413  ld   $13,y
+              15c2 e032  jmp  y,$32
+              15c3 147f  ld   $7f,y
+              15c4 80f6  adda $f6
+              15c5 1413  ld   $13,y
+              15c6 e023  jmp  y,$23
+              15c7 147f  ld   $7f,y
+              15c8 dc52  st   $52,[y,x++]
+              15c9 e07a  jmp  y,$7a
+              15ca dc14  st   $14,[y,x++]
 forth.core.ext.NIP:
-              15b1 80f3  adda $f3
-              15b2 1413  ld   $13,y
-              15b3 e032  jmp  y,$32
-              15b4 147f  ld   $7f,y
-              15b5 80f6  adda $f6
-              15b6 1413  ld   $13,y
-              15b7 e023  jmp  y,$23
-              15b8 147f  ld   $7f,y
-              15b9 dc12  st   $12,[y,x++] ;-> forth.core.SWAP
-              15ba e07a  jmp  y,$7a
-              15bb dc15  st   $15,[y,x++]
-              15bc dc04  st   $04,[y,x++] ;-> forth.core.DROP
-              15bd e07a  jmp  y,$7a
-              15be dc15  st   $15,[y,x++]
-              15bf dc52  st   $52,[y,x++] ;-> forth.core.EXIT
-              15c0 e07a  jmp  y,$7a
-              15c1 dc14  st   $14,[y,x++]
+              15cb 80f3  adda $f3
+              15cc 1413  ld   $13,y
+              15cd e032  jmp  y,$32
+              15ce 147f  ld   $7f,y
+              15cf 80f6  adda $f6
+              15d0 1413  ld   $13,y
+              15d1 e023  jmp  y,$23
+              15d2 147f  ld   $7f,y
+              15d3 dc2c  st   $2c,[y,x++] ;-> forth.core.SWAP
+              15d4 e07a  jmp  y,$7a
+              15d5 dc15  st   $15,[y,x++]
+              15d6 dc1e  st   $1e,[y,x++] ;-> forth.core.DROP
+              15d7 e07a  jmp  y,$7a
+              15d8 dc15  st   $15,[y,x++]
+              15d9 dc52  st   $52,[y,x++] ;-> forth.core.EXIT
+              15da e07a  jmp  y,$7a
+              15db dc14  st   $14,[y,x++]
 forth.core.ext.0<>:
-              15c2 80f3  adda $f3
-              15c3 1413  ld   $13,y
-              15c4 e032  jmp  y,$32
-              15c5 147f  ld   $7f,y
-              15c6 80f6  adda $f6
-              15c7 1413  ld   $13,y
-              15c8 e023  jmp  y,$23
-              15c9 147f  ld   $7f,y
-              15ca dcbd  st   $bd,[y,x++] ;-> forth.core.0=
-              15cb e07a  jmp  y,$7a
-              15cc dc14  st   $14,[y,x++]
-              15cd dcbd  st   $bd,[y,x++] ;-> forth.core.0=
-              15ce e07a  jmp  y,$7a
-              15cf dc14  st   $14,[y,x++]
-              15d0 dc52  st   $52,[y,x++] ;-> forth.core.EXIT
-              15d1 e07a  jmp  y,$7a
-              15d2 dc14  st   $14,[y,x++]
+              15dc 80f3  adda $f3
+              15dd 1413  ld   $13,y
+              15de e032  jmp  y,$32
+              15df 147f  ld   $7f,y
+              15e0 80f6  adda $f6
+              15e1 1413  ld   $13,y
+              15e2 e023  jmp  y,$23
+              15e3 147f  ld   $7f,y
+              15e4 dcbd  st   $bd,[y,x++] ;-> forth.core.0=
+              15e5 e07a  jmp  y,$7a
+              15e6 dc14  st   $14,[y,x++]
+              15e7 dcbd  st   $bd,[y,x++] ;-> forth.core.0=
+              15e8 e07a  jmp  y,$7a
+              15e9 dc14  st   $14,[y,x++]
+              15ea dc52  st   $52,[y,x++] ;-> forth.core.EXIT
+              15eb e07a  jmp  y,$7a
+              15ec dc14  st   $14,[y,x++]
                                           5308  # --- Page boundary ---
                                           5309  start_of_forth_word_space = pc()  # Variable used in unit tests to locate test data
-              15d3 0200  nop              5310  align(0x100,0x100)
-              15d4 0200  nop
-              15d5 0200  nop
-              * 44 times
+              15ed 0200  nop              5310  align(0x100,0x100)
+              15ee 0200  nop
+              15ef 0200  nop
+              * 18 times
               15ff 0200  nop              5310  align(0x100,0x100)
                                           5311
                                           5312  #-----------------------------------------------------------------------

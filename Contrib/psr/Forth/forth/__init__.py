@@ -4,6 +4,7 @@ from asm import C, adda, align, label, nop, pc, st
 
 from . import (
     _arithmetic,
+    _branching,
     _docol_exit,
     _literal,
     _memory,
@@ -45,7 +46,6 @@ def _start_page():
 def emit_kernel_words():
     #### Page
     _start_page()
-    # Core stuff
     _next.next3_rom_head()
     _next.next3_ram_rom()
     _next.next3_ram_ram()
@@ -60,9 +60,10 @@ def emit_kernel_words():
     _arithmetic.zero_equal()
     _literal.lit_rom_mode()
     _literal.char_lit_rom_mode()
+    _branching.branch_rom_mode()
     ####
     _start_page()
-    # Stack manipulation words
+    _branching.question_branch_rom_mode()
     _stackmanipulation.drop()
     _stackmanipulation.drop_two()
     _stackmanipulation.swap()

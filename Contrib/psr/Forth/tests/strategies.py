@@ -1,4 +1,4 @@
-from hypothesis.strategies import integers
+from hypothesis.strategies import integers, one_of, sampled_from
 
 from forth import variables
 
@@ -25,3 +25,9 @@ numbers = integers(min_value=-(1 << 15), max_value=(1 << 15) - 1)
 
 # Arbitrary numbers within the range of a 16 bit unsigned integer
 unsigned_numbers = integers(min_value=0, max_value=(1 << 16) - 1)
+
+# False and True flag values
+flags = sampled_from([0, -1])
+
+# Basically numbers - Should shrink towards the flag values though.
+truth_values = one_of(flags, numbers)

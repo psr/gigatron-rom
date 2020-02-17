@@ -58,7 +58,7 @@ def test_question_branch_rom_mode(
 ):
     # Arrange
     # Jump target must not intersect with jump
-    assume(not set(range(address, address + 2)) & set(range(target, target + 3)))
+    assume(not set(range(address, address + 5)) & set(range(target, target + 3)))
     # We need to not be within the last five bytes of the page,
     # as there needs to be an instruction after us to run into if we don't branch.
     assume((address & 0xFF) + 5 <= 0xFF)
@@ -83,7 +83,7 @@ def test_question_branch_rom_mode(
     # Act
     do_test_word(emulator, "forth.internal.rom-mode.?BRANCH", continue_on_reenter=False)
     # Assert
-    if not tos or ip_movement == 0:
+    if not tos:
         # IP should point after target address
         assert (
             target + 3

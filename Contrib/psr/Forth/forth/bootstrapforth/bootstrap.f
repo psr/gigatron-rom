@@ -12,7 +12,7 @@
   WHILE
     FIND ?DUP IF                                     ( xt +-1 )
       STATE @ IF                                     ( xt +-1 )
-        0> IF EXECUTE ELSE POSTPONE COMPILE, THEN   ( ??? )
+        0> IF EXECUTE ELSE COMPILE, THEN   ( ??? )
       ELSE                                            ( xt +-1 )
         DROP EXECUTE                                       ( ??? )
       THEN

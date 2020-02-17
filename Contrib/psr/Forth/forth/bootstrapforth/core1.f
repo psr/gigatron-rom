@@ -1,4 +1,4 @@
-\ Definitions for core words common to both the bootstrap Forth and the 
+\ Definitions for core words common to both the bootstrap Forth and the
 \ Gigatron Forth.
 
 \ When compiling the bootstrap Forth the next file to load is bootstrap.f
@@ -24,3 +24,6 @@
     ." Aborted!"
     BYE
 ;
+
+: ' WORD FIND DROP ;  \ TODO Error handling
+

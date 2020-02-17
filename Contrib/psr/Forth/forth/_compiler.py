@@ -3,10 +3,11 @@ import copy
 import json
 import pathlib
 import re
+from itertools import count
 
 from asm import C, X, Xpp, Y
 from asm import _symbols as asm_symbols
-from asm import hi, jmp, label, ld, lo, pc, st
+from asm import bra, hi, jmp, label, ld, lo, pc, st
 
 from . import variables
 from ._docol_exit import docol, docol_rom_only
@@ -107,12 +108,58 @@ with open(pathlib.Path(__file__).parent / "bootstrapforth" / "bootstrap.f") as f
     )
     interpreter.run(python_forth_dictionary["QUIT"].execution_token)
     quit = interpreter_dictionary["QUIT"].execution_token
-
-# Compile the definitions of various immediate words
-with open(pathlib.Path(__file__).parent / "immediates.f") as f:
-    interpreter_dictionary.define("EXIT", "forth.core.EXIT")
+# Recompile some compiling words into the interpreter_dictionary
+with open(pathlib.Path(__file__).parent / "ticks_and_postpone.f") as f:
     interpreter = Interpreter(
         python_forth_dictionary, f, target_dictionary=interpreter_dictionary
+    )
+    interpreter.run(python_forth_dictionary["QUIT"].execution_token)
+
+_labels = (".thread_label#" + str(i) for i in count())
+
+
+@interpreter_dictionary.word(">MARK")
+def forward_mark(state):
+    """Compile the source of a forward branch"""
+    target_label = next(_labels)
+    state.data_stack.append(target_label)
+    bra(target_label)
+    ld(lo(target_label) - pc() + 3)
+
+
+@interpreter_dictionary.word(">RESOLVE")
+def forward_resolve(state):
+    """Mark the target of a forward branch"""
+    target_label = state.data_stack.pop()
+    label(target_label)
+
+
+@interpreter_dictionary.word("<MARK")
+def backward_mark(state):
+    """Mark the destination for a backward branch"""
+    target_label = next(_labels)
+    state.data_stack.append(target_label)
+    label(target_label)
+
+
+@interpreter_dictionary.word("<RESOLVE")
+def backward_resolve(state):
+    """Compile the tharget for a backward branch"""
+    target_label = state.data_stack.pop()
+    state.data_stack.append(target_label)
+    bra(target_label)
+    ld(lo(target_label) - pc() + 3)
+
+
+# Compile the definitions of various compiling words.
+# Use Gigatron dictionary as the first search dictionary (so that it can find e.g. EXIT),
+# but put definitions in the interpreter_dictionary
+with open(pathlib.Path(__file__).parent / "control.f") as f:
+    interpreter = Interpreter(
+        interpreter_dictionary,
+        f,
+        target_dictionary=interpreter_dictionary,
+        search_dictionaries=[gigatron_forth_dictionary, interpreter_dictionary],
     )
     interpreter.run(python_forth_dictionary["QUIT"].execution_token)
 

@@ -32,14 +32,15 @@ from ._runtime import Interpreter, State
 _BOOTSTRAP_BRINGUP_SEQUENCE = ["core1.f", "bootstrap.f"]
 
 # Adds definitions to the runtime that were provided by the compiler before
-_POST_BOOTSTRAP_SEQUENCE = ["core0.f", "../immediates.f"]
+_POST_BOOTSTRAP_SEQUENCE = ["core0.f", "../ticks_and_postpone.f", "../control.f"]
 
 # To load a more complete environment we start over again with the following sequence of files
 
 _PYTHON_FORTH_BRINGUP_SEQUENCE = [
     "core1.f",
     "core0.f",
-    "../immediates.f",
+    "../ticks_and_postpone.f",
+    "../control.f",
     "bootstrap.f",  # TODO: a more complete environment!
 ]
 

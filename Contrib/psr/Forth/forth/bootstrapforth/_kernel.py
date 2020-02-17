@@ -103,10 +103,12 @@ def lit(state, value):
     state.data_stack.append(value)
 
 
+@kernel.word("BRANCH")
 def branch(state, offset):
     state.thread_index += offset
 
 
+@kernel.word("?BRANCH")
 def zero_branch(state, offset):
     if not state.data_stack.pop():
         state.thread_index += offset
@@ -264,6 +266,24 @@ def _d(state):
     print(state.data_stack.pop(), end=" ")
 
 
+@kernel.word(">MARK")
+def _forward_mark(state):
+    state.data_stack.append(
+        len(state.current_definition) - 1
+    )  # Index of BRANCH or ?BRANCH
+
+
+@kernel.word(">RESOLVE")
+def _forward_resolve(state):
+    branch_source = state.data_stack.pop()
+    branch_target = len(state.current_definition)
+    relative_jump = branch_target - branch_source - 1
+    xt = state.current_definition[branch_source]
+    state.current_definition[branch_source] = ExecutionToken(
+        xt._name, xt._code, relative_jump
+    )
+
+
 class _ForwardReference:
     def __init__(self, state, name, word):
         self._location = len(state.current_definition)
@@ -282,6 +302,7 @@ class _ForwardReference:
         )
 
 
+# TODO: Remove in favour of high-level versions
 @kernel.word(immediate=True)
 def IF(state):
     state.data_stack.append(_ForwardReference(state, "0BRANCH", zero_branch))

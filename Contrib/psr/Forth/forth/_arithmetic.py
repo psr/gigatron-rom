@@ -6,19 +6,30 @@ from asm import (
     Xpp,
     Y,
     adda,
+    anda,
     beq,
     bne,
     bra,
     label,
     ld,
     lo,
+    ora,
+    pc,
     st,
     suba,
     wait,
+    xora,
 )
 
 from ._utilities import NEXT, add_cost_of_next
-from .variables import data_stack_page, data_stack_pointer
+from .variables import (
+    data_stack_page,
+    data_stack_pointer,
+    tmp0,
+    tmp1,
+    tmp2,
+    tmp3,
+)
 
 
 def increment():
@@ -112,3 +123,46 @@ def zero_equal():
 
 
 cost_of_zero_equal = 13
+
+
+def bitwise():
+    """Common implementation for all of the bitwise operators
+    """
+    for name, target in [("AND", ".and"), ("OR", ".or"), ("XOR", ".xor")]:
+        label(f"forth.core.{name}")
+        adda(-add_cost_of_next(cost_of_binary_bitwise) / 2)  # 1
+        bra(".copy-first-value")  # 2
+        ld(lo(target))  # 3
+
+    label(".copy-first-value")
+    st([tmp0])  # 4
+    adda(1)  # 5
+    st([tmp1])
+    ld(data_stack_page, Y)
+    ld([data_stack_pointer], X)
+    ld(2)
+    adda([data_stack_pointer])  # 10
+    st([data_stack_pointer])  # 11
+    for tmp in [tmp2, tmp3]:
+        ld([Y, X])
+        st([tmp])
+        st([Y, Xpp])  # 17 = 11 + 2 * 3
+    ld([Y, X])
+    bra([tmp0])
+    bra(pc() + 1)  # 20
+    # 21
+    st([Y, Xpp])  # 22
+    ld([Y, X])
+    bra([tmp1])  # 24
+    bra(".bitwise-done")  # 25
+    # 26
+    for l, op in [(".and", anda), (".or", ora), (".xor", xora)]:
+        label(l)
+        op([tmp2])
+        op([tmp3])
+    label(".bitwise-done")
+    st([Y, X])  # 27
+    NEXT(cost_of_binary_bitwise)
+
+
+cost_of_binary_bitwise = 27

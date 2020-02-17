@@ -7302,21 +7302,66 @@ forth.core.2SWAP:
               15bd 1413  ld   $13,y       ;NEXT
               15be e00e  jmp  y,$0e
               15bf 00ea  ld   $ea
-forth.NOP:    15c0 80f3  adda $f3
-              15c1 1413  ld   $13,y
-              15c2 e032  jmp  y,$32
-              15c3 147f  ld   $7f,y
-              15c4 80f6  adda $f6
-              15c5 1413  ld   $13,y
-              15c6 e023  jmp  y,$23
-              15c7 147f  ld   $7f,y
-              15c8 dc52  st   $52,[y,x++]
-              15c9 e07a  jmp  y,$7a
-              15ca dc14  st   $14,[y,x++]
-              15cb 0200  nop
-              15cc 0200  nop
-              15cd 0200  nop
-              * 53 times
+forth.core.AND:
+              15c0 80f1  adda $f1
+              15c1 fcc9  bra  .copy-first-value
+              15c2 00de  ld   $de
+forth.core.OR:
+              15c3 80f1  adda $f1
+              15c4 fcc9  bra  .copy-first-value
+              15c5 00e0  ld   $e0
+forth.core.XOR:
+              15c6 80f1  adda $f1
+              15c7 fcc9  bra  .copy-first-value
+              15c8 00e2  ld   $e2
+.copy-first-value:
+              15c9 c224  st   [$24]
+              15ca 8001  adda $01
+              15cb c225  st   [$25]
+              15cc 1400  ld   $00,y
+              15cd 111c  ld   [$1c],x
+              15ce 0002  ld   $02
+              15cf 811c  adda [$1c]
+              15d0 c21c  st   [$1c]
+              15d1 0d00  ld   [y,x]
+              15d2 c226  st   [$26]
+              15d3 de00  st   [y,x++]
+              15d4 0d00  ld   [y,x]
+              15d5 c227  st   [$27]
+              15d6 de00  st   [y,x++]
+              15d7 0d00  ld   [y,x]
+              15d8 fd24  bra  [$24]
+              15d9 fcda  bra  $15da
+              15da de00  st   [y,x++]
+              15db 0d00  ld   [y,x]
+              15dc fd25  bra  [$25]
+              15dd fce4  bra  .bitwise-done
+.and:         15de 2126  anda [$26]
+              15df 2127  anda [$27]
+.or:          15e0 4126  ora  [$26]
+              15e1 4127  ora  [$27]
+.xor:         15e2 6126  xora [$26]
+              15e3 6127  xora [$27]
+.bitwise-done:
+              15e4 ce00  st   [y,x]
+              15e5 1413  ld   $13,y       ;NEXT
+              15e6 e00f  jmp  y,$0f
+              15e7 00f1  ld   $f1
+forth.NOP:    15e8 80f3  adda $f3
+              15e9 1413  ld   $13,y
+              15ea e032  jmp  y,$32
+              15eb 147f  ld   $7f,y
+              15ec 80f6  adda $f6
+              15ed 1413  ld   $13,y
+              15ee e023  jmp  y,$23
+              15ef 147f  ld   $7f,y
+              15f0 dc52  st   $52,[y,x++]
+              15f1 e07a  jmp  y,$7a
+              15f2 dc14  st   $14,[y,x++]
+              15f3 0200  nop
+              15f4 0200  nop
+              15f5 0200  nop
+              * 13 times
 forth.restart-or-quit:
               1600 fd30  bra  [$30]
               1601 f802  ble  .quit

@@ -71,13 +71,15 @@ def emit_kernel_words():
     _stackmanipulation.over()
     _stackmanipulation.rot()
     _stackmanipulation.two_swap()
+    _arithmetic.bitwise()
     # No-op thread used for testing DOCOL and EXIT
     # This can probably be removed later
     label("forth.NOP")
     _docol_exit.make_thread()
-    from . import _compiler
 
     _start_page()
+    from . import _compiler
+
     _compiler.compile_file("core.f")
 
 

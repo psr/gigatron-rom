@@ -166,3 +166,20 @@ def bitwise():
 
 
 cost_of_binary_bitwise = 27
+
+
+def invert():
+    label("forth.core.INVERT")
+    adda(-add_cost_of_next(cost_of_invert) / 2)  # 1
+    ld(data_stack_page, Y)
+    ld([data_stack_pointer], X)
+    ld([Y, X])
+    xora(0xFF)  # 5
+    st([Y, Xpp])
+    ld([Y, X])
+    xora(0xFF)
+    st([Y, X])  # 9
+    NEXT(cost_of_invert)
+
+
+cost_of_invert = 9

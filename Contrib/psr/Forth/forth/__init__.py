@@ -72,6 +72,7 @@ def emit_kernel_words():
     _stackmanipulation.rot()
     _stackmanipulation.two_swap()
     _arithmetic.bitwise()
+    _arithmetic.invert()
     # No-op thread used for testing DOCOL and EXIT
     # This can probably be removed later
     label("forth.NOP")

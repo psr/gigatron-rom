@@ -77,3 +77,17 @@ def make_binary_bitwise_operator_test(name, operator):
 test_xor = make_binary_bitwise_operator_test("XOR", operator.xor)
 test_or = make_binary_bitwise_operator_test("OR", operator.or_)
 test_and = make_binary_bitwise_operator_test("AND", operator.and_)
+
+
+@given(
+    data_stack_depth=data_stack_depths(with_room_for_values=1), tos=numbers,
+)
+def test_invert(emulator, data_stack, data_stack_depth, tos):
+    # Arrange
+    data_stack.set_depth_in_bytes(data_stack_depth)
+    data_stack.push_word(tos)
+    # Act
+    do_test_word(emulator, "forth.core.INVERT")
+    # Assert
+    assert (~tos & 0xFFFF) == data_stack.pop_u16()
+    assert data_stack_depth == len(data_stack)

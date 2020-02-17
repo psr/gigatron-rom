@@ -7033,7 +7033,7 @@ forth.core.1-:
               14bb e00e  jmp  y,$0e
               14bc 00f9  ld   $f9
 forth.core.0=:
-              14bd a010  suba $10
+              14bd 80f8  adda $f8
               14be 111c  ld   [$1c],x
               14bf 0500  ld   [x]
               14c0 ecc8  bne  .not-zero1

@@ -81,7 +81,7 @@ def zero_equal():
     flag is true if and only if x is equal to zero.
     """
     label("forth.core.0=")
-    suba(add_cost_of_next(cost_of_zero_equal))  # 1
+    adda(-add_cost_of_next(cost_of_zero_equal) / 2)  # 1
     ld([data_stack_pointer], X)
     ld([X])
     bne(".not-zero1")

@@ -94,7 +94,7 @@ class Dictionary(collections.abc.Mapping):
             flags = Flags.Immediate if immediate else Flags(0)
             execution_token = ExecutionToken(name, fn)
             self.define(name, execution_token, flags)
-            return execution_token
+            return fn
 
         return decorator
 

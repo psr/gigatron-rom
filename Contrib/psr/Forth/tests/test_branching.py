@@ -39,7 +39,7 @@ def test_branch_rom_mode(emulator, address, target):
         [0x00, ip_movement & 0xFF],  # ld ip_movement
     ]
     # Act
-    do_test_word(emulator, "forth.internal.BRANCH-rom-mode", continue_on_reenter=False)
+    do_test_word(emulator, "forth.internal.rom-mode.BRANCH", continue_on_reenter=False)
     # Assert
     assert (
         target + 3
@@ -81,9 +81,9 @@ def test_question_branch_rom_mode(
         b"\xdc\xff",  # $ff,[y, x++]
     ]
     # Act
-    do_test_word(emulator, "forth.internal.?BRANCH-rom-mode", continue_on_reenter=False)
+    do_test_word(emulator, "forth.internal.rom-mode.?BRANCH", continue_on_reenter=False)
     # Assert
-    if not tos:
+    if not tos or ip_movement == 0:
         # IP should point after target address
         assert (
             target + 3

@@ -7086,7 +7086,7 @@ forth.internal.C-LIT:
               14ed 0200  nop
               14ee e133  jmp  y,[$33]
               14ef 1400  ld   $00,y
-forth.internal.BRANCH-rom-mode:
+forth.internal.rom-mode.BRANCH:
               14f0 80f7  adda $f7
               14f1 00f8  ld   $f8         ;Store cost
               14f2 c224  st   [$24]
@@ -7103,7 +7103,7 @@ forth.restart-or-quit:
               1501 f802  ble  .quit
 .quit:        1502 1413  ld   $13,y       ;jmp forth.exit.from-failed-test
               1503 e01c  jmp  y,$1c
-forth.internal.?BRANCH-rom-mode:
+forth.internal.rom-mode.?BRANCH:
               1504 80f0  adda $f0
               1505 111c  ld   [$1c],x
               1506 011c  ld   [$1c]

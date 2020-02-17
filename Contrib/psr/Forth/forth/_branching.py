@@ -26,7 +26,7 @@ from .variables import (
 
 def branch_rom_mode():
     """Unconditional Branch ( -- )"""
-    label("forth.internal.BRANCH-rom-mode")
+    label("forth.internal.rom-mode.BRANCH")
     adda(-cost_of_branch_rom_mode // 2)  # 1
 
     ld(-(cost_of_branch_rom_mode // 2))
@@ -55,7 +55,7 @@ def question_branch_rom_mode():
 
     Naming is per the Forth '83 standard.
     """
-    label("forth.internal.?BRANCH-rom-mode")
+    label("forth.internal.rom-mode.?BRANCH")
     adda(-cost_of_question_branch_rom_mode // 2)  # 1
 
     ld([data_stack_pointer], X)

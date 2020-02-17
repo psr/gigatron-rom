@@ -70,7 +70,7 @@ def _compile_comma(state):
     st(hi(address), [Y, Xpp])
 
 
-@interpreter_dictionary.word()
+@interpreter_dictionary.word(immediate=True)
 def LITERAL(state):
     value = state.data_stack.pop()
     value_fits_in_byte = 0 <= value < 256

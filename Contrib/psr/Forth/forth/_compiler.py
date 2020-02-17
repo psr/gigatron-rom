@@ -2,6 +2,7 @@
 import copy
 import json
 import pathlib
+import re
 
 from asm import C, X, Xpp, Y
 from asm import _symbols as asm_symbols
@@ -40,9 +41,17 @@ def _get_label(name):
 
 gigatron_forth_dictionary = Dictionary()
 
-
+_standard_word_lists = {word["Word List"] for word in _ALL_STANDARD_WORDS.values()}
+_known_prefixes = {
+    ".".join(["forth"] + word_list.lower().split() + [])
+    for word_list in _standard_word_lists
+}
+_known_prefixes |= {"forth.internal.", "forth.internal.rom-mode."}
+has_standard_prefix_re = re.compile(
+    "^" + "|".join(re.escape(prefix) for prefix in _known_prefixes)
+)
 for symbol, address in asm_symbols.items():
-    if symbol.startswith("forth.core"):
+    if has_standard_prefix_re.match(symbol):
         name_parts = symbol.split(".")
         gigatron_forth_dictionary.define(name_parts[-1], symbol)
 

@@ -77,6 +77,7 @@ def emit_kernel_words():
     _docol_exit.make_thread()
     from . import _compiler
 
+    _start_page()
     _compiler.compile_file("core.f")
 
 

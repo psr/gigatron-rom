@@ -103,17 +103,17 @@ def LITERAL(state):
 
 # Recompile QUIT into the interpreter_dictionary
 with open(pathlib.Path(__file__).parent / "bootstrapforth" / "bootstrap.f") as f:
-    interpreter = Interpreter(
-        python_forth_dictionary, f, target_dictionary=interpreter_dictionary
-    )
+    interpreter = Interpreter(interpreter_dictionary, f)
     interpreter.run(python_forth_dictionary["QUIT"].execution_token)
     quit = interpreter_dictionary["QUIT"].execution_token
+
 # Recompile some compiling words into the interpreter_dictionary
 with open(pathlib.Path(__file__).parent / "ticks_and_postpone.f") as f:
     interpreter = Interpreter(
         python_forth_dictionary, f, target_dictionary=interpreter_dictionary
     )
     interpreter.run(python_forth_dictionary["QUIT"].execution_token)
+
 
 _labels = (".thread_label#" + str(i) for i in count())
 

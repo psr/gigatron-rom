@@ -7490,12 +7490,32 @@ forth.core.CELL+:
               166b dc52  st   $52,[y,x++] ;-> forth.core.EXIT
               166c e07a  jmp  y,$7a
               166d dc14  st   $14,[y,x++]
+forth.core.-: 166e 80f3  adda $f3
+              166f 1413  ld   $13,y
+              1670 e032  jmp  y,$32
+              1671 147f  ld   $7f,y
+              1672 80f6  adda $f6
+              1673 1413  ld   $13,y
+              1674 e023  jmp  y,$23
+              1675 147f  ld   $7f,y
+              1676 dce8  st   $e8,[y,x++] ;-> forth.core.INVERT
+              1677 e07a  jmp  y,$7a
+              1678 dc15  st   $15,[y,x++]
+              1679 dc9c  st   $9c,[y,x++] ;-> forth.core.1+
+              167a e07a  jmp  y,$7a
+              167b dc14  st   $14,[y,x++]
+              167c dc04  st   $04,[y,x++] ;-> forth.core.+
+              167d e07a  jmp  y,$7a
+              167e dc16  st   $16,[y,x++]
+              167f dc52  st   $52,[y,x++] ;-> forth.core.EXIT
+              1680 e07a  jmp  y,$7a
+              1681 dc14  st   $14,[y,x++]
                                           5308  # --- Page boundary ---
                                           5309  start_of_forth_word_space = pc()  # Variable used in unit tests to locate test data
-              166e 0200  nop              5310  align(0x100,0x100)
-              166f 0200  nop
-              1670 0200  nop
-              * 145 times
+              1682 0200  nop              5310  align(0x100,0x100)
+              1683 0200  nop
+              1684 0200  nop
+              * 125 times
               16ff 0200  nop              5310  align(0x100,0x100)
                                           5311
                                           5312  #-----------------------------------------------------------------------

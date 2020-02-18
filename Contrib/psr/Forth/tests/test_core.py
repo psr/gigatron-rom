@@ -2,7 +2,12 @@
 from hypothesis import given
 
 from asm import symbol
-from strategies import data_stack_depths, numbers, truth_values
+from strategies import (
+    addresses,
+    data_stack_depths,
+    numbers,
+    truth_values,
+)
 from utilities import do_test_word, get_IP, get_W, set_IP, set_W
 
 
@@ -62,3 +67,20 @@ def test_question_dup(emulator, data_stack, return_stack, data_stack_depth, numb
         assert number == data_stack.pop_i16()
         assert number == data_stack.pop_i16()
     assert data_stack_depth == len(data_stack)
+
+
+@given(data_stack_depth=data_stack_depths(with_room_for_values=1), address=addresses)
+def test_cell_plus(emulator, data_stack, data_stack_depth, address):
+    # Arrange
+    data_stack.set_depth_in_bytes(data_stack_depth)
+    data_stack.push_word(address)
+    # Act
+    set_IP(0x4282)
+    set_W(symbol("forth.core.CELL+") + 4)
+    # Act
+    do_test_word(emulator, get_W())
+    while get_IP() != 0x4282:
+        do_test_word(emulator, "forth.next3.rom-mode")
+
+    # Assert
+    (address + 2) & 0xFFFF == data_stack.pop_u16()

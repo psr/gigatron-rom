@@ -6,3 +6,5 @@
 
 : ?DUP ( x -- 0 | x x )
     DUP IF DUP THEN ;
+
+: CELL+ ( a-addr1 -- a-addr2 ) 2 + ;

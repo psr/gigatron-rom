@@ -79,6 +79,7 @@ def emit_kernel_words():
     _docol_exit.make_thread()
 
     _start_page()
+    _arithmetic.add()
     from . import _compiler
 
     _compiler.compile_file("core.f")

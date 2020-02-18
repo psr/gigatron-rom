@@ -8,6 +8,7 @@ from asm import (
     adda,
     anda,
     beq,
+    bmi,
     bne,
     bra,
     label,
@@ -183,3 +184,82 @@ def invert():
 
 
 cost_of_invert = 9
+
+
+def add():
+    # This is exactly the same algorithm as in the vCPU implementation, but with my own comments to explain it to myself.
+    label("forth.core.+")
+    adda(-add_cost_of_next(cost_of_add) / 2)  # 1
+    low, high = tmp0, tmp1
+    ld(data_stack_page, Y)
+    C("Load and move data stack pointer")
+    ld([data_stack_pointer], X)
+    ld([data_stack_pointer])
+    adda(2)  # 5
+    st([data_stack_pointer])  # 6
+
+    # Copy TOS to low, high
+    c = "Copy TOS to zero-page"
+    for address in [low, high]:
+        ld([Y, X])
+        c = C(c)
+        st([address])
+        st([Y, Xpp])  # 12 = 6 + 2 * 3
+
+    # Add low bytes
+    ld([Y, X])
+    C("Add low bytes")
+    adda([low])
+    st([Y, Xpp])  # 15
+    bmi(".add.result-has-1-in-bit-7")
+    suba([low])  # 17 Restore to low-byte of TOS
+
+    # We previously had a result with a 0 in bit seven 0xxxxxxx
+    # We can now use the operands to work out if there was
+    # a carry out of bit seven.
+
+    # The truth table is as follows
+
+    #    | A[7] | B[7] | Carry-in || Result[7] | Carry-out
+    # ---|------------------------------------------------
+    #  0 |   0  |   0  |     0    ||     0     |     0
+    #  1 |   0  |   0  |     1    ||     1     |     0
+    #  2 |   0  |   1  |     0    ||     1     |     0
+    #  3 |   0  |   1  |     1    ||     0     |     1
+    #  4 |   1  |   0  |     0    ||     1     |     0
+    #  5 |   1  |   0  |     1    ||     0     |     1
+    #  6 |   1  |   1  |     0    ||     0     |     1
+    #  7 |   1  |   1  |     1    ||     1     |     1
+
+    # Given that there is zero in bit seven (cases 0, 3, 5 and 6)
+    # There is not a carry (case 0) when both A[7] and B[7] are 0
+    # There is if either or both are 1.
+    # Bitwise OR of the two operands will place the carry in bit seven
+    bra(".add.carry-bit-in-msb")  # 18
+    ora([low])  # 19
+
+    label(".add.result-has-1-in-bit-7")
+    # Given that there is one in bit seven (cases 1, 2, 4 and 7)
+    # There is not a carry (case 1, 2, 4) when either A[7] or B[7] are 0
+    # There is only a carry (case 7) when both are one.
+    # Bitwise AND of the two operands will place the carry in bit seven
+    bra(".add.carry-bit-in-msb")  # 18
+    anda([low])  # 19
+
+    label(".add.carry-bit-in-msb")
+    # vCPU moves uses anda $80, x to load 0x00 or 0x80 to X, and loads [X],
+    # using constant values at 0x80 and 0x00, but we still need X for now,
+    # So branching on the sign-bit works out just as cheap.
+    bmi(".add.carry")
+    ld([Y, X])  # 21
+    bra(".add.finish")
+    adda([high])  # 23
+    label(".add.carry")
+    adda(1)  # 22
+    adda([high])  # 23
+    label(".add.finish")
+    st([Y, X])  # 24
+    NEXT(cost_of_add)
+
+
+cost_of_add = 24

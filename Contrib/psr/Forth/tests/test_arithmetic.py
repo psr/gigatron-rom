@@ -91,3 +91,18 @@ def test_invert(emulator, data_stack, data_stack_depth, tos):
     # Assert
     assert (~tos & 0xFFFF) == data_stack.pop_u16()
     assert data_stack_depth == len(data_stack)
+
+
+@given(
+    data_stack_depth=data_stack_depths(with_room_for_values=2), tos=numbers, nos=numbers
+)
+def test_add(emulator, data_stack, data_stack_depth, tos, nos):
+    # Arrange
+    data_stack.set_depth_in_bytes(data_stack_depth)
+    data_stack.push_word(nos)
+    data_stack.push_word(tos)
+    # Act
+    do_test_word(emulator, "forth.core.+")
+    # Assert
+    assert (tos + nos) & 0xFFFF == data_stack.pop_u16()
+    assert data_stack_depth == len(data_stack)

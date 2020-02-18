@@ -1,5 +1,6 @@
 """Tests for kernel words brought in from core.f"""
 from hypothesis import given
+from hypothesis.strategies import just, one_of, shared
 
 from asm import symbol
 from strategies import (
@@ -103,4 +104,30 @@ def test_minus(emulator, data_stack, data_stack_depth, tos, nos):
         do_test_word(emulator, "forth.next3.rom-mode")
     # Assert
     (nos - tos) & 0xFFFF == data_stack.pop_u16()
+    assert data_stack_depth == len(data_stack)
+
+
+# Strategies that might generate equal values (if I understand correctly)
+values = shared(numbers)
+maybe_equal = values.flatmap(lambda value: one_of(just(value), numbers))
+
+
+@given(
+    data_stack_depth=data_stack_depths(with_room_for_values=2),
+    tos=values,
+    nos=maybe_equal,
+)
+def test_equals(emulator, data_stack, data_stack_depth, tos, nos):
+    # Arrange
+    data_stack.set_depth_in_bytes(data_stack_depth)
+    data_stack.push_word(nos)
+    data_stack.push_word(tos)
+    # Act
+    set_IP(0x4282)
+    set_W(symbol("forth.core.=") + 4)
+    do_test_word(emulator, get_W())
+    while get_IP() != 0x4282:
+        do_test_word(emulator, "forth.next3.rom-mode")
+    # Assert
+    assert (tos == nos) == data_stack.pop_flag()
     assert data_stack_depth == len(data_stack)

@@ -20,6 +20,9 @@
 : [ STATE 0 ! ; IMMEDIATE
 : ] STATE 1 ! ;
 
+: HEX BASE 16 ! ;
+: DECIMAL BASE 10 ! ;
+
 : ABORT
     ." Aborted!"
     BYE

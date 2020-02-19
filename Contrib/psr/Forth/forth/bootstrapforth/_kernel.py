@@ -8,6 +8,7 @@ from ._runtime import ExecutionToken, State, ThreadExecutionToken
 kernel = dictionary = Dictionary()
 
 kernel.system_variable("STATE", "state")
+kernel.system_variable("BASE", "number_base")
 
 
 def _make_unary_operator(name, fn):

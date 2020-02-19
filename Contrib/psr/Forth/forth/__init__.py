@@ -80,6 +80,7 @@ def emit_kernel_words():
 
     _start_page()
     _arithmetic.add()
+    _arithmetic.left_shift()
     from . import _compiler
 
     _compiler.compile_file("core.f")

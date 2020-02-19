@@ -144,6 +144,8 @@ class Emulator(object):
 
     def zero_memory(self):
         _gtemu.ffi.buffer(RAM)[:] = BLANK_RAM
+        # Needed for bit shuffling
+        _gtemu.ffi.buffer(RAM)[0b1000_0000] = b"\x01"
 
 
 ROM = _gtemu.lib.ROM

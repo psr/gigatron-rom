@@ -75,6 +75,18 @@ def test_cell_plus(emulator, data_stack, data_stack_depth, address):
     assert data_stack_depth == len(data_stack)
 
 
+@given(data_stack_depth=data_stack_depths(with_room_for_values=1), tos=numbers)
+def test_negate(emulator, data_stack, data_stack_depth, tos):
+    # Arrange
+    data_stack.set_depth_in_bytes(data_stack_depth)
+    data_stack.push_word(tos)
+    # Act
+    _do_test_thread(emulator, "forth.core.NEGATE")
+    # Assert
+    (-tos) & 0xFFFF == data_stack.pop_u16()
+    assert data_stack_depth == len(data_stack)
+
+
 @given(
     data_stack_depth=data_stack_depths(with_room_for_values=2), tos=numbers, nos=numbers
 )

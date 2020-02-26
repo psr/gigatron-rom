@@ -10,7 +10,7 @@ from asm import _symbols as asm_symbols
 from asm import bra, hi, jmp, label, ld, lo, pc, st
 
 from . import variables
-from ._docol_exit import docol, docol_rom_only
+from ._docol_exit import docol_rom_only
 from .bootstrapforth import (
     Dictionary,
     DictionaryFlags,
@@ -41,6 +41,7 @@ def _get_label(name):
 # Dictionary of words defined in Gigatron Forth
 
 gigatron_forth_dictionary = Dictionary()
+ram_dictionary = {}  # Put words that need to be usable from RAM in here.
 
 _standard_word_lists = {word["Word List"] for word in _ALL_STANDARD_WORDS.values()}
 _known_prefixes = {
@@ -54,7 +55,13 @@ has_standard_prefix_re = re.compile(
 for symbol, address in asm_symbols.items():
     if has_standard_prefix_re.match(symbol):
         name_parts = symbol.split(".")
-        gigatron_forth_dictionary.define(name_parts[-1], symbol)
+        if not name_parts[-2]:
+            name = "." + name_parts[-1]
+        else:
+            name = name_parts[-1]
+        gigatron_forth_dictionary.define(name, symbol)
+        if _is_standard_word(name):
+            ram_dictionary[name] = (symbol,)
 
 
 # Interpreter dictionary, Contains Gigatron specific definitions of various immediate words, on top of python forth words
@@ -175,15 +182,12 @@ def _colon(state):
     # Emit a prefix, and store (word_label, address) in dictionary
     label(word_label)
     address = pc()
+    docol_rom_only()
     if _is_standard_word(name):
-        # We want this thread to be accessible from RAM mode
-        docol()
-        address += 4  # Always skip first four bytes - avoiding ram-mode entrypoint
-    else:
-        docol_rom_only()
-    state.target_dictionary.define(
-        name, (word_label, address), flags=DictionaryFlags.Hidden
-    )
+        # This is a standard word, and needs to be available to the user.
+        # Add an entry to the dictionary that we will eventually copy into RAM.
+        ram_dictionary[name] = ("forth.DOCOL", address + 4)
+    state.target_dictionary.define(name, (word_label), flags=DictionaryFlags.Hidden)
 
 
 def compile_file(path):

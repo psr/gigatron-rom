@@ -21,7 +21,7 @@ def test_nip(emulator, data_stack, return_stack, data_stack_depth, tos, nos):
     data_stack.push_word(nos)
     data_stack.push_word(tos)
     set_IP(0x4282)
-    set_W(symbol("forth.core.ext.NIP") + 4)
+    set_W(symbol("forth.core.ext.NIP"))
     # Act
     do_test_word(emulator, get_W())
     while get_IP() != 0x4282:
@@ -38,7 +38,7 @@ def test_zero_not_equal(emulator, data_stack, return_stack, data_stack_depth, nu
     data_stack.set_depth_in_bytes(data_stack_depth)
     data_stack.push_word(number)
     set_IP(0x4282)
-    set_W(symbol("forth.core.ext.0<>") + 4)
+    set_W(symbol("forth.core.ext.0<>"))
     # Act
     do_test_word(emulator, get_W())
     while get_IP() != 0x4282:
@@ -55,7 +55,7 @@ def test_question_dup(emulator, data_stack, return_stack, data_stack_depth, numb
     data_stack.set_depth_in_bytes(data_stack_depth)
     data_stack.push_word(number)
     set_IP(0x4282)
-    set_W(symbol("forth.core.?DUP") + 4)
+    set_W(symbol("forth.core.?DUP"))
     # Act
     do_test_word(emulator, get_W())
     while get_IP() != 0x4282:
@@ -77,7 +77,7 @@ def test_cell_plus(emulator, data_stack, data_stack_depth, address):
     data_stack.push_word(address)
     # Act
     set_IP(0x4282)
-    set_W(symbol("forth.core.CELL+") + 4)
+    set_W(symbol("forth.core.CELL+"))
     # Act
     do_test_word(emulator, get_W())
     while get_IP() != 0x4282:
@@ -98,7 +98,7 @@ def test_minus(emulator, data_stack, data_stack_depth, tos, nos):
     data_stack.push_word(tos)
     # Act
     set_IP(0x4282)
-    set_W(symbol("forth.core.-") + 4)
+    set_W(symbol("forth.core.-"))
     do_test_word(emulator, get_W())
     while get_IP() != 0x4282:
         do_test_word(emulator, "forth.next3.rom-mode")
@@ -124,7 +124,7 @@ def test_equals(emulator, data_stack, data_stack_depth, tos, nos):
     data_stack.push_word(tos)
     # Act
     set_IP(0x4282)
-    set_W(symbol("forth.core.=") + 4)
+    set_W(symbol("forth.core.="))
     do_test_word(emulator, get_W())
     while get_IP() != 0x4282:
         do_test_word(emulator, "forth.next3.rom-mode")

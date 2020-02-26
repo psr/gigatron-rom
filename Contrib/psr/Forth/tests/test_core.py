@@ -12,6 +12,14 @@ from strategies import (
 from utilities import do_test_word, get_IP, get_W, set_IP, set_W
 
 
+def _do_test_thread(emulator, label):
+    set_IP(0x4282)
+    set_W(symbol(label))
+    do_test_word(emulator, get_W())
+    while get_IP() != 0x4282:
+        do_test_word(emulator, "forth.next3.rom-mode")
+
+
 @given(
     data_stack_depth=data_stack_depths(with_room_for_values=2), tos=numbers, nos=numbers
 )
@@ -20,13 +28,8 @@ def test_nip(emulator, data_stack, return_stack, data_stack_depth, tos, nos):
     data_stack.set_depth_in_bytes(data_stack_depth)
     data_stack.push_word(nos)
     data_stack.push_word(tos)
-    set_IP(0x4282)
-    set_W(symbol("forth.core.ext.NIP"))
     # Act
-    do_test_word(emulator, get_W())
-    while get_IP() != 0x4282:
-        do_test_word(emulator, "forth.next3.rom-mode")
-
+    _do_test_thread(emulator, "forth.core.ext.NIP")
     # Assert
     assert tos == data_stack.pop_i16()
     assert data_stack_depth == len(data_stack)
@@ -37,13 +40,8 @@ def test_zero_not_equal(emulator, data_stack, return_stack, data_stack_depth, nu
     # Arrange
     data_stack.set_depth_in_bytes(data_stack_depth)
     data_stack.push_word(number)
-    set_IP(0x4282)
-    set_W(symbol("forth.core.ext.0<>"))
     # Act
-    do_test_word(emulator, get_W())
-    while get_IP() != 0x4282:
-        do_test_word(emulator, "forth.next3.rom-mode")
-
+    _do_test_thread(emulator, "forth.core.ext.0<>")
     # Assert
     assert (number != 0) == data_stack.pop_flag()
     assert data_stack_depth == len(data_stack)
@@ -54,13 +52,8 @@ def test_question_dup(emulator, data_stack, return_stack, data_stack_depth, numb
     # Arrange
     data_stack.set_depth_in_bytes(data_stack_depth)
     data_stack.push_word(number)
-    set_IP(0x4282)
-    set_W(symbol("forth.core.?DUP"))
     # Act
-    do_test_word(emulator, get_W())
-    while get_IP() != 0x4282:
-        do_test_word(emulator, "forth.next3.rom-mode")
-
+    _do_test_thread(emulator, "forth.core.?DUP")
     # Assert
     if number == 0:
         assert 0 == data_stack.pop_i16()
@@ -76,13 +69,7 @@ def test_cell_plus(emulator, data_stack, data_stack_depth, address):
     data_stack.set_depth_in_bytes(data_stack_depth)
     data_stack.push_word(address)
     # Act
-    set_IP(0x4282)
-    set_W(symbol("forth.core.CELL+"))
-    # Act
-    do_test_word(emulator, get_W())
-    while get_IP() != 0x4282:
-        do_test_word(emulator, "forth.next3.rom-mode")
-
+    _do_test_thread(emulator, "forth.core.CELL+")
     # Assert
     (address + 2) & 0xFFFF == data_stack.pop_u16()
     assert data_stack_depth == len(data_stack)
@@ -97,11 +84,7 @@ def test_minus(emulator, data_stack, data_stack_depth, tos, nos):
     data_stack.push_word(nos)
     data_stack.push_word(tos)
     # Act
-    set_IP(0x4282)
-    set_W(symbol("forth.core.-"))
-    do_test_word(emulator, get_W())
-    while get_IP() != 0x4282:
-        do_test_word(emulator, "forth.next3.rom-mode")
+    _do_test_thread(emulator, "forth.core.-")
     # Assert
     (nos - tos) & 0xFFFF == data_stack.pop_u16()
     assert data_stack_depth == len(data_stack)
@@ -123,11 +106,7 @@ def test_equals(emulator, data_stack, data_stack_depth, tos, nos):
     data_stack.push_word(nos)
     data_stack.push_word(tos)
     # Act
-    set_IP(0x4282)
-    set_W(symbol("forth.core.="))
-    do_test_word(emulator, get_W())
-    while get_IP() != 0x4282:
-        do_test_word(emulator, "forth.next3.rom-mode")
+    _do_test_thread(emulator, "forth.core.=")
     # Assert
     assert (tos == nos) == data_stack.pop_flag()
     assert data_stack_depth == len(data_stack)

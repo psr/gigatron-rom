@@ -18,3 +18,9 @@
 : = ( x1 x2 -- flag )
     XOR 0= ;
 
+: 0< ( n -- flag )
+    [ BASE @ HEX ] 8000 [ BASE SWAP ! ] AND 0<> ;
+
+: 0> ( n -- flag )
+    0 SWAP - 0< ;
+

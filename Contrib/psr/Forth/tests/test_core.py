@@ -122,3 +122,31 @@ def test_equals(emulator, data_stack, data_stack_depth, tos, nos):
     # Assert
     assert (tos == nos) == data_stack.pop_flag()
     assert data_stack_depth == len(data_stack)
+
+
+@given(
+    data_stack_depth=data_stack_depths(with_room_for_values=1), tos=numbers,
+)
+def test_zero_lessthan(emulator, data_stack, data_stack_depth, tos):
+    # Arrange
+    data_stack.set_depth_in_bytes(data_stack_depth)
+    data_stack.push_word(tos)
+    # Act
+    _do_test_thread(emulator, "forth.core.0<")
+    # Assert
+    assert (tos < 0) == data_stack.pop_flag()
+    assert data_stack_depth == len(data_stack)
+
+
+@given(
+    data_stack_depth=data_stack_depths(with_room_for_values=1), tos=numbers,
+)
+def test_zero_greaterthan(emulator, data_stack, data_stack_depth, tos):
+    # Arrange
+    data_stack.set_depth_in_bytes(data_stack_depth)
+    data_stack.push_word(tos)
+    # Act
+    _do_test_thread(emulator, "forth.core.ext.0>")
+    # Assert
+    assert (tos > 0) == data_stack.pop_flag()
+    assert data_stack_depth == len(data_stack)

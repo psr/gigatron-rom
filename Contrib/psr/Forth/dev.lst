@@ -7536,12 +7536,54 @@ forth.core.=: 168a 80f6  adda $f6
               1694 dc52  st   $52,[y,x++] ;-> forth.core.EXIT
               1695 e07a  jmp  y,$7a
               1696 dc14  st   $14,[y,x++]
+forth.core.0<:
+              1697 80f6  adda $f6
+              1698 1413  ld   $13,y
+              1699 e023  jmp  y,$23
+              169a 147f  ld   $7f,y
+              169b dcd3  st   $d3,[y,x++] ;-> forth.internal.LIT
+              169c e07a  jmp  y,$7a
+              169d dc14  st   $14,[y,x++]
+              169e dc00  st   $00,[y,x++] ;32768
+              169f dc80  st   $80,[y,x++]
+              16a0 1030  ld   $30,x       ;X <- W
+              16a1 dcc0  st   $c0,[y,x++] ;-> forth.core.AND
+              16a2 e07a  jmp  y,$7a
+              16a3 dc15  st   $15,[y,x++]
+              16a4 dc42  st   $42,[y,x++] ;-> forth.core.ext.0<>
+              16a5 e07a  jmp  y,$7a
+              16a6 dc16  st   $16,[y,x++]
+              16a7 dc52  st   $52,[y,x++] ;-> forth.core.EXIT
+              16a8 e07a  jmp  y,$7a
+              16a9 dc14  st   $14,[y,x++]
+forth.core.ext.0>:
+              16aa 80f6  adda $f6
+              16ab 1413  ld   $13,y
+              16ac e023  jmp  y,$23
+              16ad 147f  ld   $7f,y
+              16ae dcdf  st   $df,[y,x++] ;-> forth.internal.C-LIT
+              16af e07a  jmp  y,$7a
+              16b0 dc14  st   $14,[y,x++]
+              16b1 dc00  st   $00,[y,x++] ;0
+              16b2 1030  ld   $30,x       ;X <- W
+              16b3 dc2c  st   $2c,[y,x++] ;-> forth.core.SWAP
+              16b4 e07a  jmp  y,$7a
+              16b5 dc15  st   $15,[y,x++]
+              16b6 dc7d  st   $7d,[y,x++] ;-> forth.core.-
+              16b7 e07a  jmp  y,$7a
+              16b8 dc16  st   $16,[y,x++]
+              16b9 dc97  st   $97,[y,x++] ;-> forth.core.0<
+              16ba e07a  jmp  y,$7a
+              16bb dc16  st   $16,[y,x++]
+              16bc dc52  st   $52,[y,x++] ;-> forth.core.EXIT
+              16bd e07a  jmp  y,$7a
+              16be dc14  st   $14,[y,x++]
                                           5308  # --- Page boundary ---
                                           5309  start_of_forth_word_space = pc()  # Variable used in unit tests to locate test data
-              1697 0200  nop              5310  align(0x100,0x100)
-              1698 0200  nop
-              1699 0200  nop
-              * 104 times
+              16bf 0200  nop              5310  align(0x100,0x100)
+              16c0 0200  nop
+              16c1 0200  nop
+              * 64 times
               16ff 0200  nop              5310  align(0x100,0x100)
                                           5311
                                           5312  #-----------------------------------------------------------------------

@@ -79,6 +79,7 @@ def emit_kernel_words():
     _docol_exit.make_thread()
 
     _start_page()
+    _stackmanipulation.two_dup()
     _arithmetic.add()
     _arithmetic.left_shift()
     from . import _compiler

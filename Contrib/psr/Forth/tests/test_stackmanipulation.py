@@ -90,6 +90,25 @@ def test_dup(emulator, data_stack, initial_stack):
         max_size=max_data_stack_size - 1,
     )
 )
+def test_two_dup(emulator, data_stack, initial_stack):
+    # Arrange
+    for value in reversed(initial_stack):
+        data_stack.push_word(value)
+    # Act
+    do_test_word(emulator, "forth.core.2DUP")
+    # Assert
+    expected_stack = [initial_stack[0], initial_stack[1]] + initial_stack
+    actual_stack = [data_stack.pop_u16() for _ in range(len(data_stack) // 2)]
+    assert actual_stack == expected_stack
+
+
+@given(
+    initial_stack=lists(
+        integers(min_value=0, max_value=(1 << 16) - 1),
+        min_size=2,
+        max_size=max_data_stack_size - 1,
+    )
+)
 def test_over(emulator, data_stack, initial_stack):
     # Arrange
     for value in reversed(initial_stack):

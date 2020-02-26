@@ -83,6 +83,27 @@ def dup():
 cost_of_dup = 16
 
 
+def two_dup():
+    label("forth.core.2DUP")
+    adda(-add_cost_of_next(cost_of_2dup) / 2)  # 1
+    ld(data_stack_page, Y)
+    ld([data_stack_pointer], X)  # 3
+    for tmp in [tmp0, tmp1, tmp2, tmp3]:
+        ld([Y, X])
+        st([tmp])
+        st([Y, Xpp])  # 15 = 3 + 4 * 3
+    ld([data_stack_pointer])
+    suba(4)
+    st([data_stack_pointer], X)  # 18
+    for tmp in [tmp0, tmp1, tmp2, tmp3]:
+        ld([tmp])
+        st([Y, Xpp])  # 26 = 18 + 4 * 2
+    NEXT(cost_of_2dup)
+
+
+cost_of_2dup = 26
+
+
 def over():
     label("forth.core.OVER")
     adda(-add_cost_of_next(cost_of_over) / 2)

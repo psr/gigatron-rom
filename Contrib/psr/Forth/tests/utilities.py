@@ -130,6 +130,10 @@ def do_test_word(emulator, entrypoint=None, continue_on_reenter=True):
     def do_iteration():
         emulator.next_instruction = entrypoint
         worst_case_ticks = _get_max_tick_cost_of_current_word(emulator)
+        assert worst_case_ticks and worst_case_ticks > 0, (
+            f"Instruction at {entrypoint:x} does not look like a Forth word - it does not have a cost."
+            f" IP = {get_IP():x}; W = {get_W():x}"
+        )
         emulator.next_instruction = entrypoint
         actual_cycles = emulator.run_for(worst_case_ticks * 2)
         if emulator.PC == reenter_odd:

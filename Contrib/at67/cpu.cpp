@@ -5,8 +5,6 @@
 #include <iomanip>
 #include <vector>
 #include <algorithm>
-#include <chrono>
-#include <thread>
 
 #include "memory.h"
 #include "cpu.h"
@@ -43,10 +41,12 @@ namespace Cpu
     int _vCpuInstPerFrameMax = 0;
     float _vCpuUtilisation = 0.0;
 
+    bool _coldBoot = true;
     bool _isInReset = false;
     bool _checkRomType = true;
     bool _debugging = false;
     bool _initAudio = true;
+    bool _consoleSaveFile = true;
 
     std::vector<uint8_t> _RAM;
     uint8_t _ROM[ROM_SIZE][2];
@@ -60,7 +60,9 @@ namespace Cpu
     std::vector<InternalGt1> _internalGt1s;
 
     int getNumRoms(void) {return _numRoms;}
-    uint8_t* getPtrToROM(int& romSize) {romSize = sizeof _ROM; return (uint8_t*)_ROM;}
+    int getRomIndex(void) {return _romIndex;}
+
+    uint8_t* getPtrToROM(int& romSize) {romSize = sizeof(_ROM); return (uint8_t*)_ROM;}
     RomType getRomType(void) {return _romType;}
 
     const uint8_t _endianBytes[] = {0x00, 0x01, 0x02, 0x03};
@@ -100,22 +102,29 @@ namespace Cpu
     }
 #endif
 
-    Endianess getHostEndianess(void)
+#ifdef _WIN32
+    void enableWin32ConsoleSaveFile(bool consoleSaveFile)
     {
-        return *((Endianess*)_endianBytes);
+        _consoleSaveFile = consoleSaveFile;
+    }
+#endif
+
+    Endianness getHostEndianness(void)
+    {
+        return *((Endianness*)_endianBytes);
     }
 
-    void swapEndianess(uint16_t& value)
+    void swapEndianness(uint16_t& value)
     {
         value = (value >>8)  |  (value <<8);
     }
 
-    void swapEndianess(uint32_t& value)
+    void swapEndianness(uint32_t& value)
     {
         value = (value >>24)  |  ((value >>8) & 0x0000FF00)  |  ((value <<8) & 0x00FF0000)  |  (value <<24);
     }
 
-    void swapEndianess(uint64_t& value)
+    void swapEndianness(uint64_t& value)
     {
         value = (value >>56)  |  ((value >>40) & 0x000000000000FF00LL)  |  ((value >>24) & 0x0000000000FF0000LL)  |  ((value >>8) & 0x00000000FF000000LL)  |
         ((value <<8) & 0x000000FF00000000LL)  |  ((value <<24) & 0x0000FF0000000000LL)  |  ((value <<40) & 0x00FF000000000000LL)  |  (value <<56);
@@ -227,7 +236,7 @@ namespace Cpu
     char filebuffer[RAM_SIZE_HI];
     bool patchSplitGt1IntoRom(const std::string& splitGt1path, const std::string& splitGt1name, uint16_t startAddress, InternalGt1Id gt1Id)
     {
-        size_t filelength = 0;
+        std::streampos filelength = 0;
 
         // Instruction ROM
         std::ifstream romfile_ti(splitGt1path + "_ti", std::ios::binary | std::ios::in);
@@ -248,7 +257,7 @@ namespace Cpu
             fprintf(stderr, "Cpu::patchSplitGt1IntoRom() : failed to read %s ROM file.\n", std::string(splitGt1path + "_ti").c_str());
             return false;
         }
-        for(int i=0; i<filelength; i++) _ROM[startAddress + i][ROM_INST] = filebuffer[i];
+        for(int i=0; i<int(filelength); i++) _ROM[startAddress + i][ROM_INST] = filebuffer[i];
 
         // Data ROM
         std::ifstream romfile_td(splitGt1path + "_td", std::ios::binary | std::ios::in);
@@ -269,7 +278,7 @@ namespace Cpu
             fprintf(stderr, "Cpu::patchSplitGt1IntoRom() : failed to read %s ROM file.\n", std::string(splitGt1path + "_td").c_str());
             return false;
         }
-        for(int i=0; i<filelength; i++) _ROM[startAddress + i][ROM_DATA] = filebuffer[i];
+        for(int i=0; i<int(filelength); i++) _ROM[startAddress + i][ROM_DATA] = filebuffer[i];
 
         // Replace internal gt1 menu option with split gt1
         _ROM[_internalGt1s[gt1Id]._patch + 0][ROM_DATA] = LO_BYTE(startAddress);
@@ -293,6 +302,11 @@ namespace Cpu
     uint16_t _vPC = 0x0200;
     State _stateS, _stateT;
 
+#ifdef _WIN32
+    HWND _consoleWindowHWND;
+#endif
+
+    bool getColdBoot(void) {return _coldBoot;}
     bool getIsInReset(void) {return _isInReset;}
     State& getStateS(void) {return _stateS;}
     State& getStateT(void) {return _stateT;}
@@ -306,7 +320,7 @@ namespace Cpu
     uint16_t getROM16(uint16_t address, int page) {return _ROM[address & (ROM_SIZE-1)][page & 0x01] | (_ROM[(address+1) & (ROM_SIZE-1)][page & 0x01]<<8);}
     float getvCpuUtilisation(void) {return _vCpuUtilisation;}
 
-
+    void setColdBoot(bool coldBoot) {_coldBoot = coldBoot;}
     void setIsInReset(bool isInReset) {_isInReset = isInReset;}
     void setClock(int64_t clock) {_clock = clock;}
     void setIN(uint8_t in) {_IN = in;}
@@ -431,12 +445,14 @@ namespace Cpu
             case VideoB:  patchScanlineModeVideoB();                            break;
             case VideoC:  patchScanlineModeVideoC();                            break;
             case VideoBC: patchScanlineModeVideoB(); patchScanlineModeVideoC(); break;
+
+            default: break;
         }
     }
 
     void garble(uint8_t* mem, int len)
     {
-        for(int i=0; i<len; i++) mem[i] = rand();
+        for(int i=0; i<len; i++) mem[i] = uint8_t(rand());
     }
 
     void createRomHeader(const uint8_t* rom, const std::string& filename, const std::string& name, int length)
@@ -470,57 +486,16 @@ namespace Cpu
     void loadRom(int index)
     {
         _romIndex = index % _numRoms;
-        memcpy(_ROM, _romFiles[_romIndex], sizeof _ROM);
+        memcpy(_ROM, _romFiles[_romIndex], sizeof(_ROM));
         reset(true);
     }
 
     void swapRom(void)
     {
         _romIndex = (_romIndex + 1) % _numRoms;
-        memcpy(_ROM, _romFiles[_romIndex], sizeof _ROM);
+        memcpy(_ROM, _romFiles[_romIndex], sizeof(_ROM));
         reset(true);
     }
-
-
-#ifdef _WIN32
-    HWND _consoleWindowHWND;
-    void restoreWin32Console(void)
-    {
-        std::string line;
-        std::ifstream infile(Editor::getCwdPath() + "/" + "console.txt");
-        if(infile.is_open())
-        {
-            getline(infile, line);
-
-            int xpos, ypos, width, height;
-            sscanf_s(line.c_str(), "%d %d %d %d", &xpos, &ypos, &width, &height);
-            if(xpos < -2000  ||  xpos > 4000  ||  ypos < 320  ||  ypos > 1000  ||  width < 100  ||  width > 2000  ||  height < 100 ||  height > 1000)
-            {
-                xpos = -1000; ypos = 320; width = 1000; height = 1000;
-            }
-
-            MoveWindow(_consoleWindowHWND, xpos, ypos, width, height, true);
-            BringWindowToTop(_consoleWindowHWND);
-        }
-    }
-
-    void saveWin32Console(void)
-    {
-        RECT rect;
-        if(GetWindowRect(_consoleWindowHWND, &rect))
-        {
-            std::ofstream outfile(Editor::getCwdPath() + "/" + "console.txt");
-            if(outfile.is_open())
-            {
-                int xpos = rect.left;
-                int ypos = rect.top;
-                int width = rect.right - rect.left;
-                int height = rect.bottom - rect.top;
-                outfile << xpos << " " << ypos << " " << width << " " << height << std::endl;
-            }
-        }
-    }
-#endif
 
     void shutdown(void)
     {
@@ -528,11 +503,11 @@ namespace Cpu
         saveWin32Console();
 #endif
 
-        for(int i=NUM_INT_ROMS; i<_romFiles.size(); i++)
+        for(int i=NUM_INT_ROMS; i<int(_romFiles.size()); i++)
         {
             if(_romFiles[i])
             {
-                delete[] _romFiles[i];
+                delete [] _romFiles[i];
                 _romFiles[i] = nullptr;
             }
         }
@@ -583,9 +558,9 @@ namespace Cpu
 
         // Memory
         srand((unsigned int)time(NULL)); // Initialize with randomized data
-        garble((uint8_t*)_ROM, sizeof _ROM);
+        garble((uint8_t*)_ROM, sizeof(_ROM));
         garble(&_RAM[0], Memory::getSizeRAM());
-        garble((uint8_t*)&_stateS, sizeof _stateS);
+        garble((uint8_t*)&_stateS, sizeof(_stateS));
 
         // Internal ROMS
         _romFiles.push_back(_gigatron_0x1c_rom);
@@ -595,6 +570,9 @@ namespace Cpu
         uint8_t types[NUM_INT_ROMS] = {0x1c, 0x20, 0x28, 0x38};
         std::string names[NUM_INT_ROMS] = {"ROMv1.rom", "ROMv2.rom", "ROMv3.rom", "ROMv4.rom"};
         for(int i=0; i<NUM_INT_ROMS; i++) Editor::addRomEntry(types[i], names[i]);
+
+        // Latest internal ROM is the one that is loaded at startup
+        _romIndex = int(_romFiles.size()) - 1;
 
         // External ROMS
         for(int i=0; i<Loader::getConfigRomsSize(); i++)
@@ -610,17 +588,17 @@ namespace Cpu
             else
             {
                 // Load ROM file
-                uint8_t* rom = new (std::nothrow) uint8_t[sizeof _ROM];
+                uint8_t* rom = new (std::nothrow) uint8_t[sizeof(_ROM)];
                 if(!rom)
                 {
                     // This is fairly pointless as the code does not have any exception handling for the many std:: memory allocations that occur
-                    // If you're running out of memory running this application, (which requires around 10 Mbytes), then you need to leave the 80's
+                    // If you're running out of memory running this application, (which requires around 20 Mbytes), then you need to leave the 80's
                     shutdown();
                     fprintf(stderr, "Cpu::initialise() : out of memory!\n");
                     _EXIT_(EXIT_FAILURE);
                 }
 
-                file.read((char *)rom, sizeof _ROM);
+                file.read((char *)rom, sizeof(_ROM));
                 if(file.bad() || file.fail())
                 {
                     fprintf(stderr, "Cpu::initialise() : failed to read ROM file : %s\n", name.c_str());
@@ -635,13 +613,12 @@ namespace Cpu
 
         // Switchable ROMS
         _numRoms = int(_romFiles.size());
-        _romIndex = _numRoms - 1;
-        memcpy(_ROM, _romFiles[_romIndex], sizeof _ROM);
+        memcpy(_ROM, _romFiles[_romIndex], sizeof(_ROM));
 
 //#define CREATE_ROM_HEADER
 #ifdef CREATE_ROM_HEADER
         // Create a header file representation of a ROM, (match the ROM type number with the ROM file before enabling and running this code)
-        createRomHeader((uint8_t *)_ROM, "gigatron_xxxx.h", "_gigatron_xxxx_rom", sizeof _ROM);
+        createRomHeader((uint8_t *)_ROM, "gigatron_xxxx.h", "_gigatron_xxxx_rom", sizeof(_ROM));
 #endif
 
 //#define CUSTOM_ROM
@@ -792,6 +769,7 @@ namespace Cpu
             }
             break;
 #endif
+            default: break;
         }
 
         int ins = S._IR >> 5;       // Instruction
@@ -815,17 +793,21 @@ namespace Cpu
                 case 5: to =   &T._Y;                              break;
                 case 6: to = E(&T._OUT);                           break;
                 case 7: to = E(&T._OUT); lo=S._X; hi=S._Y; incX=1; break;
+
+                default: break;
             }
         }
 
         uint16_t addr = (hi << 8) | lo;
-        int B = S._undef; // Data Bus
+        uint8_t B = S._undef; // Data Bus
         switch(bus)
         {
             case 0: B=S._D;                                            break;
             case 1: if (!W) B = _RAM[addr & (Memory::getSizeRAM()-1)]; break;
             case 2: B=S._AC;                                           break;
             case 3: B=_IN;                                             break;
+
+            default: break;
         }
 
         if(W) _RAM[addr & (Memory::getSizeRAM()-1)] = B; // Random Access Memory
@@ -841,6 +823,8 @@ namespace Cpu
             case 5: ALU = S._AC - B; break; // SUBA
             case 6: ALU = S._AC;     break; // ST
             case 7: ALU = -S._AC;    break; // Bcc/JMP
+
+            default: break;
         }
 
         if(to) *to = ALU; // Load value into register
@@ -866,14 +850,8 @@ namespace Cpu
 
     void reset(bool coldBoot)
     {
+        _coldBoot = coldBoot;
         _checkRomType = true;
-
-        // Cold boot
-        if(coldBoot)
-        {
-            //setRAM(BOOT_COUNT, 0x00);
-            //setRAM(BOOT_CHECK, 0xA6);
-        }
 
         clearUserRAM();
         setRAM(ZERO_CONST_ADDRESS, 0x00);
@@ -901,6 +879,8 @@ namespace Cpu
     // Counts maximum and used vCPU instruction slots available per frame
     void vCpuUsage(const State& S, const State& T)
     {
+        UNREFERENCED_PARAM(T);
+
         // All ROM's so far v1 through v4 use the same vCPU dispatch address!
         if(S._PC == ROM_VCPU_DISPATCH)
         {
@@ -963,12 +943,10 @@ namespace Cpu
 
             if(!_debugging)
             {
-                // Input and graphics
+                // Input and graphics 60 times per second
                 Editor::handleInput();
                 Graphics::render(true);
             }
-
-            //std::this_thread::sleep_for(std::chrono::milliseconds(5));
         }
 
         // Pixel
@@ -979,7 +957,7 @@ namespace Cpu
                 if(_vgaX >=HPIXELS_START  &&  _vgaX < HPIXELS_END) Graphics::refreshPixel(_stateS, _vgaX-HPIXELS_START, _vgaY);
 
                 // Show pixel reticle when debugging Native code
-                if(_debugging  &&  _vgaX >=HPIXELS_START-1  &&  _vgaX <= HPIXELS_END-1) Graphics::pixelReticle(_stateS, _vgaX-(HPIXELS_START-1), _vgaY);
+                //if(_debugging  &&  _vgaX >=HPIXELS_START-1  &&  _vgaX <= HPIXELS_END-1) Graphics::pixelReticle(_stateS, _vgaX-(HPIXELS_START-1), _vgaY);
             }
         }
 
@@ -1005,8 +983,10 @@ namespace Cpu
 
             if(_initAudio  &&  _clock > STARTUP_DELAY_CLOCKS*10.0)
             {
+                Audio::initialiseChannels(_coldBoot, _romType);
+
+                _coldBoot = false;
                 _initAudio = false;
-                Audio::initialiseChannels();
             }
 
             if(!_debugging  &&  _clock - _clockStall > CPU_STALL_CLOCKS)
@@ -1025,18 +1005,12 @@ namespace Cpu
             _XOUT = _stateT._AC;
         
             // Audio
-            if(Audio::getRealTimeAudio())
-            {
-                Audio::playSample();
-            }
-            else
-            {
-                Audio::fillAudioBuffer();
-                if(_vgaY == SCREEN_HEIGHT+4) Audio::playAudioBuffer();
-            }
+            //Audio::playSample();
+            //Audio::fillBuffer();
+            Audio::fillCallbackBuffer();
 
             // Loader
-            Loader::upload(_vgaY);
+            if(_clock > STARTUP_DELAY_CLOCKS*10.0) Loader::upload(_vgaY);
 
             // Horizontal timing errors
             if(_vgaY >= 0  &&  _vgaY < SCREEN_HEIGHT)
@@ -1065,5 +1039,47 @@ namespace Cpu
         _clock++;
     }
 
+#ifdef _WIN32
+    void restoreWin32Console(void)
+    {
+        if(!_consoleSaveFile) return;
+
+        std::string line;
+        std::ifstream infile(Loader::getCwdPath() + "/" + "console.txt");
+        if(infile.is_open())
+        {
+            getline(infile, line);
+
+            int xpos, ypos, width, height;
+            sscanf_s(line.c_str(), "%d %d %d %d", &xpos, &ypos, &width, &height);
+            if(xpos < -2000  ||  xpos > 4000  ||  ypos < 320  ||  ypos > 1000  ||  width < 100  ||  width > 2000  ||  height < 100 ||  height > 1000)
+            {
+                xpos = -1000; ypos = 320; width = 1000; height = 1000;
+            }
+
+            MoveWindow(_consoleWindowHWND, xpos, ypos, width, height, true);
+            BringWindowToTop(_consoleWindowHWND);
+        }
+    }
+
+    void saveWin32Console(void)
+    {
+        if(!_consoleSaveFile) return;
+
+        RECT rect;
+        if(GetWindowRect(_consoleWindowHWND, &rect))
+        {
+            std::ofstream outfile(Loader::getCwdPath() + "/" + "console.txt");
+            if(outfile.is_open())
+            {
+                int xpos = rect.left;
+                int ypos = rect.top;
+                int width = rect.right - rect.left;
+                int height = rect.bottom - rect.top;
+                outfile << xpos << " " << ypos << " " << width << " " << height << std::endl;
+            }
+        }
+    }
+#endif
 #endif
 }

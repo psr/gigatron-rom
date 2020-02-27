@@ -2,21 +2,24 @@
 #include <stdlib.h>
 #include <math.h>
 #include <algorithm>
+#include <atomic>
 
 #include "memory.h"
+#include "loader.h"
 #include "cpu.h"
 #include "audio.h"
 #include "timing.h"
 #include "editor.h"
-#include "midi/music.h"
 #include "expression.h"
 #include "inih/INIReader.h"
+#include "tools/gtmidi/music.h"
 
 #include <SDL.h>
 
 
-#define AUDIO_SAMPLES    (SCAN_LINES + 1)
-#define AUDIO_FREQUENCY  (SCAN_LINES*VSYNC_RATE)
+#define AUDIO_SAMPLES     (SCAN_LINES)
+#define AUDIO_BUFFER_SIZE (SCAN_LINES*4)
+#define AUDIO_FREQUENCY   (int(SCAN_LINES*59.98))
 
 
 namespace Audio
@@ -25,8 +28,9 @@ namespace Audio
 
     SDL_AudioDeviceID _audioDevice = 1;
 
-    int32_t _audioIndex = 0;
-    uint16_t _audioSamples[AUDIO_SAMPLES] = {0};
+    std::atomic<int64_t> _audioInIndex(AUDIO_SAMPLES*2);
+    std::atomic<int64_t> _audioOutIndex(0);
+    uint16_t _audioSamples[AUDIO_BUFFER_SIZE] = {0};
 
     int _scoreIndex = 0;
     uint8_t* _score[] = {(uint8_t*)musicMidi00};
@@ -45,10 +49,30 @@ namespace Audio
         return true;
     }
 
+    void sdl2AudioCallback(void* userData, unsigned char *stream, int length)
+    {
+        UNREFERENCED_PARAM(userData);
+
+        int16_t *sdl2Stream = (int16_t *)stream;
+
+        for(int i=0; i<length/2; i++)
+        {
+            if(_audioOutIndex % AUDIO_BUFFER_SIZE  ==  _audioInIndex % AUDIO_BUFFER_SIZE)
+            {
+                sdl2Stream[i] = _audioSamples[(_audioOutIndex-1) % AUDIO_BUFFER_SIZE];
+            }
+            else
+            {
+                sdl2Stream[i] = _audioSamples[_audioOutIndex++ % AUDIO_BUFFER_SIZE];
+            }
+        }
+    }
+
+
     void initialise(void)
     {
         // Loader config
-        INIReader iniReader(AUDIO_CONFIG_INI);
+        INIReader iniReader(Loader::getExePath() + "/" + AUDIO_CONFIG_INI);
         _configIniReader = iniReader;
         if(_configIniReader.ParseError() == 0)
         {
@@ -60,7 +84,7 @@ namespace Audio
             {
                 if(section.find(sectionString) == section.end())
                 {
-                    fprintf(stderr, "Loader::initialise() : INI file '%s' has bad Sections : reverting to default values.\n", AUDIO_CONFIG_INI);
+                    fprintf(stderr, "Audio::initialise() : INI file '%s' has bad Sections : reverting to default values.\n", AUDIO_CONFIG_INI);
                     break;
                 }
 
@@ -78,7 +102,7 @@ namespace Audio
         }
         else
         {
-            fprintf(stderr, "Loader::initialise() : couldn't find loader configuration INI file '%s' : reverting to default values.\n", AUDIO_CONFIG_INI);
+            fprintf(stderr, "Audio::initialise() : couldn't find audio configuration INI file '%s' : reverting to default values.\n", AUDIO_CONFIG_INI);
         }
 
         SDL_AudioSpec audSpec;
@@ -86,6 +110,8 @@ namespace Audio
         audSpec.freq = AUDIO_FREQUENCY;
         audSpec.format = AUDIO_S16;
         audSpec.channels = 1;
+        audSpec.callback = sdl2AudioCallback;
+        audSpec.samples = AUDIO_SAMPLES;
 
         if(SDL_OpenAudio(&audSpec, NULL) < 0)
         {
@@ -93,14 +119,34 @@ namespace Audio
             fprintf(stderr, "Audio::initialise() : failed to initialise SDL audio\n");
             _EXIT_(EXIT_FAILURE);
         }
-        SDL_PauseAudio(0);
 
-        initialiseChannels();
+        initialiseChannels(false, Cpu::ROMERR);
+
+        SDL_PauseAudio(0);
     }
 
-    void initialiseChannels(void)
+    void initialiseChannels(bool coldBoot, Cpu::RomType romType)
     {
-        for(int i=0; i<GIGA_SOUND_CHANNELS; i++)
+        static uint8_t waveTables[256];
+
+        // ROM's V1 to V3 do not re-initialise RAM Audio Wave Tables on soft reboot
+        if(romType > Cpu::ROMERR  &&  romType < Cpu::ROMv4)
+        {
+            // Save Audio Wave Tables on cold reboot
+            if(coldBoot)
+            {
+                //fprintf(stderr, "Audio::initialiseChannels() : Saving Audio Wave Tables\n");
+                for(uint16_t i=0; i<256; i++) waveTables[i] = Cpu::getRAM(0x0700 + i);
+            }
+            // Restore Audio Wave Tables on warm reboot
+            else
+            {
+                //fprintf(stderr, "Audio::initialiseChannels() : Restoring Audio Wave Tables\n");
+                for(uint16_t i=0; i<256; i++) Cpu::setRAM(0x0700 + i, waveTables[i]);
+            }
+        }
+
+        for(uint16_t i=0; i<GIGA_SOUND_CHANNELS; i++)
         {
             Cpu::setRAM(GIGA_CH0_WAV_A + i*GIGA_CHANNEL_OFFSET, 0x00); // sample index modification for advanced noise generation
             Cpu::setRAM(GIGA_CH0_WAV_X + i*GIGA_CHANNEL_OFFSET, 0x03); // waveform index
@@ -122,16 +168,25 @@ namespace Audio
 #endif
     }
 
-    void fillAudioBuffer(void)
+    void fillCallbackBuffer(void)
     {
-        _audioSamples[_audioIndex] = (Cpu::getXOUT() & 0xf0) <<5;
-        _audioIndex = (_audioIndex + 1) % AUDIO_SAMPLES;
+        _audioSamples[_audioInIndex++ % AUDIO_BUFFER_SIZE] = (Cpu::getXOUT() & 0xf0) <<5;
     }
 
-    void playAudioBuffer(void)
+    void fillBuffer(void)
     {
-        SDL_QueueAudio(_audioDevice, &_audioSamples[0], _audioIndex <<1);
-        _audioIndex = 0;
+        _audioSamples[_audioInIndex++] = (Cpu::getXOUT() & 0xf0) <<5;
+        if(_audioInIndex == AUDIO_SAMPLES)
+        {
+            playBuffer();
+            _audioInIndex = 0;
+        }
+    }
+
+    void playBuffer(void)
+    {
+        SDL_QueueAudio(_audioDevice, &_audioSamples[0], uint32_t(_audioInIndex) <<1);
+        _audioInIndex = 0;
     }
 
     void playSample(void)
@@ -148,7 +203,7 @@ namespace Audio
 
     void nextScore(void)
     {
-        initialiseChannels();
+        initialiseChannels(false, Cpu::ROMERR);
 
         if(++_scoreIndex >= 1) _scoreIndex = 0;
         _scorePtr = (uint8_t*)_score[_scoreIndex];
@@ -162,7 +217,7 @@ namespace Audio
         if(firstTime == true)
         {
             firstTime = false;
-            initialiseChannels();            
+            initialiseChannels(false, Cpu::ROMERR);            
         }
 
         static int16_t midiDelay = 0;

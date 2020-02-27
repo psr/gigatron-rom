@@ -5,16 +5,13 @@
 
 
 #if defined(_WIN32)
-#include <direct.h>
 #include "dirent/dirent.h"
-#define getcwd _getcwd
 #undef max
 #undef min
 #else
 #include <unistd.h>
 #include <dirent.h>
 #endif
-
 
 #include <SDL.h>
 #include "memory.h"
@@ -47,7 +44,6 @@ namespace Editor
 
     bool _hexEdit = false;
     bool _startMusic = false;
-    bool _handlePS2Key = false;
 
     SDL_Keycode _sdlKeyScanCode = 0;
     uint16_t _sdlKeyModifier = 0;
@@ -64,8 +60,7 @@ namespace Editor
     uint16_t _singleStepVpc = 0x0000;
     uint16_t _singleStepAddress = VIDEO_Y_ADDRESS;
 
-    std::string _cwdPath = ".";
-    std::string _filePath = "./";
+    std::string _browserPath = "./";
 
     MouseState _mouseState;
     MemoryMode _memoryMode = RAM;
@@ -115,8 +110,6 @@ namespace Editor
     bool getPageDnButton(void) {return _pageDnButton;}
     bool getDelAllButton(void) {return _delAllButton;}
  
-    const std::string& getCwdPath(void) {return _cwdPath;}
-
     MemoryMode getMemoryMode(void) {return _memoryMode;}
     EditorMode getEditorMode(void) {return _editorMode;}
     KeyboardMode getKeyboardMode(void) {return _keyboardMode;}
@@ -214,13 +207,6 @@ namespace Editor
         //fprintf(stderr, "%d %d %d  %d %d %d  %08x\n", x, y, cy, _pageUpButton, _pageDnButton, _delAllButton, _mouseState._state);
     }
 
-    std::string getBrowserPath(bool removeSlash)
-    {
-        std::string str = _filePath;
-        if(removeSlash  &&  str.length()) str.erase(str.length()-1);
-        return str;
-    }
-
     bool scanCodeFromIniKey(const std::string& sectionString, const std::string& iniKey, const std::string& defaultKey, KeyCodeMod& keyCodeMod)
     {
         keyCodeMod._keyMod = KMOD_NONE;
@@ -265,16 +251,23 @@ namespace Editor
         return _emulator[keyWord]._keyMod;
     }
 
+    std::string getBrowserPath(bool removeSlash)
+    {
+        std::string str = _browserPath;
+        if(removeSlash  &&  str.length()) str.erase(str.length()-1);
+        return str;
+    }
+    void setBrowserPath(const std::string& path)
+    {
+        _browserPath = path;
+    }
+
 
     void initialise(void)
     {
         SDL_StartTextInput();
 
-        // Current working directory
-        char cwdPath[FILENAME_MAX];
-        if(!getcwd(cwdPath, FILENAME_MAX)) strcpy(cwdPath, ".");
-        _cwdPath = std::string(cwdPath);
-        _filePath = _cwdPath + "/";
+        _browserPath = Loader::getCwdPath() + "/";
 
         // Keyboard to SDL key mapping
         _sdlKeys["ENTER"]       = SDLK_RETURN;
@@ -415,7 +408,6 @@ namespace Editor
         _emulator["ImageEditor"]  = {SDLK_i, KMOD_LCTRL};
         _emulator["ScanlineMode"] = {SDLK_s, KMOD_LCTRL};
         _emulator["Reset"]        = {SDLK_F1, KMOD_LCTRL};
-        _emulator["Execute"]      = {SDLK_F5, KMOD_LCTRL};
         _emulator["Help"]         = {SDLK_h, KMOD_LCTRL};
         _emulator["Quit"]         = {SDLK_q, KMOD_LCTRL};
 
@@ -431,8 +423,7 @@ namespace Editor
         _keyboard["B"]      = {SDLK_SLASH, KMOD_NONE};
 
         // Hardware INI key to SDL key mapping
-        _hardware["Reset"]   = {SDLK_F1, KMOD_LALT};
-        _hardware["Execute"] = {SDLK_F5, KMOD_LALT};
+        _hardware["Reset"]   = {SDLK_F2, KMOD_LCTRL};
 
         // Debugger INI key to SDL key mapping
         _debugger["Debug"]     = {SDLK_F6, KMOD_LCTRL};
@@ -441,7 +432,7 @@ namespace Editor
         _debugger["StepWatch"] = {SDLK_F9, KMOD_LCTRL};
 
         // Input configuration
-        INIReader iniReader(INPUT_CONFIG_INI);
+        INIReader iniReader(Loader::getExePath() + "/" + INPUT_CONFIG_INI);
         _configIniReader = iniReader;
         if(_configIniReader.ParseError() < 0)
         {
@@ -478,7 +469,6 @@ namespace Editor
                     scanCodeFromIniKey(sectionString, "ImageEditor",  "CTRL+I",   _emulator["ImageEditor"]);
                     scanCodeFromIniKey(sectionString, "ScanlineMode", "CTRL+S",   _emulator["ScanlineMode"]);
                     scanCodeFromIniKey(sectionString, "Reset",        "CTRL+F1",  _emulator["Reset"]);
-                    scanCodeFromIniKey(sectionString, "Execute",      "CTRL+F5",  _emulator["Execute"]);
                     scanCodeFromIniKey(sectionString, "Help",         "CTRL+H",   _emulator["Help"]);
                     scanCodeFromIniKey(sectionString, "Quit",         "CTRL+Q",   _emulator["Quit"]);
                 }
@@ -500,8 +490,7 @@ namespace Editor
 
                 case Hardware:
                 {
-                    scanCodeFromIniKey(sectionString, "Reset",   "ALT+F1", _hardware["Reset"]);
-                    scanCodeFromIniKey(sectionString, "Execute", "ALT+F5", _hardware["Execute"]);
+                    scanCodeFromIniKey(sectionString, "Reset",   "CTRL+F2", _hardware["Reset"]);
                 }
                 break;
 
@@ -513,23 +502,25 @@ namespace Editor
                     scanCodeFromIniKey(sectionString, "StepWatch", "CTRL+F9", _debugger["StepWatch"]);
                 }
                 break;
+
+                default: break;
             }
         }
     }
 
     void backOneDirectory(void)
     {
-        size_t slash = _filePath.find_last_of("\\/", _filePath.size()-2);
+        size_t slash = _browserPath.find_last_of("\\/", _browserPath.size()-2);
         if(slash != std::string::npos)
         {
-            _filePath = _filePath.substr(0, slash + 1);
+            _browserPath = _browserPath.substr(0, slash + 1);
         }
     }
 
     void browseDirectory(void)
     {
-        std::string path = _filePath  + ".";
-        Assembler::setIncludePath(_filePath);
+        std::string path = _browserPath  + ".";
+        Assembler::setIncludePath(_browserPath);
 
         _fileEntries.clear();
 
@@ -558,21 +549,21 @@ namespace Editor
         }
 
         std::sort(dirnames.begin(), dirnames.end());
-        for(int i=0; i<dirnames.size(); i++)
+        for(int i=0; i<int(dirnames.size()); i++)
         {
             FileEntry fileEntry = {Dir, dirnames[i]};
             _fileEntries.push_back(fileEntry);
         }
 
         std::sort(filenames.begin(), filenames.end());
-        for(int i=0; i<filenames.size(); i++)
+        for(int i=0; i<int(filenames.size()); i++)
         {
             FileEntry fileEntry = {File, filenames[i]};
             _fileEntries.push_back(fileEntry);
         }
 
         // Only reset cursor and file index if file list size has changed
-        if(int(_fileEntriesSize != _fileEntries.size()))
+        if(_fileEntriesSize != int(_fileEntries.size()))
         {
             _cursorX = 0;
             _cursorY = 0;
@@ -587,7 +578,7 @@ namespace Editor
 
         if(entry != "..")
         {
-            _filePath += entry + "/";
+            _browserPath += entry + "/";
         }
         else
         {
@@ -602,34 +593,37 @@ namespace Editor
         switch(_editorMode)
         {
             case Hex:  _hexBaseAddress = (_hexBaseAddress - HEX_CHARS_X*numRows) & (Memory::getSizeRAM()-1); break;
-            case Load: if((_fileEntriesIndex -= numRows) < 0) _fileEntriesIndex = 0;                                    break;
-            case Rom:  if((_romEntriesIndex -= numRows) < 0) _romEntriesIndex = 0;                                      break;
+            case Load: if((_fileEntriesIndex -= numRows) < 0) _fileEntriesIndex = 0;                         break;
+            case Rom:  if((_romEntriesIndex -= numRows) < 0) _romEntriesIndex = 0;                           break;
+
             case Dasm: 
             {
                 if(numRows == 1)
                 {
                     if(_memoryMode == RAM)
                     {
-                        _vpcBaseAddress = (_vpcBaseAddress - Assembler::getPrevDasmByteCount()) & (Memory::getSizeRAM()-1);
+                        _vpcBaseAddress = uint16_t(_vpcBaseAddress - Assembler::getPrevDasmByteCount()) & (Memory::getSizeRAM()-1);
                     }
                     else
                     {
-                        _ntvBaseAddress = (_ntvBaseAddress - Assembler::getPrevDasmByteCount()) & (Memory::getSizeRAM()-1);
+                        _ntvBaseAddress = uint16_t(_ntvBaseAddress - Assembler::getPrevDasmByteCount()) & (Memory::getSizeRAM()-1);
                     }
                 }
                 else
                 {
                     if(_memoryMode == RAM)
                     {
-                        _vpcBaseAddress = (_vpcBaseAddress - Assembler::getPrevDasmPageByteCount()) & (Memory::getSizeRAM()-1);
+                        _vpcBaseAddress = uint16_t(_vpcBaseAddress - Assembler::getPrevDasmPageByteCount()) & (Memory::getSizeRAM()-1);
                     }
                     else
                     {
-                        _ntvBaseAddress = (_ntvBaseAddress - Assembler::getPrevDasmPageByteCount()) & (Memory::getSizeRAM()-1);
+                        _ntvBaseAddress = uint16_t(_ntvBaseAddress - Assembler::getPrevDasmPageByteCount()) & (Memory::getSizeRAM()-1);
                     }
                 }
             }
             break;
+
+            default: break;
         }
     }
 
@@ -638,6 +632,7 @@ namespace Editor
         switch(_editorMode)
         {
             case Hex:  _hexBaseAddress = (_hexBaseAddress + HEX_CHARS_X*numRows) & (Memory::getSizeRAM()-1); break;
+
             case Load:
             {
                 if(_fileEntries.size() > HEX_CHARS_Y)
@@ -648,6 +643,7 @@ namespace Editor
                 }
             }
             break;
+
             case Rom:
             {
                 if(_romEntries.size() > HEX_CHARS_Y)
@@ -658,32 +654,35 @@ namespace Editor
                 }
             }
             break;
+
             case Dasm:
             {
                 if(numRows == 1)
                 {
                     if(_memoryMode == RAM)
                     {
-                        _vpcBaseAddress = (_vpcBaseAddress + Assembler::getCurrDasmByteCount()) & (Memory::getSizeRAM()-1);
+                        _vpcBaseAddress = uint16_t(_vpcBaseAddress + Assembler::getCurrDasmByteCount()) & (Memory::getSizeRAM()-1);
                     }
                     else
                     {
-                        _ntvBaseAddress = (_ntvBaseAddress + Assembler::getCurrDasmByteCount()) & (Memory::getSizeRAM()-1);
+                        _ntvBaseAddress = uint16_t(_ntvBaseAddress + Assembler::getCurrDasmByteCount()) & (Memory::getSizeRAM()-1);
                     }
                 }
                 else
                 {
                     if(_memoryMode == RAM)
                     {
-                        _vpcBaseAddress = (_vpcBaseAddress + Assembler::getCurrDasmPageByteCount()) & (Memory::getSizeRAM()-1);
+                        _vpcBaseAddress = uint16_t(_vpcBaseAddress + Assembler::getCurrDasmPageByteCount()) & (Memory::getSizeRAM()-1);
                     }
                     else
                     {
-                        _ntvBaseAddress = (_ntvBaseAddress + Assembler::getCurrDasmPageByteCount()) & (Memory::getSizeRAM()-1);
+                        _ntvBaseAddress = uint16_t(_ntvBaseAddress + Assembler::getCurrDasmPageByteCount()) & (Memory::getSizeRAM()-1);
                     }
                 }
             }
             break;
+
+            default: break;
         }
     }
 
@@ -710,6 +709,8 @@ namespace Editor
             {
                 case File: Loader::setUploadTarget(Loader::Emulator); break;
                 case Dir: changeBrowseDirectory(); break;
+
+                default: break;
             }
         }
         else if(_editorMode == Rom)
@@ -727,12 +728,26 @@ namespace Editor
             if(_memoryMode == RAM)
             {
                 auto it = std::find(_vpcBreakPoints.begin(), _vpcBreakPoints.end(), Assembler::getDisassembledCode(_cursorY)->_address);
-                (it != _vpcBreakPoints.end()) ? _vpcBreakPoints.erase(it) : _vpcBreakPoints.push_back(Assembler::getDisassembledCode(_cursorY)->_address);
+                if(it != _vpcBreakPoints.end())
+                {
+                    _vpcBreakPoints.erase(it);
+                }
+                else
+                {
+                    _vpcBreakPoints.push_back(Assembler::getDisassembledCode(_cursorY)->_address);
+                }
             }
             else
             {
                 auto it = std::find(_ntvBreakPoints.begin(), _ntvBreakPoints.end(), Assembler::getDisassembledCode(_cursorY)->_address);
-                (it != _ntvBreakPoints.end()) ? _ntvBreakPoints.erase(it) : _ntvBreakPoints.push_back(Assembler::getDisassembledCode(_cursorY)->_address);
+                if(it != _ntvBreakPoints.end())
+                {
+                    _ntvBreakPoints.erase(it);
+                }
+                else
+                {
+                    _ntvBreakPoints.push_back(Assembler::getDisassembledCode(_cursorY)->_address);
+                }
             }
         }
     }
@@ -748,6 +763,8 @@ namespace Editor
             switch(fileType)
             {
                 case File: Loader::setUploadTarget(Loader::Hardware); break;
+
+                default: break;
             }
         }
     }
@@ -785,23 +802,27 @@ namespace Editor
         if(_sdlKeyScanCode >= SDLK_a  &&  _sdlKeyScanCode <= SDLK_f) range = 2;
         if(range == 1  ||  range == 2)
         {
-            uint16_t value = 0;    
+            uint16_t value = 0;
             switch(range)
             {
-                case 1: value = _sdlKeyScanCode - SDLK_0;      break;
-                case 2: value = _sdlKeyScanCode - SDLK_a + 10; break;
+                case 1: value = uint16_t(_sdlKeyScanCode - SDLK_0);      break;
+                case 2: value = uint16_t(_sdlKeyScanCode - SDLK_a + 10); break;
+
+                default: break;
             }
 
             // Edit memory
             if(_memoryMode == RAM  &&  _cursorY >= 0)
             {
-                uint16_t address = _hexBaseAddress + _cursorX + _cursorY*HEX_CHARS_X;
+                uint16_t address = uint16_t(_hexBaseAddress + _cursorX + _cursorY*HEX_CHARS_X);
                 switch(_memoryDigit)
                 {
-                    case 0: value = (value << 4) & 0x00F0; Cpu::setRAM(address, Cpu::getRAM(address) & 0x000F | value); break;
-                    case 1: value = (value << 0) & 0x000F; Cpu::setRAM(address, Cpu::getRAM(address) & 0x00F0 | value); break;
+                    case 0: value = (value << 4) & 0xF0; Cpu::setRAM(address, uint8_t((Cpu::getRAM(address) & 0x0F) | value)); break;
+                    case 1: value = (value << 0) & 0x0F; Cpu::setRAM(address, uint8_t((Cpu::getRAM(address) & 0xF0) | value)); break;
+
+                    default: break;
                 }
-                _memoryDigit = (++_memoryDigit) & 0x01;
+                _memoryDigit = (_memoryDigit + 1) & 0x01;
                 return;
             }
 
@@ -812,10 +833,12 @@ namespace Editor
                 {
                     switch(_addressDigit)
                     {
-                        case 0: value = (value << 12) & 0xF000; _cpuUsageAddressA = _cpuUsageAddressA & 0x0FFF | value; break;
-                        case 1: value = (value << 8)  & 0x0F00; _cpuUsageAddressA = _cpuUsageAddressA & 0xF0FF | value; break;
-                        case 2: value = (value << 4)  & 0x00F0; _cpuUsageAddressA = _cpuUsageAddressA & 0xFF0F | value; break;
-                        case 3: value = (value << 0)  & 0x000F; _cpuUsageAddressA = _cpuUsageAddressA & 0xFFF0 | value; break;
+                        case 0: value = (value << 12) & 0xF000; _cpuUsageAddressA = (_cpuUsageAddressA & 0x0FFF) | value; break;
+                        case 1: value = (value << 8)  & 0x0F00; _cpuUsageAddressA = (_cpuUsageAddressA & 0xF0FF) | value; break;
+                        case 2: value = (value << 4)  & 0x00F0; _cpuUsageAddressA = (_cpuUsageAddressA & 0xFF0F) | value; break;
+                        case 3: value = (value << 0)  & 0x000F; _cpuUsageAddressA = (_cpuUsageAddressA & 0xFFF0) | value; break;
+
+                        default: break;
                     }
                 }
                 break;
@@ -824,10 +847,12 @@ namespace Editor
                 {
                     switch(_addressDigit)
                     {
-                        case 0: value = (value << 12) & 0xF000; _cpuUsageAddressB = _cpuUsageAddressB & 0x0FFF | value; break;
-                        case 1: value = (value << 8)  & 0x0F00; _cpuUsageAddressB = _cpuUsageAddressB & 0xF0FF | value; break;
-                        case 2: value = (value << 4)  & 0x00F0; _cpuUsageAddressB = _cpuUsageAddressB & 0xFF0F | value; break;
-                        case 3: value = (value << 0)  & 0x000F; _cpuUsageAddressB = _cpuUsageAddressB & 0xFFF0 | value; break;
+                        case 0: value = (value << 12) & 0xF000; _cpuUsageAddressB = (_cpuUsageAddressB & 0x0FFF) | value; break;
+                        case 1: value = (value << 8)  & 0x0F00; _cpuUsageAddressB = (_cpuUsageAddressB & 0xF0FF) | value; break;
+                        case 2: value = (value << 4)  & 0x00F0; _cpuUsageAddressB = (_cpuUsageAddressB & 0xFF0F) | value; break;
+                        case 3: value = (value << 0)  & 0x000F; _cpuUsageAddressB = (_cpuUsageAddressB & 0xFFF0) | value; break;
+
+                        default: break;
                     }
                 }
                 break;
@@ -841,10 +866,12 @@ namespace Editor
                         {
                             switch(_addressDigit)
                             {
-                                case 0: value = (value << 12) & 0xF000; _loadBaseAddress = _loadBaseAddress & 0x0FFF | value; break;
-                                case 1: value = (value << 8)  & 0x0F00; _loadBaseAddress = _loadBaseAddress & 0xF0FF | value; break;
-                                case 2: value = (value << 4)  & 0x00F0; _loadBaseAddress = _loadBaseAddress & 0xFF0F | value; break;
-                                case 3: value = (value << 0)  & 0x000F; _loadBaseAddress = _loadBaseAddress & 0xFFF0 | value; break;
+                                case 0: value = (value << 12) & 0xF000; _loadBaseAddress = (_loadBaseAddress & 0x0FFF) | value; break;
+                                case 1: value = (value << 8)  & 0x0F00; _loadBaseAddress = (_loadBaseAddress & 0xF0FF) | value; break;
+                                case 2: value = (value << 4)  & 0x00F0; _loadBaseAddress = (_loadBaseAddress & 0xFF0F) | value; break;
+                                case 3: value = (value << 0)  & 0x000F; _loadBaseAddress = (_loadBaseAddress & 0xFFF0) | value; break;
+
+                                default: break;
                             }
 
                             if(_loadBaseAddress < LOAD_BASE_ADDRESS) _loadBaseAddress = LOAD_BASE_ADDRESS;
@@ -859,10 +886,12 @@ namespace Editor
                                 {
                                     switch(_addressDigit)
                                     {
-                                        case 0: value = (value << 12) & 0xF000; _vpcBaseAddress = _vpcBaseAddress & 0x0FFF | value; break;
-                                        case 1: value = (value << 8)  & 0x0F00; _vpcBaseAddress = _vpcBaseAddress & 0xF0FF | value; break;
-                                        case 2: value = (value << 4)  & 0x00F0; _vpcBaseAddress = _vpcBaseAddress & 0xFF0F | value; break;
-                                        case 3: value = (value << 0)  & 0x000F; _vpcBaseAddress = _vpcBaseAddress & 0xFFF0 | value; break;
+                                        case 0: value = (value << 12) & 0xF000; _vpcBaseAddress = (_vpcBaseAddress & 0x0FFF) | value; break;
+                                        case 1: value = (value << 8)  & 0x0F00; _vpcBaseAddress = (_vpcBaseAddress & 0xF0FF) | value; break;
+                                        case 2: value = (value << 4)  & 0x00F0; _vpcBaseAddress = (_vpcBaseAddress & 0xFF0F) | value; break;
+                                        case 3: value = (value << 0)  & 0x000F; _vpcBaseAddress = (_vpcBaseAddress & 0xFFF0) | value; break;
+
+                                        default: break;
                                     }
                                 }
                                 break;
@@ -871,10 +900,12 @@ namespace Editor
                                 {
                                     switch(_addressDigit)
                                     {
-                                        case 0: value = (value << 12) & 0xF000; _ntvBaseAddress = _ntvBaseAddress & 0x0FFF | value; break;
-                                        case 1: value = (value << 8)  & 0x0F00; _ntvBaseAddress = _ntvBaseAddress & 0xF0FF | value; break;
-                                        case 2: value = (value << 4)  & 0x00F0; _ntvBaseAddress = _ntvBaseAddress & 0xFF0F | value; break;
-                                        case 3: value = (value << 0)  & 0x000F; _ntvBaseAddress = _ntvBaseAddress & 0xFFF0 | value; break;
+                                        case 0: value = (value << 12) & 0xF000; _ntvBaseAddress = (_ntvBaseAddress & 0x0FFF) | value; break;
+                                        case 1: value = (value << 8)  & 0x0F00; _ntvBaseAddress = (_ntvBaseAddress & 0xF0FF) | value; break;
+                                        case 2: value = (value << 4)  & 0x00F0; _ntvBaseAddress = (_ntvBaseAddress & 0xFF0F) | value; break;
+                                        case 3: value = (value << 0)  & 0x000F; _ntvBaseAddress = (_ntvBaseAddress & 0xFFF0) | value; break;
+
+                                        default: break;
                                     }
                                 }
                                 break;
@@ -886,13 +917,17 @@ namespace Editor
                         {
                             switch(_addressDigit)
                             {
-                                case 0: value = (value << 12) & 0xF000; _hexBaseAddress = _hexBaseAddress & 0x0FFF | value; break;
-                                case 1: value = (value << 8)  & 0x0F00; _hexBaseAddress = _hexBaseAddress & 0xF0FF | value; break;
-                                case 2: value = (value << 4)  & 0x00F0; _hexBaseAddress = _hexBaseAddress & 0xFF0F | value; break;
-                                case 3: value = (value << 0)  & 0x000F; _hexBaseAddress = _hexBaseAddress & 0xFFF0 | value; break;
+                                case 0: value = (value << 12) & 0xF000; _hexBaseAddress = (_hexBaseAddress & 0x0FFF) | value; break;
+                                case 1: value = (value << 8)  & 0x0F00; _hexBaseAddress = (_hexBaseAddress & 0xF0FF) | value; break;
+                                case 2: value = (value << 4)  & 0x00F0; _hexBaseAddress = (_hexBaseAddress & 0xFF0F) | value; break;
+                                case 3: value = (value << 0)  & 0x000F; _hexBaseAddress = (_hexBaseAddress & 0xFFF0) | value; break;
+
+                                default: break;
                             }
                         }
                         break;
+
+                        default: break;
                     }
                 }
                 break;
@@ -901,10 +936,12 @@ namespace Editor
                 {
                     switch(_addressDigit)
                     {
-                        case 0: value = (value << 12) & 0xF000; _varsBaseAddress = _varsBaseAddress & 0x0FFF | value; break;
-                        case 1: value = (value << 8)  & 0x0F00; _varsBaseAddress = _varsBaseAddress & 0xF0FF | value; break;
-                        case 2: value = (value << 4)  & 0x00F0; _varsBaseAddress = _varsBaseAddress & 0xFF0F | value; break;
-                        case 3: value = (value << 0)  & 0x000F; _varsBaseAddress = _varsBaseAddress & 0xFFF0 | value; break;
+                        case 0: value = (value << 12) & 0xF000; _varsBaseAddress = (_varsBaseAddress & 0x0FFF) | value; break;
+                        case 1: value = (value << 8)  & 0x0F00; _varsBaseAddress = (_varsBaseAddress & 0xF0FF) | value; break;
+                        case 2: value = (value << 4)  & 0x00F0; _varsBaseAddress = (_varsBaseAddress & 0xFF0F) | value; break;
+                        case 3: value = (value << 0)  & 0x000F; _varsBaseAddress = (_varsBaseAddress & 0xFFF0) | value; break;
+
+                        default: break;
                     }
                 }
                 break;
@@ -913,10 +950,12 @@ namespace Editor
                 {
                     switch(_addressDigit)
                     {
-                        case 0: value = (value << 12) & 0xF000; _singleStepAddress = _singleStepAddress & 0x0FFF | value; break;
-                        case 1: value = (value << 8)  & 0x0F00; _singleStepAddress = _singleStepAddress & 0xF0FF | value; break;
-                        case 2: value = (value << 4)  & 0x00F0; _singleStepAddress = _singleStepAddress & 0xFF0F | value; break;
-                        case 3: value = (value << 0)  & 0x000F; _singleStepAddress = _singleStepAddress & 0xFFF0 | value; break;
+                        case 0: value = (value << 12) & 0xF000; _singleStepAddress = (_singleStepAddress & 0x0FFF) | value; break;
+                        case 1: value = (value << 8)  & 0x0F00; _singleStepAddress = (_singleStepAddress & 0xF0FF) | value; break;
+                        case 2: value = (value << 4)  & 0x00F0; _singleStepAddress = (_singleStepAddress & 0xFF0F) | value; break;
+                        case 3: value = (value << 0)  & 0x000F; _singleStepAddress = (_singleStepAddress & 0xFFF0) | value; break;
+
+                        default: break;
                     }
                 }
                 break;
@@ -924,7 +963,7 @@ namespace Editor
                 default: return;
             }
 
-            _addressDigit = (++_addressDigit) & 0x03;
+            _addressDigit = (_addressDigit + 1) & 0x03;
         }
     }
 
@@ -943,6 +982,8 @@ namespace Editor
         _singleStep = false;
         _singleStepEnabled = false;
         _singleStepMode = RunToBrk;
+
+        Audio::clearQueue();
     }
 
     // PS2 Keyboard emulation mode
@@ -958,6 +999,8 @@ namespace Editor
                 case SDLK_DOWN:     (_keyboardMode == HwPS2) ? Loader::sendCommandToGiga(HW_PS2_DOWN,   true) : Cpu::setIN(Cpu::getIN() & ~INPUT_DOWN  ); return true;
                 case SDLK_PAGEUP:   (_keyboardMode == HwPS2) ? Loader::sendCommandToGiga(HW_PS2_START,  true) : Cpu::setIN(Cpu::getIN() & ~INPUT_START ); return true;
                 case SDLK_PAGEDOWN: (_keyboardMode == HwPS2) ? Loader::sendCommandToGiga(HW_PS2_SELECT, true) : Cpu::setIN(Cpu::getIN() & ~INPUT_SELECT); return true;
+
+                default: break;
             }
 
             if((_sdlKeyScanCode >= 0  &&  _sdlKeyScanCode <= 31) ||  _sdlKeyScanCode == 127  ||  _sdlKeyScanCode == 'c')
@@ -977,13 +1020,14 @@ namespace Editor
                             return true;
                         }
                     }
+
+                    default: break;
                 }
             }
 
             // Handle normal keys
             if(_sdlKeyScanCode >= 32  &&  _sdlKeyScanCode <= 126)
             {
-                _handlePS2Key = true;
                 return true;
             }
         }
@@ -1022,34 +1066,38 @@ namespace Editor
 
 
     int gtRgbFileindex = 0;
+    std::vector<std::string> names = {"lowres", "turrican", "clouds1", "sunset", "mario", "juggler", "venus", "forest", "doom", "MonaLisa", "parallax"};
 
     void loadGtRgbFile(void)
     {
-        static std::string names[] = {"Gamma_hi", "Gigatron_hi", "Juggler_hi", "Mario_hi"}; //{"Clouds", "Clouds", "Clouds", "Clouds"};
-
         Image::TgaFile tgaFile;
-        Image::GtRgbFile gtRgbFile;
+        Image::loadTgaFile("images/" + names[gtRgbFileindex] + ".tga", tgaFile);
 
-        Image::loadTgaFile(names[gtRgbFileindex] + ".tga", tgaFile);
-        gtRgbFile._header = {GTRGB_IDENTIFIER, Image::GT_RGB_222, tgaFile._header._width, tgaFile._header._height};
+        std::vector<uint8_t> data;
+        std::vector<uint16_t> optional;
+        Image::GtRgbFile gtRgbFile{GTRGB_IDENTIFIER, Image::GT_RGB_222, tgaFile._header._width, tgaFile._header._height, data, optional};
         Image::ditherRGB8toRGB2(tgaFile._data, gtRgbFile._data, tgaFile._header._width, tgaFile._header._height, tgaFile._imageOrigin);
+
+        if(gtRgbFile._header._width > 256)
+        {
+            fprintf(stderr, "Editor::loadGtRgbFile() : Width > 256, (%d, %d), in %s\n", gtRgbFile._header._width, gtRgbFile._header._height, names[gtRgbFileindex].c_str());
+            return;
+        }
 
         uint16_t vram = 0x0800;
         for(int y=0; y<gtRgbFile._header._height; y++)
         {
             for(int x=0; x<gtRgbFile._header._width; x++)
             {
-                uint8_t data = gtRgbFile._data[y*gtRgbFile._header._width + x];
-                Cpu::setRAM(vram++, data);
-                //if((vram & 0x00FF) == 0x00) vram += 0x00A0;
-                if((vram & 0x00FF) == 0xA0) vram = (vram + 0x0100) & 0xFF00;
+                Cpu::setRAM(vram++, gtRgbFile._data[y*gtRgbFile._header._width + x]);
             }
+            vram += 256 - gtRgbFile._header._width;
         }
     }
 
     void loadNextGtRgbFile(void)
     {
-        gtRgbFileindex = (gtRgbFileindex + 1) % 4;
+        gtRgbFileindex = (gtRgbFileindex + 1) % names.size();
         loadGtRgbFile();
     }
 
@@ -1141,44 +1189,6 @@ namespace Editor
     // PS2 Keyboard emulation mode
     bool handlePs2KeyUp(void)
     {
-        _handlePS2Key = false;
-
-        if(_keyboardMode == PS2)
-        {
-            switch(_sdlKeyScanCode)
-            {
-                case SDLK_LEFT:     Cpu::setIN(0xFF); return true;
-                case SDLK_RIGHT:    Cpu::setIN(0xFF); return true;
-                case SDLK_UP:       Cpu::setIN(0xFF); return true;
-                case SDLK_DOWN:     Cpu::setIN(0xFF); return true;
-                case SDLK_PAGEUP:   Cpu::setIN(0xFF); return true;
-                case SDLK_PAGEDOWN: Cpu::setIN(0xFF); return true;
-            }
-
-            if((_sdlKeyScanCode >= 0  &&  _sdlKeyScanCode <= 31) ||  _sdlKeyScanCode == 127  ||  _sdlKeyScanCode == 'c')
-            {
-                switch(_sdlKeyScanCode)
-                {
-                    case SDLK_TAB:       Cpu::setIN(0xFF); return true;
-                    case SDLK_ESCAPE:    Cpu::setIN(0xFF); return true;
-                    case SDLK_RETURN:    Cpu::setIN(0xFF); return true;
-                    case SDLK_DELETE:    Cpu::setIN(0xFF); return true;
-
-                    case 'c': if(_sdlKeyModifier == KMOD_LCTRL) Cpu::setIN(0xFF); return true;
-                }
-            }
-
-            if(_sdlKeyScanCode >= 32  &&  _sdlKeyScanCode <= 126)
-            {
-                Cpu::setIN(0xFF);
-                return true;
-            }
-        }
-        else if(_keyboardMode == HwPS2)
-        {
-            if(_sdlKeyScanCode >= 0  &&  _sdlKeyScanCode <= 127) return true;
-        }
-
         return false;
     }
 
@@ -1202,7 +1212,7 @@ namespace Editor
 
     void handleKeyUp(void)
     {
-        // To`ggle help screen
+        // Toggle help screen
         if(_sdlKeyScanCode == _emulator["Help"]._scanCode  &&  _sdlKeyModifier == _emulator["Help"]._keyMod)
         {
             static bool helpScreen = false;
@@ -1289,18 +1299,20 @@ namespace Editor
         else if(_sdlKeyScanCode ==  _keyboard["Mode"]._scanCode  &&  _sdlKeyModifier == _keyboard["Mode"]._keyMod)
         {
             int keyboardMode = _keyboardMode;
-            keyboardMode = (++keyboardMode) % NumKeyboardModes;
-            _keyboardMode = (KeyboardMode)keyboardMode;
+            keyboardMode = (keyboardMode + 1) % (NumKeyboardModes - 1); // TODO: HwPS2 is disabled for now, (requires extra functionality in BabelFish.ino)
 
             // Enable/disable Arduino emulated PS2 keyboard
-            (_keyboardMode == HwPS2) ? Loader::sendCommandToGiga(HW_PS2_ENABLE,  true) : Loader::sendCommandToGiga(HW_PS2_DISABLE, true);
+            if(keyboardMode == HwPS2) Loader::sendCommandToGiga(HW_PS2_ENABLE,  true);
+            if(_keyboardMode == HwPS2) Loader::sendCommandToGiga(HW_PS2_DISABLE, true);
+
+            _keyboardMode = (KeyboardMode)keyboardMode;
         }
 
         // RAM/ROM mode
         else if(_sdlKeyScanCode ==  _emulator["MemoryMode"]._scanCode  &&  _sdlKeyModifier == _emulator["MemoryMode"]._keyMod)
         {
             int memoryMode = _memoryMode;
-            memoryMode = (_editorMode == Dasm) ? (++memoryMode) % (NumMemoryModes-1) : (++memoryMode) % NumMemoryModes;
+            memoryMode = (_editorMode == Dasm) ? (memoryMode + 1) % (NumMemoryModes-1) : (memoryMode + 1) % NumMemoryModes;
             _memoryMode = (MemoryMode)memoryMode;
             
             // Update debugger address with PC or vPC
@@ -1315,12 +1327,6 @@ namespace Editor
         else if(_sdlKeyScanCode ==  _emulator["MemorySize"]._scanCode  &&  _sdlKeyModifier == _emulator["MemorySize"]._keyMod)
         {
             Cpu::swapMemoryModel();
-        }
-
-        // Hardware upload and execute
-        else if(_sdlKeyScanCode == _hardware["Execute"]._scanCode  &&  _sdlKeyModifier == _hardware["Execute"]._keyMod)
-        {
-            Loader::setUploadTarget(Loader::Hardware);
         }
 
         updateEditor();
@@ -1347,6 +1353,8 @@ namespace Editor
                         Graphics::setWidthHeight(event.window.data1, event.window.data2);
                     }
                     break;
+
+                    default: break;
                 }
             }
             break;
@@ -1356,6 +1364,8 @@ namespace Editor
                 Cpu::shutdown();
                 exit(0);
             }
+
+            default: break;
         }
     }
 
@@ -1389,8 +1399,18 @@ namespace Editor
                 {
                     case RunToBrk:
                     {
-                        auto it = std::find(_ntvBreakPoints.begin(), _ntvBreakPoints.end(), nPC);
-                        if(it != _ntvBreakPoints.end()) singleStep(nPC);
+                        if(_ntvBreakPoints.size() == 0)
+                        {
+                            resetDebugger();
+                        }
+                        else
+                        {
+                            auto it = std::find(_ntvBreakPoints.begin(), _ntvBreakPoints.end(), nPC);
+                            if(it != _ntvBreakPoints.end())
+                            {
+                                singleStep(nPC);
+                            }
+                        }
                     }
                     break;
                 
@@ -1405,6 +1425,8 @@ namespace Editor
                         if(Cpu::getRAM(_singleStepAddress) != _singleStepNtv) singleStep(nPC);
                     }
                     break;
+
+                    default: break;
                 }
             }
             // vCPU debugging, (this code can potentially run for every Native instruction, for efficiency we check vPC so this code only runs for each vCPU instruction)
@@ -1418,13 +1440,24 @@ namespace Editor
                     resetDebugger();
                     fprintf(stderr, "Editor::handleDebugger() : Single step stall for %d milliseconds : exiting debugger.\n", SDL_GetTicks() - _singleStepTicks);
                 }
+
                 // Single step on breakpoint, vPC or on watch value
                 switch(_singleStepMode)
                 {
                     case RunToBrk:
                     {
-                        auto it = std::find(_vpcBreakPoints.begin(), _vpcBreakPoints.end(), vPC);
-                        if(it != _vpcBreakPoints.end()) singleStep(vPC);
+                        if(_vpcBreakPoints.size() == 0)
+                        {
+                            resetDebugger();
+                        }
+                        else
+                        {
+                            auto it = std::find(_vpcBreakPoints.begin(), _vpcBreakPoints.end(), vPC);
+                            if(it != _vpcBreakPoints.end())
+                            {
+                                singleStep(vPC);
+                            }
+                        }
                     }
                     break;
                 
@@ -1440,6 +1473,8 @@ namespace Editor
                         if(Cpu::getRAM(_singleStepAddress) != _singleStepVpc) singleStep(vPC);
                     }
                     break;
+
+                    default: break;
                 }
 
                 clocks = 0;
@@ -1451,9 +1486,20 @@ namespace Editor
         // Pause simulation and handle debugging keys
         while(_singleStepEnabled)
         {
-            _onVarType = updateOnVarType();
-            Graphics::refreshScreen();
-            Graphics::render(false);
+            // Update graphics but only once every 16.66667ms
+            static uint64_t prevFrameCounter = 0;
+            double frameTime = double(SDL_GetPerformanceCounter() - prevFrameCounter) / double(SDL_GetPerformanceFrequency());
+
+            Timing::setFrameUpdate(false);
+            if(frameTime > VSYNC_TIMING_60)
+            {
+                _onVarType = updateOnVarType();
+
+                prevFrameCounter = SDL_GetPerformanceCounter();
+                Timing::setFrameUpdate(true);
+                Graphics::refreshScreen();
+                Graphics::render(false);
+            }
 
             SDL_Event event;
             while(SDL_PollEvent(&event))
@@ -1532,6 +1578,8 @@ namespace Editor
                         }
                     }
                     break;
+
+                    default: break;
                 }
             }
         }
@@ -1541,7 +1589,13 @@ namespace Editor
 
     void handlePS2key(SDL_Event& event)
     {
-        if(_handlePS2Key) (_keyboardMode == HwPS2) ? Loader::sendCommandToGiga(event.text.text[0], true) : Cpu::setIN(event.text.text[0]);
+        switch(_keyboardMode)
+        {
+            case PS2:   Cpu::setIN(event.text.text[0]);                      break;
+            case HwPS2: Loader::sendCommandToGiga(event.text.text[0], true); break;
+
+            default: break;
+        }
     }
 
     void handleInput(void)
@@ -1574,7 +1628,27 @@ namespace Editor
                 case SDL_TEXTINPUT:  handlePS2key(event);     break;
                 case SDL_KEYDOWN:    handleKeyDown();         break;
                 case SDL_KEYUP:      handleKeyUp();           break;
+
+                default: break;
             }
+        }
+
+        if(_keyboardMode == PS2)
+        {
+            int numKeys;
+            const Uint8 *keyboardState = SDL_GetKeyboardState(&numKeys);
+            bool anyKeyPressed = false;
+            static bool anyKeyPressedPrev = anyKeyPressed;
+            for(int i=0; i<numKeys; i++)
+            {
+                if(keyboardState[i])
+                { 
+                    anyKeyPressed = true;
+                    break;
+                }
+            }
+            if(anyKeyPressedPrev  &&  !anyKeyPressed) Cpu::setIN(0xFF);
+            anyKeyPressedPrev = anyKeyPressed;
         }
 
         // Updates current game's high score once per second, (assuming handleInput is called in vertical blank)

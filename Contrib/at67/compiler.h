@@ -25,19 +25,17 @@
 #define USER_CODE_START   0x0200
 #define USER_VAR_END      0x007F
 
-//#define SMALL_CODE_SIZE
-//#define ARRAY_INDICES_ONE
-
 
 namespace Compiler
 {
-    enum VarType {VarInt8=0, VarInt16, VarInt32, VarFloat16, VarFloat32, VarArray, VarStr};
+    enum VarType {VarInt8=1, VarInt16, VarStr, VarInt32, VarFloat16, VarFloat32, VarArray};
     enum IntSize {Int8=1, Int16=2, Int32=4};
     enum ConstType {ConstInt16, ConstStr};
     enum ConstStrType {StrChar, StrHex, StrHexw, StrLeft, StrRight, StrMid};
     enum IfElseEndType {IfBlock, ElseIfBlock, ElseBlock, EndIfBlock};
     enum OperandType {OperandVar, OperandTemp, OperandConst};
-    enum StatementResult {StatementError, StatementSuccess, StatementExpression, SingleStatementParsed, MultiStatementParsed};
+    enum StatementResult {StatementError, StatementSuccess, StatementExpression, SingleStatementParsed, MultiStatementParsed, StringStatementParsed};
+    enum CodeOptimiseType {CodeSpeed, CodeSize};
 
     struct Constant
     {
@@ -130,6 +128,18 @@ namespace Compiler
         std::vector<uint16_t> _lut;
     };
 
+    struct InputLut
+    {
+        uint16_t _address;
+        uint16_t _varsAddr;
+        uint16_t _strsAddr;
+        uint16_t _typesAddr;
+
+        std::vector<uint16_t> _varsLut;
+        std::vector<uint16_t> _strsLut;
+        std::vector<uint16_t> _typesLut;
+    };
+
     struct CodeLine
     {
         std::string _text;
@@ -140,6 +150,7 @@ namespace Compiler
         std::string _expression;
         OnGotoGosubLut _onGotoGosubLut;
         StrConcatLut _strConcatLut;
+        InputLut _inputLut;
         int _vasmSize = 0;
         int _labelIndex = -1;
         int  _varIndex = -1;
@@ -167,7 +178,8 @@ namespace Compiler
         int16_t _loopStep;
         uint16_t _varEnd;
         uint16_t _varStep;
-        bool _optimise = false;
+        bool _farJump = true;
+        bool _optimise = true;
         int _codeLineIndex;
     };
 
@@ -184,6 +196,7 @@ namespace Compiler
     {
         int _jmpIndex;
         int _codeLineIndex;
+        Expression::CCType _ccType;
     };
 
     struct WhileWendData
@@ -209,7 +222,14 @@ namespace Compiler
     struct DefDataWord
     {
         uint16_t _address;
-        std::vector<uint16_t> _data;
+        std::vector<int16_t> _data;
+    };
+
+    struct DefDataImage
+    {
+        uint16_t _address;
+        uint16_t _width, _height, _stride;
+        std::vector<uint8_t> _data;
     };
 
 
@@ -218,15 +238,22 @@ namespace Compiler
     uint16_t getRuntimeStart(void);
     uint16_t getTempVarStart(void);
     uint16_t getStrWorkArea(void);
+    CodeOptimiseType getCodeOptimiseType(void);
+    bool getCompilingError(void);
+    bool getArrayIndiciesOne(void);
+
     std::string& getTempVarStartStr(void);
     int getCurrentLabelIndex(void);
     std::string& getNextInternalLabel(void);
 
     void setRuntimeEnd(uint16_t runtimeEnd);
     void setRuntimeStart(uint16_t runtimeStart);
+    void setTempVarStart(uint16_t tempVarStart);
+    void setStrWorkArea(uint16_t strWorkArea);
     void setCreateNumericLabelLut(bool createNumericLabelLut);
-    void setNextInternalLabel(const std::string& label);
-    void adjustDiscardedLabels(const std::string name, uint16_t address);
+    void setCodeOptimiseType(CodeOptimiseType codeOptimiseType);
+    void setCompilingError(bool compilingError);
+    void setArrayIndiciesOne(bool arrayIndiciesOne);
 
     int incJumpFalseUniqueId(void);
 
@@ -241,6 +268,7 @@ namespace Compiler
     std::vector<std::string>& getRuntime(void);
     std::vector<DefDataByte>& getDefDataBytes(void);
     std::vector<DefDataWord>& getDefDataWords(void);
+    std::vector<DefDataImage>& getDefDataImages(void);
 
     std::map<std::string, MacroIndexEntry>& getMacroIndexEntries(void);
 
@@ -249,6 +277,9 @@ namespace Compiler
     std::stack<EndIfData>& getEndIfDataStack(void);
     std::stack<WhileWendData>& getWhileWendDataStack(void);
     std::stack<RepeatUntilData>& getRepeatUntilDataStack(void);
+
+    void setNextInternalLabel(const std::string& label);
+    void adjustDiscardedLabels(const std::string name, uint16_t address);
 
     bool initialise(void);
     bool initialiseMacros(void);
@@ -264,7 +295,7 @@ namespace Compiler
     int findStr(std::string& strName);
 
     bool createCodeLine(const std::string& code, int codeLineOffset, int labelIndex, int varIndex, Expression::Int16Byte int16Byte, bool vars, CodeLine& codeLine);
-    void createLabel(uint16_t address, const std::string& name, const std::string& output, int codeLineIndex, Label& label, bool numeric=false, bool addUnderscore=true, bool pageJump=false, bool gosub=false);
+    void createLabel(uint16_t address, const std::string& name, int codeLineIndex, Label& label, bool numeric=false, bool addUnderscore=true, bool pageJump=false, bool gosub=false);
     void createIntVar(const std::string& varName, int16_t data, int16_t init, CodeLine& codeLine, int codeLineIndex, bool containsVars, int& varIndex, VarType varType=VarInt16, uint16_t arrayStart=0x0000, int intSize=Int16, int arrSize=0);
     int getOrCreateString(CodeLine& codeLine, int codeLineIndex, const std::string& str, std::string& name, uint16_t& address, uint8_t maxSize=USER_STR_SIZE, bool constString=true);
     uint16_t getOrCreateConstString(const std::string& input, int& index);
@@ -281,13 +312,13 @@ namespace Compiler
     void getNextTempVar(void);
 
     uint32_t isExpression(std::string& input, int& varIndex, int& constIndex, int& strIndex);
-    OperandType parseExpression(CodeLine& codeLine, int codeLineIndex, std::string& expression, std::string& operand, Expression::Numeric& numeric);
-    uint32_t parseExpression(CodeLine& codeLine, int codeLineIndex, std::string& expression, Expression::Numeric& numeric);
-    uint32_t handleExpression(CodeLine& codeLine, int codeLineIndex, std::string& expression, Expression::Numeric numeric);
+    OperandType parseExpression(int codeLineIndex, std::string& expression, std::string& operand, Expression::Numeric& numeric);
+    uint32_t parseExpression(int codeLineIndex, std::string& expression, Expression::Numeric& numeric);
+    uint32_t handleExpression(int codeLineIndex, std::string& expression, Expression::Numeric numeric);
     StatementResult parseMultiStatements(const std::string& code, CodeLine& codeLine, int codeLineIndex, int& varIndex, int& strIndex);
 
-    void addLabelToJumpCC(std::vector<VasmLine>& vasm, std::string& label);
-    void addLabelToJump(std::vector<VasmLine>& vasm, std::string& label);
+    void addLabelToJumpCC(std::vector<VasmLine>& vasm, const std::string& label);
+    void addLabelToJump(std::vector<VasmLine>& vasm, const std::string& label);
 
     bool compile(const std::string& inputFilename, const std::string& outputFilename);
 }

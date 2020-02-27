@@ -1,6 +1,7 @@
 _startAddress_      EQU                     0x0200
 
 ; Internal variables
+serialRawPrev       EQU                     0x0081
 register0           EQU                     0x0082
 register1           EQU                     register0 + 0x02
 register2           EQU                     register0 + 0x04
@@ -25,26 +26,29 @@ frameCountPrev      EQU                     register0 + 0x28
 miscFlags           EQU                     register0 + 0x2A
 highByteMask        EQU                     register0 + 0x2C
 
+; Internal buffers
+textWorkArea        EQU                     0xffa0
+
 ; Includes
 %include            include/gigatron.i
-%include            include/macros.i
+%include            include/macros_CALLI.i
 
 ; Labels
 _entryPoint_        EQU                     0x0200
-_10                 EQU                     0x0240
-_20                 EQU                     0x0249
-_30                 EQU                     0x025b
-_40                 EQU                     0x0282
-_50                 EQU                     0x02a3
-_60                 EQU                     0x02d1
-_70                 EQU                     0x0315
-_80                 EQU                     0x033c
-_90                 EQU                     0x0361
+_10                 EQU                     0x021b
+_20                 EQU                     0x0222
+_30                 EQU                     0x0234
+_40                 EQU                     0x0255
+_50                 EQU                     0x0274
+_60                 EQU                     0x029e
+_70                 EQU                     0x02cb
+_80                 EQU                     0x02ee
+_90                 EQU                     0x0313
 _page_0x0300        EQU                     0x0300
-_else_0x03bc        EQU                     0x0383
+_else_0x036f        EQU                     0x032d
 
 ; Variables
-_Z_array            EQU                     0xfe00
+_Z_array            EQU                     0xfee2
 _Z_array            DW                      0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 0x0000 
 _D                  EQU                     0x0030
 _M                  EQU                     0x0032
@@ -54,27 +58,21 @@ _J                  EQU                     0x0038
 _A                  EQU                     0x003a
 
 ; Strings
-_str_0xff60          EQU                     0xff60
-_str_0xff60          DB                      3 'PI=' 0
-_str_0xff65          EQU                     0xff65
-_str_0xff65          DB                      1 '.' 0
+_str_0xfedd         EQU                     0xfedd
+_str_0xfedd         DB                      3 'PI=' 0
+_str_0xfeda         EQU                     0xfeda
+_str_0xfeda         DB                      1 '.' 0
 
 ; Define Bytes
+
+; Define Words
 
 ; Lookup Tables
 
 ; Code
-_entryPoint_        InitRealTimeProc        
-                    InitEqOp                
-                    InitNeOp                
-                    InitLeOp                
-                    InitGeOp                
-                    InitLtOp                
-                    InitGtOp                
-                    Initialise                                              ; INIT
+_entryPoint_        Initialise                                              ; INIT
 
-                    LDWI                    clearVertBlinds
-                    CALL                    giga_vAC
+                    CALLI                   clearVertBlinds
                     LDI                     0
                     STW                     _D                              ; DIM Z(94)=0:CLS:D=0
 
@@ -88,21 +86,20 @@ _20                 LDI                     94
                     LDI                     1
                     STW                     0xb2                            ; M=94:FOR I=0 TO M-1
 
-_30                 LDWI                    0xfe00
+_30                 LDWI                    0xfee2
                     ADDW                    _I
                     ADDW                    _I
                     STW                     register1
                     LDI                     20
                     DOKE                    register1
-                    ForNextLoopStepUp       _I _30 0xb0 0xb2
-                    PrintString             _str_0xff60                     ; Z(I)=20:NEXT I:PRINT "PI=";
+                    ForNextFarVarPos        _I _30 0xb0 0xb2
+                    PrintString             _str_0xfedd                     ; Z(I)=20:NEXT I:PRINT "PI=";
 
 _40                 LDW                     _D
                     STW                     mathX
                     LDI                     100
                     STW                     mathY
-                    LDWI                    divide16bit
-                    CALL                    giga_vAC
+                    CALLI                   divide16bit
                     LDW                     mathRem
                     STW                     _E
                     LDI                     0
@@ -121,19 +118,17 @@ _50                 LDW                     _M
                     STW                     mathX
                     LDW                     _J
                     STW                     mathY
-                    LDWI                    multiply16bit
-                    CALL                    giga_vAC
+                    CALLI                   multiply16bit
                     ADDW                    _D
                     STW                     0xc4
-                    LDWI                    0xfe00
+                    LDWI                    0xfee2
                     ADDW                    _J
                     ADDW                    _J
                     DEEK                    
                     STW                     mathX
                     LDI                     100
                     STW                     mathY
-                    LDWI                    multiply16bit
-                    CALL                    giga_vAC
+                    CALLI                   multiply16bit
                     ADDW                    0xc4
                     STW                     _D                              ; J=M-I:D=D+D*J+Z(J)*100
 
@@ -145,27 +140,21 @@ _60                 LDW                     _J
                     STW                     mathX
                     LDW                     _A
                     STW                     mathY
-                    LDWI                    divide16bit
-                    CALL                    giga_vAC
-                    LDWI                    0xfe00
+                    CALLI                   divide16bit
+                    LDWI                    0xfee2
                     ADDW                    _J
                     ADDW                    _J
                     STW                     register1
-                    STW                     0xde
-                    LDWI                    _page_0x0300
-                    CALL                    giga_vAC
-_page_0x0300        LDW                     0xde
                     LDW                     mathRem
                     DOKE                    register1
                     LDW                     _D
                     STW                     mathX
                     LDW                     _A
                     STW                     mathY
-                    LDWI                    divide16bit
-                    CALL                    giga_vAC
+                    CALLI                   divide16bit
                     STW                     _D                              ; A=J+J+1:Z(J)=D%A:D=D/A
 
-_70                 ForNextLoopStepUp       _I _50 0xb0 0xb2
+_70                 ForNextFarVarPos        _I _50 0xb0 0xb2
                     LDW                     _M
                     SUBI                    6
                     STW                     _M
@@ -173,8 +162,7 @@ _70                 ForNextLoopStepUp       _I _50 0xb0 0xb2
                     STW                     mathX
                     LDI                     100
                     STW                     mathY
-                    LDWI                    divide16bit
-                    CALL                    giga_vAC
+                    CALLI                   divide16bit
                     ADDW                    _E
                     STW                     _E                              ; NEXT I:M=M-6:E=E+D/100
 
@@ -182,29 +170,27 @@ _80                 LDW                     _E
                     STW                     mathX
                     LDI                     10
                     STW                     mathY
-                    LDWI                    divide16bit
-                    CALL                    giga_vAC
+                    CALLI                   _page_0x0300
+_page_0x0300        CALLI                   divide16bit
                     PrintAcInt16            
                     LDW                     _M
                     SUBI                    88
                     BNE                     _90
-                    PrintString             _str_0xff65                     ; PRINT E/10;:IF M &&= 88 THEN PRINT ".";
+                    PrintString             _str_0xfeda                     ; PRINT E/10;:IF M &&= 88 THEN PRINT ".";
 
 _90                 LDW                     _E
                     STW                     mathX
                     LDI                     10
                     STW                     mathY
-                    LDWI                    divide16bit
-                    CALL                    giga_vAC
+                    CALLI                   divide16bit
                     LDW                     mathRem
                     PrintAcInt16            
                     LDW                     _M
                     SUBI                    10
-                    BLE                     _else_0x03bc
-                    LDWI                    _40
-                    CALL                    giga_vAC                        ; PRINT E%10;:IF M &&> 10 THEN GOTO 40
+                    BLE                     _else_0x036f
+                    CALLI                   _40                             ; PRINT E%10;:IF M &&> 10 THEN GOTO 40
 
-_else_0x03bc        BRA                     _else_0x03bc                    ; END
+_else_0x036f        BRA                     _else_0x036f                    ; END
 
 
 
@@ -214,32 +200,25 @@ _else_0x03bc        BRA                     _else_0x03bc                    ; EN
 ;****************************************************************************************************************************************
 ;****************************************************************************************************************************************
 
-realTimeProc        EQU     0xff68
-convertEqOp         EQU     0xff71
-convertNeOp         EQU     0xff7a
-convertLeOp         EQU     0xff83
-convertGeOp         EQU     0xff8c
-convertLtOp         EQU     0xff95
-convertGtOp         EQU     0xff9e
-multiply16bit       EQU     0xfd5a
-divide16bit         EQU     0xfd00
-resetVideoTable     EQU     0xfdd5
-initClearFuncs      EQU     0xffa7
-clearVertBlinds     EQU     0xfebe
-clearCursorRow      EQU     0xfc00
-printInit           EQU     0xfc49
-printText           EQU     0xffca
-printDigit          EQU     0xfc64
-printInt16          EQU     0xfd81
-printChar           EQU     0xfc86
-newLineScroll       EQU     0xfb00
-realTimeProcAddr    EQU     0x00dc
-convertEqOpAddr     EQU     0x00d0
-convertNeOpAddr     EQU     0x00d2
-convertLeOpAddr     EQU     0x00d4
-convertGeOpAddr     EQU     0x00d6
-convertLtOpAddr     EQU     0x00d8
-convertGtOpAddr     EQU     0x00da
+realTimeProc        EQU     0xfe07
+convertEqOp         EQU     0xfd7b
+convertNeOp         EQU     0xfd72
+convertLeOp         EQU     0xfd69
+convertGeOp         EQU     0xfd60
+convertLtOp         EQU     0xfd57
+convertGtOp         EQU     0xfd4e
+multiply16bit       EQU     0xfdcc
+divide16bit         EQU     0xfe0e
+resetVideoTable     EQU     0xfd2e
+initClearFuncs      EQU     0xfeb9
+clearVertBlinds     EQU     0xfe80
+clearCursorRow      EQU     0xfcb7
+printInit           EQU     0xfd13
+printText           EQU     0xfe69
+printDigit          EQU     0xfc95
+printInt16          EQU     0xfd84
+printChar           EQU     0xfc3e
+newLineScroll       EQU     0xfba4
 
 
 ; do *NOT* use register4 to register7 during time slicing if you call realTimeProc
@@ -248,13 +227,11 @@ defaultLabel        EQU     register1
 lutLabs             EQU     register2
 lutAddrs            EQU     register3
 lutIndex            EQU     register8
-lutLabel            EQU     register9
 
 
                     ; runs real time, (time sliced), code at regular intervals
 realTimeProc        PUSH
-                    LDWI    realTimeStub                    ; realTimeStub gets replaced by MIDI/SPRITE etc routines
-                    CALL    giga_vAC
+                    CALLI   realTimeStub                    ; realTimeStub gets replaced by MIDI/SPRITE etc routines
                     POP
                     RET
                     
@@ -310,39 +287,45 @@ convertGt_1         LDI     1
 
 
 ; do *NOT* use register4 to register7 during time slicing if you call realTimeProc
-mathX               EQU     register0
-mathY               EQU     register1
-mathSum             EQU     register2
-mathMask            EQU     register3
-mathRem             EQU     register8
-mathSign            EQU     register9
-mathScratch         EQU     register10
-mathShift           EQU     register11
-mathBase            EQU     register8
-mathPow             EQU     register9
-mathResult          EQU     register10
+mathX               EQU     register8
+mathY               EQU     register9
+mathSum             EQU     register12
+mathMask            EQU     register13
+mathRem             EQU     register12
+mathSign            EQU     register13
+mathScratch         EQU     register14
+mathShift           EQU     register15
+mathBase            EQU     register10
+mathPow             EQU     register11
+mathResult          EQU     register14
 
 
                     ; accumulator = mathX * mathY, (result 16bit)
 multiply16bit       LDI     0
                     STW     mathSum
-                    LDI     1
-    
-multiply16_loop     STW     mathMask
-                    ANDW    mathY
+                    LDW     mathX
+                    BEQ     multiply16_exit     ; if x=0 then return 0
+                    LDWI    SYS_LSRW1_48
+                    STW     giga_sysFn
+                    LDW     mathY
+                    
+multiply16_loop     BEQ     multiply16_exit     ; if y=0 then return
+                    ANDI    1
                     BEQ     multiply16_skip
                     LDW     mathSum
                     ADDW    mathX
-                    STW     mathSum
+                    STW     mathSum             ; mathSum += mathX
                     
 multiply16_skip     LDW     mathX
-                    ADDW    mathX
-                    STW     mathX
-                    LDW     mathMask
-                    ADDW    mathMask
-                    BNE     multiply16_loop
-                    PUSH
-                    CALL    realTimeProcAddr
+                    LSLW
+                    STW     mathX               ; mathX = mathX <<1
+                    LDW     mathY
+                    SYS     48
+                    STW     mathY               ; mathY = mathY >>1
+                    BRA     multiply16_loop
+
+multiply16_exit     PUSH
+                    CALLI   realTimeProc
                     POP
                     LDW     mathSum
                     RET
@@ -385,7 +368,7 @@ divide16_skip3      LDW     mathX
                     INC     mathX
                     
 divide16_skip4      PUSH
-                    CALL    realTimeProcAddr
+                    CALLI   realTimeProc
                     POP
                     LDW     mathScratch
                     ADDI    1
@@ -422,7 +405,7 @@ resetVideoTable     PUSH
                     LDWI    giga_videoTable
                     STW     evenAddr
     
-resetVT_loop        CALL    realTimeProcAddr
+resetVT_loop        CALLI   realTimeProc
                     LDW     vramAddr
                     DOKE    evenAddr
                     INC     evenAddr
@@ -436,8 +419,7 @@ resetVT_loop        CALL    realTimeProcAddr
 
 
 initClearFuncs      PUSH
-                    LDWI    resetVideoTable
-                    CALL    giga_vAC
+                    CALLI   resetVideoTable
     
                     LDWI    0x0002                              ; starting cursor position
                     STW     cursorXY
@@ -459,23 +441,22 @@ initClearFuncs      PUSH
 
                     ; clears the viewable screen using a vertical blinds effect
 clearVertBlinds     PUSH
-                    LDWI    initClearFuncs
-                    CALL    giga_vAC
+                    CALLI   initClearFuncs
 
                     LDWI    giga_vram
                     STW     giga_sysArg4
                     LD      giga_sysArg4 + 1
                     ST      top
     
-clearVB_loop        CALL    realTimeProcAddr
+clearVB_loop        CALLI   realTimeProc
                     LD      top
                     ST      giga_sysArg4 + 1                    ; top line
-                    SYS     0xFF                                ; SYS_Draw4_30, 270 - 30/2 = 0xFF
+                    SYS     30
     
                     LDWI    giga_yres - 1 + 16
                     SUBW    top
                     ST      giga_sysArg4 + 1                    ; bottom line
-                    SYS     0xFF                                ; SYS_Draw4_30, 270 - 30/2 = 0xFF
+                    SYS     30
     
                     LD      giga_sysArg4
                     ADDI    0x04
@@ -494,7 +475,7 @@ clearVB_loop        CALL    realTimeProcAddr
 
 
 
-; do *NOT* use register4 to register7 during time slicing if you call realTimeProc
+; do *NOT* use register4 to register7 during time slicing if you use realTimeProc
 textStr             EQU     register0
 textNum             EQU     register0
 textBak             EQU     register0
@@ -530,23 +511,18 @@ printInit           LDWI    SYS_VDrawBits_134
 
                     ; prints text string pointed to by the accumulator
 printText           PUSH
-                    LDWI    printInit
-                    CALL    giga_vAC
-                    LDW     textStr             
-                    PEEK                                    ; first byte is length
-                    BEQ     printT_exit
-    
-printT_char         ST      textLen
-                    INC     textStr                         ; next char
+                    STW     textStr
+                    CALLI   printInit
+
+                    ; first byte is length
+printT_char         INC     textStr                         ; next char
                     LDW     textStr             
                     PEEK
+                    BEQ     printT_exit                     ; check for delimiting zero
                     ST      textChr
-                    LDWI    printChar
-                    CALL    giga_vAC
-
-                    LD      textLen
-                    SUBI    1
-                    BNE     printT_char
+                    CALLI   printChar
+                    BRA     printT_char
+                    
 printT_exit         POP
                     RET
 
@@ -554,6 +530,7 @@ printT_exit         POP
 
                     ; prints single digit in textNum
 printDigit          PUSH
+                    STW     digitMult
                     LDW     textNum
 printD_index        SUBW    digitMult
                     BLT     printD_cont
@@ -565,8 +542,7 @@ printD_cont         LD      digitIndex
                     BEQ     printD_exit
                     ORI     0x30
                     ST      textChr
-                    LDWI    printChar
-                    CALL    giga_vAC
+                    CALLI   printChar
                     LDI     0x30
                     ST      digitIndex
 printD_exit         POP
@@ -575,41 +551,35 @@ printD_exit         POP
 
                     ; prints 16bit int in textNum
 printInt16          PUSH
-                    LDWI    printInit
-                    CALL    giga_vAC
+                    STW     textNum
+                    CALLI   printInit
                     LDI     0
                     ST      digitIndex
                     LDW     textNum
                     BGE     printI16_pos
                     LDI     0x2D
                     ST      textChr
-                    LDWI    printChar
-                    CALL    giga_vAC
+                    CALLI   printChar
                     LDWI    0
                     SUBW    textNum
                     STW     textNum    
     
 printI16_pos        LDWI    10000
                     STW     digitMult
-                    LDWI    printDigit
-                    CALL    giga_vAC
+                    CALLI   printDigit
                     LDWI    1000
                     STW     digitMult
-                    LDWI    printDigit
-                    CALL    giga_vAC
+                    CALLI   printDigit
                     LDWI    100
                     STW     digitMult
-                    LDWI    printDigit
-                    CALL    giga_vAC
+                    CALLI   printDigit
                     LDWI    10
                     STW     digitMult
-                    LDWI    printDigit
-                    CALL    giga_vAC
+                    CALLI   printDigit
                     LD      textNum
                     ORI     0x30
                     ST      textChr
-                    LDWI    printChar
-                    CALL    giga_vAC
+                    CALLI   printChar
                     POP
                     RET
 
@@ -642,7 +612,7 @@ printC_slice        ST      textSlice
                     LDW     textFont                        ; text font slice base address
                     LUP     0x00                            ; get ROM slice
                     ST      giga_sysArg2
-                    SYS     0xCB                            ; draw vertical slice, SYS_VDrawBits_134, 270 - 134/2 = 0xCB
+                    SYS     134                             ; draw vertical slice, SYS_VDrawBits_134, 270 - 134/2 = 0xCB
                     INC     textFont                        ; next vertical slice
                     INC     giga_sysArg4                    ; next x
                     LD      textSlice
@@ -650,18 +620,17 @@ printC_slice        ST      textSlice
                     BNE     printC_slice
                     
                     ST      giga_sysArg2                    ; result of printC_slice is 0
-                    SYS     0xCB                            ; draw last blank slice
+                    SYS     134                             ; draw last blank slice
                     INC     giga_sysArg4                    ; using sysArg4 as a temporary cursor address for multiple char prints
                     
                     PUSH
-                    CALL    realTimeProcAddr
+                    CALLI   realTimeProc
                     LD      cursorXY
                     ADDI    0x06
                     ST      cursorXY
                     SUBI    giga_xres - 5                   ; giga_xres - 6, (154), is last possible char in row
                     BLT     printC_pop
-                    LDWI    newLineScroll                   ; next row, scroll at bottom
-                    CALL    giga_vAC
+                    CALLI   newLineScroll                   ; next row, scroll at bottom
                     
 printC_pop          POP
 
@@ -679,37 +648,36 @@ clearCursorRow      PUSH
     
                     LDWI    SYS_Draw4_30                    ; setup 4 pixel SYS routine
                     STW     giga_sysFn
-    
+
                     LDWI    giga_videoTable                 ; current cursor position
                     PEEK
                     ST      giga_sysArg4 + 1
                     LDI     8
 
 clearCR_loopy       ST      clearLoop
-                    CALL    realTimeProcAddr
+                    CALLI   realTimeProc
                     LDI     giga_xres
                     
 clearCR_loopx       SUBI    4                               ; loop is unrolled 4 times
                     ST      giga_sysArg4
-                    SYS     0xFF                            ; SYS_Draw4_30, 270 - 30/2 = 0xFF
+                    SYS     30
                     SUBI    4
                     ST      giga_sysArg4
-                    SYS     0xFF                            ; SYS_Draw4_30, 270 - 30/2 = 0xFF
+                    SYS     30
                     SUBI    4
                     ST      giga_sysArg4
-                    SYS     0xFF                            ; SYS_Draw4_30, 270 - 30/2 = 0xFF
+                    SYS     30
                     SUBI    4
                     ST      giga_sysArg4
-                    SYS     0xFF                            ; SYS_Draw4_30, 270 - 30/2 = 0xFF
+                    SYS     30
                     BGT     clearCR_loopx
-                    
+    
                     INC     giga_sysArg4 + 1                ; next line
                     LD      clearLoop
                     SUBI    1
                     BNE     clearCR_loopy
-
-                    LDWI    printInit
-                    CALL    giga_vAC                        ; re-initialise the SYS registers
+                    
+                    CALLI   printInit                       ; re-initialise the SYS registers
                     POP
                     RET
 
@@ -735,12 +703,13 @@ newLS_cont0         PUSH
                     LDI     giga_yres - 8
                     ST      cursorXY + 1
                     
-newLS_cont1         LDWI    clearCursorRow
-                    CALL    giga_vAC
+newLS_cont1         CALLI   clearCursorRow
+                    
                     LDWI    giga_videoTable
                     STW     scanLine
     
-newLS_scroll        CALL    realTimeProcAddr
+                    ; scroll all scan lines by 8 through 0x08 to 0x7F
+newLS_scroll        CALLI   realTimeProc
                     LDW     scanLine
                     PEEK
                     ADDI    8
@@ -756,13 +725,12 @@ newLS_adjust        ADDI    8
                     LD      scanLine
                     SUBI    0xF0                            ; scanline pointers end at 0x01EE
                     BLT     newLS_scroll
-                    
+        
                     LDWI    0x8000
                     ORW     miscFlags
                     STW     miscFlags                       ; set on bottom row flag
                     
-newLS_exit          LDWI    printInit
-                    CALL    giga_vAC                        ; re-initialise the SYS registers
+newLS_exit          CALLI   printInit                       ; re-initialise the SYS registers
                     POP
                     RET
 

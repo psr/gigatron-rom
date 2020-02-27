@@ -16,10 +16,10 @@ class Program:
     self.forRom = forRom # Inject trampolines if compiling for ROM XXX why not do that outside?
     self.comments = []   # Stack of line numbers
     self.lineNumber = 0
+    self.lastWord = None
     self.filename = None
     self.openBlocks = [0] # Outside first block is 0
     self.nextBlockId = 1
-    self.start = {} # blockId -> address of block start
     self.loops = {} # blockId -> address after `do'
     self.elses = {} # blockId -> count of `else'
     self.defs  = {} # blockId -> address of last `def'
@@ -67,14 +67,11 @@ class Program:
         elif nextChar == '[':
            self.openBlocks.append(self.nextBlockId)
            self.elses[self.nextBlockId] = 0
-           self.start[self.nextBlockId] = self.vPC
            self.nextBlockId += 1
         elif nextChar == ']':
           if len(self.openBlocks) <= 1:
             self.error('Block close without open')
           b = self.openBlocks.pop()
-          if self.start[b]>>8 != (self.vPC-1)>>8:
-            self.error('Block crosses page boundary')
           define('__%s_%d_cond%d__' % (self.name, b, self.elses[b]), prev(self.vPC))
           del self.elses[b]
           if b in self.defs:
@@ -148,9 +145,10 @@ class Program:
 
       # Label definitions
       if has(var) and has(con):
-        if op == '=': self.defSymbol(var, con)
-        else:
-          self.error("Invalid operator '%s' with name and constant" % op)
+        if   op == '=' and var == 'zpReset': zpReset(con)
+        elif op == '=' and var == 'execute': self.execute = con
+        elif op == '=': self.defSymbol(var, con)
+        else: self.error("Invalid operator '%s' with name and constant" % op)
 
       # Words with constant value as operand
       elif has(con):
@@ -178,11 +176,10 @@ class Program:
         elif op == '> ++': self.emitOp('INC'); con += 1
         elif op == '!!':   self.emitOp('SYS'); con = self.sysTicks(con)
         elif op == '!':
-          if 0 <= con < 256:
-            # XXX Depricate in gcl1? (Replace with i!!)
+          if isinstance(con, int) and 0 <= con < 256:
+            # XXX Deprecate in gcl1, replace with i!!
             self.emitOp('SYS'); con = self.sysTicks(con)
           else:
-            self.warning('CALLI is an experimental feature')
             self.emitOp('CALLI_DEVROM').emit(lo(con)); con = hi(con)
         elif op == '?':    self.emitOp('LUP');          #self.depr('i?', 'i??')
         elif op == '??':   self.emitOp('LUP')
@@ -481,6 +478,8 @@ class Program:
   def emit(self, byte, comment=None):
     # Next program byte in RAM
     self.prepareSegment()
+    if not isinstance(byte, int):
+      self.error('Invalid value (number expected, got %s)' % repr(byte))
     if byte < -128 or byte >= 256:
       self.error('Value %s out of range (must be -128..255)' % repr(byte))
     self.putInRomTable(byte, comment)

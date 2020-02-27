@@ -9,6 +9,8 @@ strSrcLen           EQU     register3
 strOffset           EQU     register8
 strSrcAddr2         EQU     register9
 strTmpAddr          EQU     register10
+strLutAddr          EQU     register11
+strBakAddr          EQU     register12
 
 
 %SUB                stringChr
@@ -63,7 +65,7 @@ stringHexw          PUSH
 createHex           LDWI    SYS_LSRW4_50                        ; shift right by 4 SYS routine
                     STW     giga_sysFn
                     LD      strChr
-                    SYS     0xF5                                ; SYS_LSRW4_50, 270 - 50/2 = 0xF5
+                    SYS     50
                     SUBI    10
                     BLT     createH_skip0
                     ADDI    7
@@ -95,7 +97,7 @@ stringCopy          LDW     strSrcAddr
 %ENDS
 
 %SUB                stringAdd
-                    ; concatenates two strings together
+                    ; adds two strings together
 stringAdd           LDW     strDstAddr
                     STW     strTmpAddr
                     INC     strSrcAddr
@@ -128,6 +130,33 @@ stringA_exit        LDW     strLength
                     POKE    strTmpAddr                          ; save concatenated string length
                     LDI     0
                     POKE    strDstAddr                          ; terminating zero
+                    RET
+%ENDS
+
+%SUB                stringConcat
+                    ; concatenates multiple strings together
+stringConcat        PUSH
+                    LDW     strLutAddr
+                    DEEK
+                    BEQ     stringC_exit
+                    STW     strSrcAddr
+                    LDW     strDstAddr
+                    STW     strBakAddr
+                    
+stringC_loop        INC     strLutAddr
+                    INC     strLutAddr
+                    LDW     strLutAddr
+                    DEEK
+                    BEQ     stringC_exit
+                    STW     strSrcAddr2
+                    LDWI    stringAdd
+                    CALL    giga_vAC
+                    LDW     strBakAddr
+                    STW     strDstAddr
+                    STW     strSrcAddr
+                    BRA     stringC_loop
+                    
+stringC_exit        POP
                     RET
 %ENDS
 

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #-----------------------------------------------------------------------
 #
 #  Core video, sound and interpreter loop for Gigatron TTL microcomputer
@@ -113,13 +112,13 @@
 #  DONE Expander: Auto-detect banking, 64K and 128K
 #  DONE Expander: Boot from *.GT1 file if SDC/MMC detected
 #  XXX  Add CMPHS/CMPHU instructions to vCPU XXX Still needs testing
-#  XXX  SPI: Simple command line interface (solve "EXE vs COM" dilemma)
-#  XXX  SPI: Tutorial on formatting FAT32 partitions. (Linux=mkdosfs, apple=newfs_msdos)
-#  XXX  Apple-1: Memory mapped PIA emulation using interrupt (D010-D013)
-#  XXX  Apple-1: Include A1 BASIC
+#  XXX  GTOS: Simple command line interface (solve "EXE vs COM" dilemma)
+#  XXX  GTOS: Tutorial on formatting FAT32 partitions. (Linux=mkdosfs, apple=newfs_msdos)
+#  DONE Apple-1: Memory mapped PIA emulation using interrupt (D010-D013)
+#  DONE Apple-1: Include A1 BASIC
 #  XXX  Apple-1: Original 2514 font? Suppress lower case?
-#  XXX  Apple-1: Include assembler
-#  XXX  Apple-1: Intercept cassette interface
+#  DONE Apple-1: Include assembler
+#  DONE Apple-1: Intercept cassette interface
 #  XXX  Racer: Make noise when crashing
 #  XXX  Racer: Control speed with up/down (better for TypeC controllers)
 #  XXX  Reduce the Pictures application ROM footprint #120
@@ -131,12 +130,12 @@
 #  XXX  Babelfish freeze at power-on?
 #  XXX  Loader: make noise while loading (only channel 1 is safe to use)
 #  XXX  v6502: add 65c02 opcodes? http://nparker.llx.com/a2/opcodes.html
+#  XXX  Video: Increase vertical resolution with same videoTable (160 lines?)
 #
 #  Ideas for ROM v6+
 #  XXX  Pucrunch (well documented) or eximozer 3.0.2 (better compression)
 #  XXX  SPI: Think about SPI modes (polarities)
 #  XXX  Reset.c and Main.c (that is: port these from GCL to C)
-#  XXX  Sprites by scan line 4 reset method? ("videoG"=graphics)
 #  XXX  Need keymaps in ROM? (perhaps undocumented if not tested)
 #  XXX  FrogStroll (not in Contrib/)
 #  XXX  How it works memo: brief description of every software function
@@ -672,7 +671,7 @@ st([vPC])                       #39
 # Return to interpreter
 ld(hi('NEXTY'),Y)               #40
 jmp(Y,'NEXTY')                  #41
-ld(-44//2)                      #42
+ld(-44/2)                       #42
 
 import forth
 forth.move_ip()
@@ -699,63 +698,63 @@ assert pc() == 0x80
 
 ld(hi('REENTER'),Y)             #15 slot 0x80
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0x83
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0x86
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0x89
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0x8c
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0x8f
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0x92
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0x95
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0x98
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0x9b
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0x9e
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0xa1
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0xa4
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0xa7
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0xaa
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 #-----------------------------------------------------------------------
 # Extension SYS_Exec_88: Load code from ROM into memory and execute it
@@ -785,87 +784,103 @@ ld(0)                           #17 Address of loader on zero page
 
 ld(hi('REENTER'),Y)             #15 slot 0xb0
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0xb3
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0xb6
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0xb9
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0xbc
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0xbf
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0xc2
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0xc5
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0xc8
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0xcb
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0xce
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0xd1
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0xd4
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0xd7
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0xda
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0xdd
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0xe0
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0xe3
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 ld(hi('REENTER'),Y)             #15 slot 0xe6
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
+
+#-----------------------------------------------------------------------
+# Extension SYS_StoreBytes_DEVROM_XXX
+#-----------------------------------------------------------------------
 
 ld(hi('REENTER'),Y)             #15 slot 0xe9
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
-ld(hi('REENTER'),Y)             #15 slot 0xec
-jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+#-----------------------------------------------------------------------
+# Extension SYS_LoadBytes_DEVROM_XXX
+#-----------------------------------------------------------------------
+
+# Load object variables into zero-page
+# XXX Unfinished
+#
+# Variables
+#       vLR             Pointer to size byte + object variables
+#       $30...$30+n-1   Target location
+
+label('SYS_LoadBytes_DEVROM_XXX')
+ld(hi('sys_LoadBytes'),Y)       #15
+jmp(Y,'sys_LoadBytes')          #16
+ld([vLR+1],Y)                   #17
 
 #-----------------------------------------------------------------------
 # Extension SYS_ReadRomDir_DEVROM_80
@@ -898,7 +913,7 @@ ld([sysArgs+0],OUT)             #15
 nop()                           #16
 ld(hi('REENTER'),Y)             #17
 jmp(Y,'REENTER')                #18
-ld(-22//2)                      #19
+ld(-22/2)                       #19
 
 #-----------------------------------------------------------------------
 # Extension SYS_In_24
@@ -916,7 +931,7 @@ st([vAC+1])                     #17
 nop()                           #18
 ld(hi('REENTER'),Y)             #19
 jmp(Y,'REENTER')                #20
-ld(-24//2)                      #21
+ld(-24/2)                       #21
 
 assert pc()&255 == 0
 
@@ -1483,7 +1498,7 @@ st([vAC+1])                     #13
 ld([vPC])                       #14 Advance vPC one more
 adda(1)                         #15
 st([vPC])                       #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 bra('NEXT')                     #18
 #dummy()                        #19 Overlap
 #
@@ -1512,7 +1527,7 @@ ld([vTmp],X)                    #15
 ld([X])                         #16
 st([vAC+1])                     #17
 bra('NEXT')                     #18
-ld(-20//2)                      #19
+ld(-20/2)                       #19
 
 # Instruction STW: Store word in zero page ([D],[D+1]=vAC&255,vAC>>8), 20 cycles
 label('STW')
@@ -1525,7 +1540,7 @@ ld([vTmp],X)                    #15
 ld([vAC+1])                     #16
 st([X])                         #17
 bra('NEXT')                     #18
-ld(-20//2)                      #19
+ld(-20/2)                       #19
 
 # Instruction BCC: Test AC sign and branch conditionally, 28 cycles
 label('BCC')
@@ -1566,7 +1581,7 @@ ld([Y,X])                       #24
 label('.bcc#25')
 st([vPC])                       #25
 bra('NEXT')                     #26
-ld(-28//2)                      #27
+ld(-28/2)                       #27
 
 # Conditional GT: Branch if positive (if(vACL>0)vPCL=D)
 label('GT')
@@ -1598,7 +1613,7 @@ st([vAC])                       #10
 ld(0)                           #11
 st([vAC+1])                     #12
 bra('NEXTY')                    #13
-ld(-16//2)                      #14
+ld(-16/2)                       #14
 
 # Instruction ST: Store byte in zero page ([D]=vAC&255), 16 cycles
 label('ST')
@@ -1606,7 +1621,7 @@ ld(AC,X)                        #10,15
 ld([vAC])                       #11
 st([X])                         #12
 bra('NEXTY')                    #13
-ld(-16//2)                      #14
+ld(-16/2)                       #14
 
 # Instruction POP: Pop address from stack (vLR,vSP==[vSP]+256*[vSP+1],vSP+2), 26 cycles
 label('POP')
@@ -1625,7 +1640,7 @@ ld([vPC])                       #20
 suba(1)                         #21
 st([vPC])                       #22
 bra('NEXTY')                    #23
-ld(-26//2)                      #24
+ld(-26/2)                       #24
 
 # Conditional NE: Branch if not zero (if(vACL!=0)vPCL=D)
 label('NE')
@@ -1669,20 +1684,20 @@ label('ORI')
 ora([vAC])                      #10
 st([vAC])                       #11
 bra('NEXT')                     #12
-ld(-14//2)                      #13
+ld(-14/2)                       #13
 
 # Instruction XORI: Logical-XOR with small constant (vAC^=D), 14 cycles
 label('XORI')
 xora([vAC])                     #10
 st([vAC])                       #11
 bra('NEXT')                     #12
-ld(-14//2)                      #13
+ld(-14/2)                       #13
 
 # Instruction BRA: Branch unconditionally (vPC=(vPC&0xff00)+D), 14 cycles
 label('BRA')
 st([vPC])                       #10
 bra('NEXTY')                    #11
-ld(-14//2)                      #12
+ld(-14/2)                       #12
 
 # Instruction INC: Increment zero page byte ([D]++), 20 cycles
 label('INC')
@@ -1723,7 +1738,7 @@ ld([vTmp],X)                    #23
 adda([X])                       #24
 st([vAC+1])                     #25 Store high result
 bra('NEXT')                     #26
-ld(-28//2)                      #27
+ld(-28/2)                       #27
 
 # Instruction PEEK: Read byte from memory (vAC=[vAC]), 26 cycles
 label('PEEK')
@@ -1752,7 +1767,7 @@ ld([vPC])                       #13,12 Retry until sufficient time
 suba(2)                         #14
 st([vPC])                       #15
 bra('REENTER')                  #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 label('SYS')
 adda([vTicks])                  #10
 blt('.sys#13')                  #11
@@ -1784,7 +1799,7 @@ ld([vTmp],X)                    #22
 suba([X])                       #23
 st([vAC+1])                     #24
 label('REENTER_28')
-ld(-28//2)                      #25
+ld(-28/2)                       #25
 label('REENTER')
 bra('NEXT')                     #26 Return from SYS calls
 ld([vPC+1],Y)                   #27
@@ -1812,14 +1827,14 @@ adda(1,X)                       #21
 ld([X])                         #22
 st([vPC+1],Y)                   #23
 bra('NEXT')                     #24
-ld(-26//2)                      #25
+ld(-26/2)                       #25
 
 # Instruction ALLOC: Create or destroy stack frame (vSP+=D), 14 cycles
 label('ALLOC')
 adda([vSP])                     #10
 st([vSP])                       #11
 bra('NEXT')                     #12
-ld(-14//2)                      #13
+ld(-14/2)                       #13
 
 # The instructions below are all implemented in the second code page. Jumping
 # back and forth makes each 6 cycles slower, but it also saves space in the
@@ -1917,7 +1932,7 @@ ld([vLR+1])                     #13
 st([vPC+1])                     #14
 ld(hi('REENTER'),Y)             #15
 jmp(Y,'REENTER')                #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 
 # DEF implementation
 label('def#13')
@@ -1930,7 +1945,7 @@ ld([vTmp])                      #18
 st([vPC])                       #19
 ld(hi('NEXTY'),Y)               #20
 jmp(Y,'NEXTY')                  #21
-ld(-24//2)                      #22
+ld(-24/2)                       #22
 
 # Clear vACH (continuation of ANDI and LD instructions)
 label('andi#13')
@@ -1942,7 +1957,7 @@ ld(0)                           #15 Clear high byte
 st([vAC+1])                     #16
 ld(hi('REENTER'),Y)             #17
 jmp(Y,'REENTER')                #18
-ld(-22//2)                      #19
+ld(-22/2)                       #19
 
 # ADDI implementation
 label('addi')
@@ -2010,7 +2025,7 @@ ld([vAC])                       #19
 st([X])                         #20
 ld(hi('REENTER'),Y)             #21
 jmp(Y,'REENTER')                #22
-ld(-26//2)                      #23
+ld(-26/2)                       #23
 
 # LDLW implementation
 label('ldlw')
@@ -2024,7 +2039,7 @@ ld([X])                         #19
 st([vAC])                       #20
 ld(hi('REENTER'),Y)             #21
 jmp(Y,'REENTER')                #22
-ld(-26//2)                      #23
+ld(-26/2)                       #23
 
 # POKE implementation
 label('poke')
@@ -2038,7 +2053,7 @@ ld([vAC])                       #19
 st([Y,X])                       #20
 ld(hi('REENTER'),Y)             #21
 jmp(Y,'REENTER')                #22
-ld(-26//2)                      #23
+ld(-26/2)                       #23
 
 # PEEK implementation
 label('peek')
@@ -2053,7 +2068,7 @@ ld(0)                           #19
 st([vAC+1])                     #20
 ld(hi('REENTER'),Y)             #21
 jmp(Y,'REENTER')                #22
-ld(-26//2)                      #23
+ld(-26/2)                       #23
 
 # DOKE implementation
 label('doke')
@@ -2069,7 +2084,7 @@ ld([vAC+1])                     #21
 st([Y,X])                       #22 Incompatible with REENTER_28
 ld(hi('REENTER'),Y)             #23
 jmp(Y,'REENTER')                #24
-ld(-28//2)                      #25
+ld(-28/2)                       #25
 
 # DEEK implementation
 label('deek')
@@ -2128,7 +2143,7 @@ xora([vAC])                     #19
 st([vAC])                       #20
 ld(hi('REENTER'),Y)             #21
 jmp(Y,'REENTER')                #22
-ld(-26//2)                      #23
+ld(-26/2)                       #23
 
 #-----------------------------------------------------------------------
 #
@@ -2178,7 +2193,7 @@ st([entropy+1])                 #27
 st([vAC+1])                     #28
 ld(hi('REENTER'),Y)             #29
 jmp(Y,'REENTER')                #30
-ld(-34//2)                      #31
+ld(-34/2)                       #31
 
 label('SYS_LSRW7_30')
 ld([vAC])                       #15
@@ -2193,7 +2208,7 @@ ld([X])                         #23
 st([vAC+1])                     #24
 ld(hi('REENTER'),Y)             #25
 jmp(Y,'REENTER')                #26
-ld(-30//2)                      #27
+ld(-30/2)                       #27
 
 label('SYS_LSRW8_24')
 ld([vAC+1])                     #15
@@ -2202,7 +2217,7 @@ ld(0)                           #17
 st([vAC+1])                     #18
 ld(hi('REENTER'),Y)             #19
 jmp(Y,'REENTER')                #20
-ld(-24//2)                      #21
+ld(-24/2)                       #21
 
 label('SYS_LSLW8_24')
 ld([vAC])                       #15
@@ -2211,7 +2226,7 @@ ld(0)                           #17
 st([vAC])                       #18
 ld(hi('REENTER'),Y)             #19
 jmp(Y,'REENTER')                #20
-ld(-24//2)                      #21
+ld(-24/2)                       #21
 
 #-----------------------------------------------------------------------
 # Extension SYS_Draw4_30
@@ -2236,7 +2251,7 @@ ld([sysArgs+3])                 #23
 st([Y,Xpp])                     #24
 ld(hi('REENTER'),Y)             #25
 jmp(Y,'REENTER')                #26
-ld(-30//2)                      #27
+ld(-30/2)                       #27
 
 #-----------------------------------------------------------------------
 # Extension SYS_VDrawBits_134:
@@ -2263,7 +2278,7 @@ adda([X])                       #14
 st([X])                         #15
 ld(hi('NEXTY'),Y)               #16
 jmp(Y,'NEXTY')                  #17
-ld(-20//2)                      #18
+ld(-20/2)                       #18
 
 # Interrupt handler:
 #       ST   $xx        -> optionally store vCpuSelect
@@ -2286,7 +2301,7 @@ ld([0xff])                      #21
 st([vAC+1])                     #22
 ld(hi('REENTER'),Y)             #23
 jmp(Y,'REENTER')                #24
-ld(-28//2)                      #25
+ld(-28/2)                       #25
 # vRTI entry point
 assert(pc()&255 == 251)         # The landing offset 251 for LUP trampoline is fixed
 beq('vRTI#15')                  #13 vRTI sequence
@@ -2361,7 +2376,7 @@ label('.sysLsrw1b')
 st([vAC+1])                     #42
 ld(hi('REENTER'),Y)             #43
 jmp(Y,'REENTER')                #44
-ld(-48//2)                      #45
+ld(-48/2)                       #45
 
 label('SYS_LSRW2_52')
 ld(hi('shiftTable'),Y)          #15 Logical shift right 2 bit (X >> 2)
@@ -2394,7 +2409,7 @@ label('.sysLsrw2b')
 st([vAC+1])                     #46
 ld(hi('REENTER'),Y)             #47
 jmp(Y,'REENTER')                #48
-ld(-52//2)                      #49
+ld(-52/2)                       #49
 
 label('SYS_LSRW3_52')
 ld(hi('shiftTable'),Y)          #15 Logical shift right 3 bit (X >> 3)
@@ -2424,7 +2439,7 @@ jmp(Y,AC)                       #40
 bra(255)                        #41 bra shiftTable+255
 label('.sysLsrw3b')
 st([vAC+1])                     #45
-ld(-52//2)                      #46
+ld(-52/2)                       #46
 ld(hi('REENTER'),Y)             #47
 jmp(Y,'REENTER')                #48
 #nop()                          #49
@@ -2458,7 +2473,7 @@ label('.sysLsrw4b')
 st([vAC+1])                     #44
 ld(hi('REENTER'),Y)             #45
 jmp(Y,'REENTER')                #46
-ld(-50//2)                      #47
+ld(-50/2)                       #47
 
 label('SYS_LSRW5_50')
 ld(hi('shiftTable'),Y)          #15 Logical shift right 5 bit (X >> 5)
@@ -2486,7 +2501,7 @@ jmp(Y,AC)                       #38
 bra(255)                        #39 bra shiftTable+255
 label('.sysLsrw5b')
 st([vAC+1])                     #44
-ld(-50//2)                      #45
+ld(-50/2)                       #45
 ld(hi('REENTER'),Y)             #46
 jmp(Y,'REENTER')                #47
 #nop()                          #48
@@ -2518,7 +2533,7 @@ label('.sysLsrw6b')
 st([vAC+1])                     #42
 ld(hi('REENTER'),Y)             #43
 jmp(Y,'REENTER')                #44
-ld(-48//2)                      #45
+ld(-48/2)                       #45
 
 label('SYS_LSLW4_46')
 ld(hi('shiftTable'),Y)          #15 Logical shift left 4 bit (X << 4)
@@ -2544,7 +2559,7 @@ adda(AC)                        #36
 adda(AC)                        #37
 adda(AC)                        #38
 st([vAC])                       #39
-ld(-46//2)                      #40
+ld(-46/2)                       #40
 ld(hi('REENTER'),Y)             #41
 jmp(Y,'REENTER')                #42
 #nop()                          #43
@@ -2573,7 +2588,7 @@ label('txReturn')
 st([sysArgs+2])                 #34
 ld(hi('REENTER'),Y)             #35
 jmp(Y,'REENTER')                #36
-ld(-40//2)                      #37
+ld(-40/2)                       #37
 
 def trampoline3a():
   """Read 3 bytes from ROM page"""
@@ -2656,7 +2671,7 @@ st([sysArgs+0])                 #50 -> Pixel 0
 
 ld(hi('REENTER'),Y)             #51
 jmp(Y,'REENTER')                #52
-ld(-56//2)                      #53
+ld(-56/2)                       #53
 
 #-----------------------------------------------------------------------
 #       v6502 right shift instruction
@@ -2668,7 +2683,7 @@ st([Y,X])                       #31
 st([v6502_Qz])                  #32 Z flag
 st([v6502_Qn])                  #33 N flag
 ld(hi('v6502_next'),Y)          #34
-ld(-38//2)                      #35
+ld(-38/2)                       #35
 jmp(Y,'v6502_next')             #36
 #nop()                          #37 Overlap
 #
@@ -2680,7 +2695,7 @@ st([v6502_Qz])                  #41 Z flag
 st([v6502_Qn])                  #42 N flag
 ld(hi('v6502_next'),Y)          #43
 jmp(Y,'v6502_next')             #44
-ld(-46//2)                      #45
+ld(-46/2)                       #45
 
 #-----------------------------------------------------------------------
 #       Reserved
@@ -3040,7 +3055,7 @@ ld([Y,X])                       #42(!) No change
 st([Y,X])                       #43
 ld(hi('NEXTY'),Y)               #44 Return
 jmp(Y,'NEXTY')                  #45 All done
-ld(-48//2)                      #46
+ld(-48/2)                       #46
 label('.sysSb#21')
 nop()                           #21
 st([sysArgs+0])                 #22
@@ -3066,7 +3081,7 @@ adda([vPC])                     #39
 st([vPC])                       #40
 ld(hi('REENTER'),Y)             #41
 jmp(Y,'REENTER')                #42
-ld(-46//2)                      #43
+ld(-46/2)                       #43
 
 # SYS_SetMode_80 implementation
 label('sys_SetMode')
@@ -3085,7 +3100,7 @@ assert videoZ == 0x0100
 st([vReturn])                   #29 DISABLE video/audio/serial/etc
 nop()                           #29(!) Ignore and return
 jmp(Y,'REENTER')                #30
-ld(-34//2)                      #31
+ld(-34/2)                       #31
 label('.sysSm#25')
 ld([vAC])                       #25 Mode 0,1,2,3
 anda(3)                         #26
@@ -3124,7 +3139,7 @@ ld('nopixels')                  #44
 label('.sysSm#45')
 st([videoModeD])                #45
 jmp(Y,'REENTER')                #46
-ld(-50//2)                      #47
+ld(-50/2)                       #47
 
 # SYS_SendSerial1_v3_80 implementation
 label('sys_SendSerial1')
@@ -3164,18 +3179,18 @@ beq('.sysSs#45')                #43
 st([vAC])                       #44 Abort after key press with non-zero error
 st([vAC+1])                     #45
 jmp(Y,'REENTER')                #46
-ld(-50//2)                      #47
+ld(-50/2)                       #47
 label('.sysSs#45')
 ld([vPC])                       #45 Continue sending bits
 suba(2)                         #46
 st([vPC])                       #47
 jmp(Y,'REENTER')                #48
-ld(-52//2)                      #49
+ld(-52/2)                       #49
 label('.sysSs#40')
 st([vAC])                       #40 Stop sending bits, no error
 st([vAC+1])                     #41
 jmp(Y,'REENTER')                #42
-ld(-46//2)                      #43
+ld(-46/2)                       #43
 
 # CALLI implementation (vCPU instruction)
 label('calli#13')
@@ -3271,7 +3286,7 @@ ld(-1)                          #20    vAC > variable
 # No-operation for CMPHS/CMPHU when high bits are equal
 label('.cmphu#18')
 jmp(Y,'REENTER')                #18
-ld(-22//2)                      #19
+ld(-22/2)                       #19
 
 #-----------------------------------------------------------------------
 #
@@ -3341,7 +3356,7 @@ st([sysArgs+0])                 #27
 nop()                           #28
 ld(hi('REENTER'),Y)             #29 Normal exit (no self-repeat)
 jmp(Y,'REENTER')                #30
-ld(-34//2)                      #31
+ld(-34/2)                       #31
 
 label('.sysDpx0')
 st([sysArgs+2])                 #20 Gobble 6 pixels into buffer
@@ -3388,7 +3403,7 @@ suba(2)                         #57
 st([vPC])                       #58
 ld(hi('REENTER'),Y)             #59
 jmp(Y,'REENTER')                #60
-ld(-64//2)                      #61
+ld(-64/2)                       #61
 
 align(64)
 label('SYS_Sprite6x_v3_64')
@@ -3410,7 +3425,7 @@ st([sysArgs+0])                 #27
 nop()                           #28
 ld(hi('REENTER'),Y)             #29 Normal exit (no self-repeat)
 jmp(Y,'REENTER')                #30
-ld(-34//2)                      #31
+ld(-34/2)                       #31
 
 label('.sysDpx1')
 st([sysArgs+7])                 #20 Gobble 6 pixels into buffer (backwards)
@@ -3455,7 +3470,7 @@ suba(2)                         #55
 st([vPC])                       #56
 ld(hi('REENTER'),Y)             #57
 jmp(Y,'REENTER')                #58
-ld(-62//2)                      #59
+ld(-62/2)                       #59
 
 align(64)
 label('SYS_Sprite6y_v3_64')
@@ -3479,7 +3494,7 @@ st([sysArgs+0])                 #29
 nop()                           #30
 ld(hi('REENTER'),Y)             #31 Normal exit (no self-repeat)
 jmp(Y,'REENTER')                #32
-ld(-36//2)                      #33
+ld(-36/2)                       #33
 
 label('.sysDpx2')
 st([sysArgs+2])                 #20 Gobble 6 pixels into buffer
@@ -3526,7 +3541,7 @@ suba(2)                         #57
 st([vPC])                       #58
 ld(hi('REENTER'),Y)             #59
 jmp(Y,'REENTER')                #60
-ld(-64//2)                      #61
+ld(-64/2)                       #61
 
 align(64)
 label('SYS_Sprite6xy_v3_64')
@@ -3550,7 +3565,7 @@ st([sysArgs+0])                 #29
 nop()                           #30
 ld(hi('REENTER'),Y)             #31 Normal exit (no self-repeat)
 jmp(Y,'REENTER')                #32
-ld(-36//2)                      #33
+ld(-36/2)                       #33
 
 label('.sysDpx3')
 st([sysArgs+7])                 #20 Gobble 6 pixels into buffer (backwards)
@@ -3595,7 +3610,7 @@ suba(2)                         #55
 st([vPC])                       #56
 ld(hi('REENTER'),Y)             #57
 jmp(Y,'REENTER')                #58
-ld(-62//2)                      #59
+ld(-62/2)                       #59
 
 #-----------------------------------------------------------------------
 
@@ -3617,7 +3632,7 @@ st([sysArgs+3])                 #27,28 (must be idempotent)
 
 ld(hi('REENTER'),Y)             #29
 jmp(Y,'REENTER')                #30
-ld(-34//2)                      #31
+ld(-34/2)                       #31
 
 #-----------------------------------------------------------------------
 
@@ -3660,19 +3675,19 @@ suba(2)                         #128
 st([vPC])                       #129
 ld(hi('NEXTY'),Y)               #130
 jmp(Y,'NEXTY')                  #131
-ld(-134//2)                     #132
+ld(-134/2)                      #132
 
 label('.sysSpi#128')
 ld(hi('NEXTY'),Y)               #128 Continue program
 jmp(Y,'NEXTY')                  #129
-ld(-132//2)                     #130
+ld(-132/2)                      #130
 
 #-----------------------------------------------------------------------
 
 label('sys_v6502')
 
 st([vCpuSelect],Y)              #18 Activate v6502
-ld(-22//2)                      #19
+ld(-22/2)                       #19
 jmp(Y,'v6502_ENTER')            #20 Transfer control in the same time slice
 adda([vTicks])                  #21
 assert (38 - 22)//2 >= v6502_adjust
@@ -3720,7 +3735,7 @@ bra(255)                        #34 bra shiftTable+255
 label('.recheck17')
 ld(hi('v6502_check'),Y)         #17 Go back to time check before dispatch
 jmp(Y,'v6502_check')            #18
-ld(-20//2)                      #19
+ld(-20/2)                       #19
 
 label('v6502_lsr')
 assert v6502_Cflag == 1
@@ -3760,7 +3775,7 @@ ld([v6502_Tmp],X)               #25
 ora([X])                        #26
 st([v6502_P])                   #27
 ld(hi('v6502_next'),Y)          #28
-ld(-32//2)                      #29
+ld(-32/2)                       #29
 jmp(Y,'v6502_next')             #30
 #nop()                          #31 Overlap
 #
@@ -3780,7 +3795,7 @@ ld([v6502_ADH])                 #15
 st([v6502_PCH])                 #16
 ld(hi('v6502_next'),Y)          #17
 jmp(Y,'v6502_next')             #18
-ld(-20//2)                      #19
+ld(-20/2)                       #19
 
 label('v6502_jmp2')
 nop()                           #12
@@ -3792,7 +3807,7 @@ ld([Y,X])                       #17
 st([v6502_PCH])                 #18
 ld(hi('v6502_next'),Y)          #19
 jmp(Y,'v6502_next')             #20
-ld(-22//2)                      #21
+ld(-22/2)                       #21
 
 label('v6502_pla')
 ld([v6502_S])                   #12
@@ -3804,7 +3819,7 @@ st([v6502_A])                   #17
 st([v6502_Qz])                  #18 Z flag
 st([v6502_Qn])                  #19 N flag
 ld(hi('v6502_next'),Y)          #20
-ld(-24//2)                      #21
+ld(-24/2)                       #21
 jmp(Y,'v6502_next')             #22
 #nop()                          #23 Overlap
 #
@@ -3816,7 +3831,7 @@ st([v6502_S],X)                 #15
 ld([v6502_A])                   #16
 st([X])                         #17
 jmp(Y,'v6502_next')             #18
-ld(-20//2)                      #19
+ld(-20/2)                       #19
 
 label('v6502_brk')
 ld(hi('ENTER'))                 #12 Switch to vCPU
@@ -3903,7 +3918,7 @@ ld([v6502_IR])                  #21 'xxx0000'
 bmi('.imm24')                   #22
 ld([v6502_PCH])                 #23
 bra('v6502_check')              #24
-ld(-26//2)                      #25
+ld(-26/2)                       #25
 
 # Resync with video driver. At this point we're returning BEFORE
 # fetching and executing the next instruction.
@@ -3936,7 +3951,7 @@ ld(1)                           #31(!)
 adda([v6502_PCH])               #32
 st([v6502_PCH])                 #33
 bra('v6502_check')              #34
-ld(-36//2)                      #35
+ld(-36/2)                       #35
 
 # Accumulator Mode: ROL ROR LSL ASR -- 28 cycles
 label('v6502_modeACC')
@@ -3944,7 +3959,7 @@ ld(v6502_A&255)                 #21 Address of AC
 st([v6502_ADL],X)               #22
 ld(v6502_A>>8)                  #23
 st([v6502_ADH])                 #24
-ld(-28//2)                      #25
+ld(-28/2)                       #25
 bra('v6502_check')              #26
 #nop()                          #27 Overlap
 #
@@ -3953,7 +3968,7 @@ label('v6502_modeILL')
 label('v6502_modeIMP')
 nop()                           #21,27
 bra('v6502_check')              #22
-ld(-24//2)                      #23
+ld(-24/2)                       #23
 
 # Zero Page Modes: $DD $DD,X $DD,Y -- 36 cycles
 label('v6502_modeZPX')
@@ -3976,7 +3991,7 @@ ld(1)                           #31(!)
 adda([v6502_PCH])               #32
 st([v6502_PCH])                 #33
 bra('v6502_check')              #34
-ld(-36//2)                      #35
+ld(-36/2)                       #35
 
 # Possible retry loop for modeABS and modeIZY. Because these need
 # more time than the v6502_maxTicks of 38 Gigatron cycles, we may
@@ -3992,7 +4007,7 @@ ld([v6502_PCL])                 #33
 suba(1)                         #34
 st([v6502_PCL])                 #35
 bra('v6502_next')               #36 Retry until sufficient time
-ld(-38//2)                      #37
+ld(-38/2)                       #37
 
 # Absolute Modes: $DDDD $DDDD,X $DDDD,Y -- 64 cycles
 label('v6502_modeABS')
@@ -4051,7 +4066,7 @@ adda([v6502_PCH])               #59
 st([v6502_PCH])                 #60
 ld([v6502_ADL],X)               #61
 bra('v6502_check')              #62
-ld(-64//2)                      #63
+ld(-64/2)                       #63
 
 # Indirect Indexed Mode: ($DD),Y -- 54 cycles
 label('v6502_modeIZY')
@@ -4092,7 +4107,7 @@ adda([v6502_ADH])               #49
 st([v6502_ADH])                 #50
 ld([v6502_ADL],X)               #51
 bra('v6502_check')              #52
-ld(-54//2)                      #53
+ld(-54/2)                       #53
 
 # Relative Mode: BEQ BNE BPL BMI BCC BCS BVC BVS -- 36 cycles
 label('v6502_modeREL')
@@ -4112,7 +4127,7 @@ ld(1)                           #31(!)
 adda([v6502_PCH])               #32
 st([v6502_PCH])                 #33
 bra('v6502_check')              #34
-ld(-36//2)                      #53
+ld(-36/2)                       #53
 
 # Indexed Indirect Mode: ($DD,X) -- 38 cycles
 label('v6502_modeIZX')
@@ -4133,7 +4148,7 @@ ld(0)                           #34
 ld(1)                           #34(!)
 adda([v6502_PCH])               #35
 st([v6502_PCH])                 #36
-ld(-38//2)                      #37 !!! Fall through to v6502_check !!!
+ld(-38/2)                       #37 !!! Fall through to v6502_check !!!
 #
 # Update elapsed time for the addressing mode processing.
 # Then check if we can immediately execute this instruction.
@@ -4272,7 +4287,7 @@ ora([v6502_Tmp])                #33
 st([v6502_P])                   #34
 ld(hi('v6502_next'),Y)          #35
 jmp(Y,'v6502_next')             #36
-ld(-38//2)                      #37
+ld(-38/2)                       #37
 # Cin=1, A=$FF, B=$DD --> Result=$DD, Cout=1, V=0
 # Cin=0, A=$00, B=$DD --> Result=$DD, Cout=0, V=0
 label('.adc14')
@@ -4283,7 +4298,7 @@ ld([v6502_P])                   #17
 anda(0x7f)                      #18 V=0, keep C
 st([v6502_P])                   #19
 ld(hi('v6502_next'),Y)          #20
-ld(-24//2)                      #21
+ld(-24/2)                       #21
 jmp(Y,'v6502_next')             #22
 #nop()                          #23 Overlap
 #
@@ -4304,7 +4319,7 @@ ld(0x69)                        #17 ADC #$xx (Any ADC opcode will do)
 st([v6502_IR])                  #18
 ld(hi('v6502_check'),Y)         #20 Go back to time check before dispatch
 jmp(Y,'v6502_check')            #20
-ld(-22//2)                      #21
+ld(-22/2)                       #21
 
 # Carry calculation table
 #   L7 R7 C7   RX UC SC
@@ -4338,7 +4353,7 @@ st([v6502_P])                   #12
 nop()                           #13
 label('.next14')
 jmp(Y,'v6502_next')             #14
-ld(-16//2)                      #15
+ld(-16/2)                       #15
 
 label('v6502_BPL')
 ld([v6502_Qn])                  #9
@@ -4403,7 +4418,7 @@ adda([v6502_PCH])               #23
 st([v6502_PCH])                 #24
 nop()                           #25
 jmp(Y,'v6502_next')             #26
-ld(-28//2)                      #27
+ld(-28/2)                       #27
 
 label('v6502_INX')
 nop()                           #9
@@ -4413,13 +4428,13 @@ st([v6502_X])                   #12
 label('.inx13')
 st([v6502_Qz])                  #13 Z flag
 st([v6502_Qn])                  #14 N flag
-ld(-18//2)                      #15
+ld(-18/2)                       #15
 jmp(Y,'v6502_next')             #16
 nop()                           #17
 
 label('.next12')
 jmp(Y,'v6502_next')             #12
-ld(-14//2)                      #13
+ld(-14/2)                       #13
 
 label('v6502_DEX')
 ld([v6502_X])                   #9
@@ -4440,7 +4455,7 @@ bra('.inx13')                   #11
 st([v6502_Y])                   #12
 
 label('v6502_NOP')
-ld(-12//2)                      #9
+ld(-12/2)                       #9
 jmp(Y,'v6502_next')             #10
 #nop()                          #11 Overlap
 #
@@ -4467,7 +4482,7 @@ st([v6502_A])                   #13
 st([v6502_Qz])                  #14 Z flag
 st([v6502_Qn])                  #15 N flag
 ld(hi('v6502_next'),Y)          #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 jmp(Y,'v6502_next')             #18
 #nop()                          #19 Overlap
 #
@@ -4507,7 +4522,7 @@ ld([v6502_PCH],Y)               #31
 ld([Y,X])                       #32
 st([v6502_PCH])                 #33
 ld(hi('v6502_next'),Y)          #34
-ld(-38//2)                      #35
+ld(-38/2)                       #35
 jmp(Y,'v6502_next')             #36
 #nop()                          #37 Overlap
 #
@@ -4682,7 +4697,7 @@ st([Y,X])                       #15
 st([v6502_Qz])                  #16 Z flag
 st([v6502_Qn])                  #17 N flag
 ld(hi('v6502_next'),Y)          #18
-ld(-22//2)                      #19
+ld(-22/2)                       #19
 jmp(Y,'v6502_next')             #20
 #nop()                          #21 Overlap
 #
@@ -4694,7 +4709,7 @@ st([Y,X])                       #15
 st([v6502_Qz])                  #16 Z flag
 st([v6502_Qn])                  #17 N flag
 ld(hi('v6502_next'),Y)          #18
-ld(-22//2)                      #19
+ld(-22/2)                       #19
 jmp(Y,'v6502_next')             #20
 nop()                           #21
 
@@ -4709,7 +4724,7 @@ st([v6502_Qn])                  #17 N flag
 nop()                           #18
 ld(hi('v6502_next'),Y)          #19
 jmp(Y,'v6502_next')             #20
-ld(-22//2)                      #21
+ld(-22/2)                       #21
 
 label('v6502_ldx')
 ld([v6502_ADH],Y)               #12
@@ -4733,7 +4748,7 @@ st([v6502_Qz])                  #17 Z flag
 st([v6502_Qn])                  #18 N flag
 ld(hi('v6502_next'),Y)          #19
 jmp(Y,'v6502_next')             #20
-ld(-22//2)                      #21
+ld(-22/2)                       #21
 
 label('v6502_sta')
 ld([v6502_ADH],Y)               #12
@@ -4741,7 +4756,7 @@ ld([v6502_A])                   #13
 st([Y,X])                       #14
 ld(hi('v6502_next'),Y)          #15
 jmp(Y,'v6502_next')             #16
-ld(-18//2)                      #17
+ld(-18/2)                       #17
 
 label('v6502_stx')
 ld([v6502_ADH],Y)               #12
@@ -4749,7 +4764,7 @@ ld([v6502_X])                   #13
 st([Y,X])                       #14
 ld(hi('v6502_next'),Y)          #15
 jmp(Y,'v6502_next')             #16
-ld(-18//2)                      #17
+ld(-18/2)                       #17
 
 label('v6502_stx2')
 ld([v6502_ADL])                 #12 Special case $96: STX $DD,Y
@@ -4759,7 +4774,7 @@ ld([v6502_X])                   #15
 st([X])                         #16
 ld(hi('v6502_next'),Y)          #17
 jmp(Y,'v6502_next')             #18
-ld(-20//2)                      #19
+ld(-20/2)                       #19
 
 label('v6502_sty')
 ld([v6502_ADH],Y)               #12
@@ -4768,7 +4783,7 @@ st([Y,X])                       #14
 ld(hi('v6502_next'),Y)          #15
 jmp(Y,'v6502_next')             #16
 label('v6502_tax')
-ld(-18//2)                      #17,12
+ld(-18/2)                       #17,12
 #
 #label('v6502_tax')
 #nop()                          #12 Overlap
@@ -4780,7 +4795,7 @@ st([v6502_Qn])                  #16 N flag
 ld(hi('v6502_next'),Y)          #17
 jmp(Y,'v6502_next')             #18
 label('v6502_tsx')
-ld(-20//2)                      #19
+ld(-20/2)                       #19
 #
 #label('v6502_tsx')
 #nop()                          #12 Overlap
@@ -4793,7 +4808,7 @@ st([v6502_Qn])                  #17 N flag
 nop()                           #18
 ld(hi('v6502_next'),Y)          #19
 jmp(Y,'v6502_next')             #20
-ld(-22//2)                      #21
+ld(-22/2)                       #21
 
 label('v6502_txs')
 ld([v6502_X])                   #12
@@ -4844,7 +4859,7 @@ anda(~v6502_Vemu)               #14
 label('.clv15')
 st([v6502_P])                   #15
 ld(hi('v6502_next'),Y)          #16
-ld(-20//2)                      #17
+ld(-20/2)                       #17
 jmp(Y,'v6502_next')             #18
 label('v6502_bit')
 nop()                           #19,12
@@ -4867,7 +4882,7 @@ ora([v6502_P])                  #25
 st([v6502_P])                   #26 Update V
 ld(hi('v6502_next'),Y)          #27
 jmp(Y,'v6502_next')             #28
-ld(-30//2)                      #29
+ld(-30/2)                       #29
 
 label('v6502_rts')
 ld([v6502_S])                   #12
@@ -4888,7 +4903,7 @@ st([v6502_PCH])                 #25
 nop()                           #26
 ld(hi('v6502_next'),Y)          #27
 jmp(Y,'v6502_next')             #28
-ld(-30//2)                      #29
+ld(-30/2)                       #29
 
 label('v6502_php')
 ld([v6502_S])                   #12
@@ -4915,7 +4930,7 @@ st([X])                         #31
 nop()                           #32
 ld(hi('v6502_next'),Y)          #33
 jmp(Y,'v6502_next')             #34
-ld(-36//2)                      #35
+ld(-36/2)                       #35
 
 label('v6502_cpx')
 bra('.cmp14')                   #12
@@ -4951,7 +4966,7 @@ ora([X])                        #25
 st([v6502_P])                   #26
 ld(hi('v6502_next'),Y)          #27
 jmp(Y,'v6502_next')             #28
-ld(-30//2)                      #29
+ld(-30/2)                       #29
 
 label('v6502_plp')
 assert v6502_Nflag == 128
@@ -4971,7 +4986,7 @@ adda(v6502_Vflag)               #23
 st([v6502_P])                   #24 All other flags
 ld(hi('v6502_next'),Y)          #25
 jmp(Y,'v6502_next')             #26
-ld(-28//2)                      #27
+ld(-28/2)                       #27
 
 label('v6502_rti')
 ld([v6502_S])                   #12
@@ -4997,7 +5012,140 @@ st([v6502_PCH])                 #31
 nop()                           #32
 ld(hi('v6502_next'),Y)          #33
 jmp(Y,'v6502_next')             #34
-ld(-36//2)                      #35
+ld(-36/2)                       #35
+
+#-----------------------------------------------------------------------
+#       Extended vertical blank logic: interrupts
+#-----------------------------------------------------------------------
+align(0x100)
+
+# Check if an IRQ handler is defined
+label('vBlankFirst#78')
+ld([Y,vIRQ_DEVROM])             #78
+ora([Y,vIRQ_DEVROM+1])          #79
+bne('vBlankFirst#82')           #80
+ld([vPC])                       #81
+runVcpu(186-82-extra,           #82 Application cycles (scan line 0)
+    '---D line 0 timeout but no irq',
+    returnTo='vBlankFirst#186')
+
+label('vBlankFirst#82')
+st([0xfc])                      #82 Save vPC
+ld([vPC+1])                     #83
+st([0xfd])                      #84
+ld([vAC])                       #85 Save vAC
+st([0xfe])                      #86
+ld([vAC+1])                     #87
+st([0xff])                      #88
+ld([Y,vIRQ_DEVROM])             #89 Set vPC to vIRQ
+suba(2)                         #90
+st([vPC])                       #91
+ld([Y,vIRQ_DEVROM+1])           #92
+st([vPC+1])                     #93
+ld([vCpuSelect])                #94 Handler must save this if needed
+st([vAC+1])                     #95
+ld(0)                           #96
+st([vAC])                       #97
+ld(hi('ENTER'))                 #98 Set vCpuSelect to ENTER (=regular vCPU)
+st([vCpuSelect])                #99
+runVcpu(186-100-extra,          #100 Application cycles (scan line 0)
+    '---D line 0 timeout with irq',
+    returnTo='vBlankFirst#186')
+
+# vIRQ sequence WITH interpreter switch
+label('vRTI#18')
+ld([X])                         #18
+st([vCpuSelect])                #19
+ld([0xfc])                      #20
+st([vPC])                       #21
+ld([0xfd])                      #22
+st([vPC+1])                     #23
+ld([0xfe])                      #24
+st([vAC])                       #25
+ld([0xff])                      #26
+st([vAC+1])                     #27
+nop()                           #0
+ld(hi('RESYNC'),Y)              #1
+jmp(Y,'RESYNC')                 #2
+ld([vTicks])                    #3
+
+# Entered last line of vertical blank (line 40)
+label('vBlankLast#34')
+
+#-----------------------------------------------------------------------
+#       Extended vertical blank logic: game controller decoding
+#-----------------------------------------------------------------------
+
+# Game controller types
+# TypeA: Based on 74LS165 shift register (not supported)
+# TypeB: Based on CD4021B shift register (standard)
+# TypeC: Based on priority encoder
+#
+# Notes:
+# - TypeA was only used during development and first beta test, before ROM v1
+# - TypeB appears as type A with negative logic levels
+# - TypeB is the game controller type that comes with the original kit and ROM v1
+# - TypeB is mimicked by BabelFish / Pluggy McPlugface
+# - TypeB requires a prolonged /SER_LATCH, therefore vPulse is 8 scanlines, not 2
+# - TypeB and TypeC can be sampled in the same scanline
+# - TypeA is 1 scanline shifted as it looks at a different edge (XXX up or down?)
+# - TypeC gives incomplete information: lower buttons overshadow higher ones
+#
+#       TypeC    Alias    Button TypeB
+#       00000000  ^@   -> Right  11111110
+#       00000001  ^A   -> Left   11111101
+#       00000011  ^C   -> Down   11111011
+#       00000111  ^G   -> Up     11110111
+#       00001111  ^O   -> Start  11101111
+#       00011111  ^_   -> Select 11011111
+#       00111111  ?    -> B      10111111
+#       01111111  DEL  -> A      01111111
+#       11111111       -> (None) 11111111
+#
+#       Conversion formula:
+#               f(x) := 254 - x
+
+# Detect controller TypeC codes
+ld([serialRaw])                 #34 if serialRaw in [0,1,3,7,15,31,63,127,255]
+adda(1)                         #35
+anda([serialRaw])               #36
+bne('.buttons#39')              #37
+
+# TypeC
+ld([serialRaw])                 #38 [TypeC] if serialRaw < serialLast
+adda(1)                         #39
+anda([serialLast])              #40
+bne('.buttons#43')              #41
+ld(254)                         #42 then clear the selected bit
+nop()                           #43
+bra('.buttons#46')              #44
+label('.buttons#43')
+suba([serialRaw])               #43,45
+anda([buttonState])             #44
+st([buttonState])               #45
+label('.buttons#46')
+ld([serialRaw])                 #46 Set the lower bits
+ora([buttonState])              #47
+label('.buttons#48')
+st([buttonState])               #48
+ld([serialRaw])                 #49 Update serialLast for next pass
+jmp(Y,'vBlankLast#52')          #50
+st([serialLast])                #51
+
+# TypeB
+# pChange = pNew & ~pOld
+# nChange = nNew | ~nOld {DeMorgan}
+label('.buttons#39')
+ld(255)                         #39 [TypeB] Bitwise edge-filter to detect button presses
+xora([serialLast])              #40
+ora([serialRaw])                #41 Catch button-press events
+anda([buttonState])             #42 Keep active button presses
+ora([serialRaw])                #43
+nop()                           #44
+nop()                           #45
+bra('.buttons#48')              #46
+nop()                           #47
+
 
 #-----------------------------------------------------------------------
 #       More SYS functions
@@ -5076,7 +5224,7 @@ st('RET',     [Y,Xpp])          #82 *+52 Return
 # Return to interpreter
 ld(hi('REENTER'),Y)             #83
 jmp(Y,'REENTER')                #84
-ld(-88//2)                      #85
+ld(-88/2)                       #85
 
 # SYS_VDrawBits_134 implementation
 label('sys_VDrawBits')
@@ -5111,7 +5259,7 @@ bne('.sysVdb0')                 #42+i*25
 adda(8)                         #43+i*25 Steps of 2
 ld(hi('REENTER'),Y)             #119
 jmp(Y,'REENTER')                #120
-ld(-124//2)                     #121
+ld(-124/2)                      #121
 
 # SYS_ResetWaveforms_v4_50 implementation
 label('sys_ResetWaveforms')
@@ -5147,7 +5295,7 @@ adda([vPC])                     #43
 st([vPC])                       #44
 ld(hi('REENTER'),Y)             #45
 jmp(Y,'REENTER')                #46
-ld(-50//2)                      #47
+ld(-50/2)                       #47
 
 # SYS_ShuffleNoise_v4_46 implementation
 label('sys_ShuffleNoise')
@@ -5176,130 +5324,35 @@ adda([vPC])                     #38
 st([vPC])                       #39
 ld(hi('NEXTY'),Y)               #40
 jmp(Y,'NEXTY')                  #41
-ld(-44//2)                      #42
+ld(-44/2)                       #42
 
-# Check if an IRQ handler is defined
-label('vBlankFirst#78')
-ld([Y,vIRQ_DEVROM])             #78
-ora([Y,vIRQ_DEVROM+1])          #79
-bne('vBlankFirst#82')           #80
-ld([vPC])                       #81
-runVcpu(186-82-extra,           #82 Application cycles (scan line 0)
-    '---D line 0 timeout but no irq',
-    returnTo='vBlankFirst#186')
+# SYS_LoadBytes_DEVROM_XXX implementation
+label('sys_LoadBytes')
+ld(0x30)                        # Target address
+st([sysArgs+1])                 #
+ld([vLR+0])                     # Source address
+st([sysArgs+0],X)               #
+ld([Y,X])                       # Byte count
+label('.slb1')                  #
+st([sysArgs+2])                 #
 
-label('vBlankFirst#82')
-st([0xfc])                      #82 Save vPC
-ld([vPC+1])                     #83
-st([0xfd])                      #84
-ld([vAC])                       #85 Save vAC
-st([0xfe])                      #86
-ld([vAC+1])                     #87
-st([0xff])                      #88
-ld([Y,vIRQ_DEVROM])             #89 Set vPC to vIRQ
-suba(2)                         #90
-st([vPC])                       #91
-ld([Y,vIRQ_DEVROM+1])           #92
-st([vPC+1])                     #93
-ld([vCpuSelect])                #94 Allow interrupt to save this itself
-st([vAC])                       #95
-ld(0)                           #96 Tidy up vACH
-st([vAC+1])                     #97
-ld(hi('ENTER'))                 #98 Set vCpuSelect to ENTER (=regular vCPU)
-st([vCpuSelect])                #99
-runVcpu(186-100-extra,          #100 Application cycles (scan line 0)
-    '---D line 0 timeout with irq',
-    returnTo='vBlankFirst#186')
+ld([sysArgs+0])                 # Advance source address
+adda(1)                         #
+st([sysArgs+0],X)               #
 
-# vIRQ sequence WITH interpreter switch
-label('vRTI#18')
-ld([X])                         #18
-st([vCpuSelect])                #19
-ld([0xfc])                      #20
-st([vPC])                       #21
-ld([0xfd])                      #22
-st([vPC+1])                     #23
-ld([0xfe])                      #24
-st([vAC])                       #25
-ld([0xff])                      #26
-st([vAC+1])                     #27
-nop()                           #0
-ld(hi('RESYNC'),Y)              #1
-jmp(Y,'RESYNC')                 #2
-ld([vTicks])                    #3
+ld([Y,X])                       # Copy byte
+ld([sysArgs+1],X)               #
+st([X])                         #
 
-# Entered last line of vertical blank (line 40)
-label('vBlankLast#34')
+ld([sysArgs+1])                 # Advance target address
+adda(1)                         #
+st([sysArgs+1])                 #
 
-# Game controller types
-# TypeA: Based on 74LS165 shift register (not supported)
-# TypeB: Based on CD4021B shift register (standard)
-# TypeC: Based on priority encoder
-#
-# Notes:
-# - TypeA was only used during development and first beta test, before ROM v1
-# - TypeB appears as type A with negative logic levels
-# - TypeB is the game controller type that comes with the original kit and ROM v1
-# - TypeB is mimicked by BabelFish / Pluggy McPlugface
-# - TypeB requires a prolonged /SER_LATCH, therefore vPulse is 8 scanlines, not 2
-# - TypeB and TypeC can be sampled in the same scanline
-# - TypeA is 1 scanline shifted as it looks at a different edge (XXX up or down?)
-# - TypeC gives incomplete information: lower buttons overshadow higher ones
-#
-#       TypeC    Alias    Button TypeB
-#       00000000  ^@   -> Right  11111110
-#       00000001  ^A   -> Left   11111101
-#       00000011  ^C   -> Down   11111011
-#       00000111  ^G   -> Up     11110111
-#       00001111  ^O   -> Start  11101111
-#       00011111  ^_   -> Select 11011111
-#       00111111  ?    -> B      10111111
-#       01111111  DEL  -> A      01111111
-#       11111111       -> (None) 11111111
-#
-#       Conversion formula:
-#               f(x) := 254 - x
+ld([sysArgs+2])                 # Decrement byte count and loop
+bne('.slb1')                    #
+suba(1)                         #
 
-# Detect controller TypeC codes
-ld([serialRaw])                 #34 if serialRaw in [0,1,3,7,15,31,63,127,255]
-adda(1)                         #35
-anda([serialRaw])               #36
-bne('.buttons#39')              #37
-
-# TypeC
-ld([serialRaw])                 #38 [TypeC] if serialRaw < serialLast
-adda(1)                         #39
-anda([serialLast])              #40
-bne('.buttons#43')              #41
-ld(254)                         #42 then clear the selected bit
-nop()                           #43
-bra('.buttons#46')              #44
-label('.buttons#43')
-suba([serialRaw])               #43,45
-anda([buttonState])             #44
-st([buttonState])               #45
-label('.buttons#46')
-ld([serialRaw])                 #46 Set the lower bits
-ora([buttonState])              #47
-label('.buttons#48')
-st([buttonState])               #48
-ld([serialRaw])                 #49 Update serialLast for next pass
-jmp(Y,'vBlankLast#52')          #50
-st([serialLast])                #51
-
-# TypeB
-# pChange = pNew & ~pOld
-# nChange = nNew | ~nOld {DeMorgan}
-label('.buttons#39')
-ld(255)                         #39 [TypeB] Bitwise edge-filter to detect button presses
-xora([serialLast])              #40
-ora([serialRaw])                #41 Catch button-press events
-anda([buttonState])             #42 Keep active button presses
-ora([serialRaw])                #43
-nop()                           #44
-nop()                           #45
-bra('.buttons#48')              #46
-nop()                           #47
+# XXX Unfinished
 
 #-----------------------------------------------------------------------
 
@@ -5421,7 +5474,7 @@ def insertRomDir(name):
 #       Embedded programs must be given on the command line
 #-----------------------------------------------------------------------
 
-if pc()&255 > 251:                      # Don't start in a trampoline region
+if pc()&255 >= 251:                     # Don't start in a trampoline region
   align(0x100)
 
 for application in argv[1:]:
@@ -5569,7 +5622,7 @@ for application in argv[1:]:
     f.close()
     label(name)
     for i in range(len(raw)):
-      if pc()&255 < 251:
+      if i&255 < 251:
         ld(raw[i])
       elif pc()&255 == 251:
         trampoline()
@@ -5608,7 +5661,7 @@ insertRomDir(lastRomFile)       #25-38 Start of chain
 label('.sysDir#39')
 ld(hi('REENTER'),Y)             #39 Return
 jmp(Y,'REENTER')                #40
-ld(-44//2)                      #41
+ld(-44/2)                       #41
 
 print()
 

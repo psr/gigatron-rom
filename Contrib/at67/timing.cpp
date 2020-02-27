@@ -1,4 +1,6 @@
 #include <algorithm>
+#include <chrono>
+#include <thread>
 
 #include <SDL.h>
 #include "timing.h"
@@ -34,7 +36,7 @@ namespace Timing
 
         _frameCount++;
 
-        // Used for updating at a constant 60 times per second no matter what the FPS is
-        _frameUpdate = ((_frameCount % int((VSYNC_TIMING_60)/std::min(_frameTime, (VSYNC_TIMING_60)))) == 0);
+        // Used for updating non critical render elements at a constant N times per second independently of the main windowed FPS
+        _frameUpdate = ((_frameCount % int((NON_CRITICAL_TIMING)/std::min(_frameTime, (NON_CRITICAL_TIMING)))) == 0);
     }
 }

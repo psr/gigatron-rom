@@ -43,7 +43,54 @@
         DEEK
 %ENDM
 
-%MACRO  ForNextLoopUp _var _label _end
+%MACRO  ForNextInc _var _label _end
+        INC     _var
+        LD      _var
+        SUBI    _end
+        BLE     _label
+%ENDM
+
+%MACRO  ForNextDec _var _label _end
+        LD      _var
+        SUBI    1
+        ST      _var
+        SUBI    _end
+        BGE     _label
+%ENDM
+
+%MACRO  ForNextAdd _var _label _end _step
+        LD      _var
+        ADDI    _step
+        ST      _var
+        SUBI    _end
+        BLE     _label
+%ENDM
+
+%MACRO  ForNextSub _var _label _end _step
+        LD      _var
+        SUBI    _step
+        ST      _var
+        SUBI    _end
+        BGE     _label
+%ENDM
+
+%MACRO  ForNextVarPos _var _label _vEnd _vStep
+        LDW     _var
+        ADDW    _vStep
+        STW     _var
+        SUBW    _vEnd
+        BLE     _label
+%ENDM
+
+%MACRO  ForNextVarNeg _var _label _vEnd _vStep
+        LDW     _var
+        ADDW    _vStep
+        STW     _var
+        SUBW    _vEnd
+        BGE     _label
+%ENDM
+
+%MACRO  ForNextFarInc _var _label _end
         INC     _var
         LD      _var
         SUBI    _end
@@ -51,7 +98,7 @@
 _label_ CALLI   _label
 %ENDM
 
-%MACRO  ForNextLoopDown _var _label _end
+%MACRO  ForNextFarDec _var _label _end
         LD      _var
         SUBI    1
         ST      _var
@@ -60,7 +107,25 @@ _label_ CALLI   _label
 _label_ CALLI   _label
 %ENDM
 
-%MACRO  ForNextLoopStepUp _var _label _vEnd _vStep
+%MACRO  ForNextFarAdd _var _label _end _step
+        LD      _var
+        ADDI    _step
+        ST      _var
+        SUBI    _end
+        BGT     _label_ + 3
+_label_ CALLI   _label
+%ENDM
+
+%MACRO  ForNextFarSub _var _label _end _step
+        LD      _var
+        SUBI    _step
+        ST      _var
+        SUBI    _end
+        BLT     _label_ + 3
+_label_ CALLI   _label
+%ENDM
+
+%MACRO  ForNextFarVarPos _var _label _vEnd _vStep
         LDW     _var
         ADDW    _vStep
         STW     _var
@@ -69,13 +134,21 @@ _label_ CALLI   _label
 _label_ CALLI   _label
 %ENDM
 
-%MACRO  ForNextLoopStepDown _var _label _vEnd _vStep
+%MACRO  ForNextFarVarNeg _var _label _vEnd _vStep
         LDW     _var
         ADDW    _vStep
         STW     _var
         SUBW    _vEnd
         BLT     _label_ + 3
 _label_ CALLI   _label
+%ENDM
+
+%MACRO  Input
+        CALLI   input
+%ENDM
+
+%MACRO  NewLine
+        CALLI   newLineScroll
 %ENDM
 
 %MACRO  PrintChar _chr
@@ -168,6 +241,10 @@ _label_ CALLI   _label
 
 %MACRO  StringAdd
         CALLI   stringAdd
+%ENDM
+
+%MACRO  StringConcat
+        CALLI   stringConcat
 %ENDM
 
 %MACRO  StringMid
@@ -267,6 +344,10 @@ _label_ CALLI   _label
         CALLI   scanlineMode
 %ENDM
 
+%MACRO  WaitVBlanks
+        CALLI   waitVBlanks
+%ENDM
+
 %MACRO  WaitVBlank
         CALLI   waitVBlank
 %ENDM
@@ -285,6 +366,26 @@ _label_ CALLI   _label
 
 %MACRO  DrawVLine
         CALLI   drawVLine
+%ENDM
+
+%MACRO  DrawCircle
+        CALLI   drawCircle
+%ENDM
+
+%MACRO  DrawCircleF
+        CALLI   drawCircleF
+%ENDM
+
+%MACRO  DrawRect
+        CALLI   drawRect
+%ENDM
+
+%MACRO  DrawRectF
+        CALLI   drawRectF
+%ENDM
+
+%MACRO  DrawPoly
+        CALLI   drawPoly
 %ENDM
 
 %MACRO  AtLineCursor

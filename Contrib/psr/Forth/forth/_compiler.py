@@ -1,15 +1,16 @@
 """Compile Forth files into ROM"""
 import copy
+import functools
 import json
 import pathlib
 import re
 from itertools import count
 
-from asm import C, X, Xpp, Y
+import asm
+from asm import X, Xpp, Y
 from asm import _symbols as asm_symbols
-from asm import bra, hi, jmp, label, ld, lo, pc, st
 
-from . import variables
+from . import _start_page, variables
 from ._docol_exit import docol_rom_only
 from .bootstrapforth import (
     Dictionary,
@@ -18,6 +19,167 @@ from .bootstrapforth import (
     State,
     python_forth_dictionary,
 )
+
+# BEGIN MASSIVE HACK
+#
+# As the cross-compiler processes definitions it calls asm.py
+# functions to emit Gigatron instructions.
+#
+# However we have a rule that threads are not allowed to cross page-
+# boundaries, not least because each page that holds (the start of) a Forth
+# word must start with the restart-or-quit trampoline.
+#
+# When the cross-compiler encounters a colon definition, it doesn't know
+# how long it will end up being in terms of instructions emitted, and so
+# whether it will end up crossing the page. Instead we recognise when we
+# have gone too far - and then undo what we have already done.
+#
+# asm.py doesn't currently offer much support for this (although it might
+# be helpful to move some of this machinery in there), and so in the code
+# that follows we monkey about with its internal state, in a thoroughly
+# unhygenic way.
+#
+# The net result is that instead of calling the asm.py functions directly,
+# we call wrapped versions, which are capable of undoing, and then redoing
+# their effect.
+
+
+# State
+_asm_state = None  # Captured state from asm.py
+_assembler_call_buffer = []  # [(asm.py function, *args, **kwargs)] for replay
+_current_label = None  # Label of the definition we're in
+
+
+def _capture_asm_state():
+    """Grab the internal state of the asm module, and store in _asm_state"""
+    global _asm_state
+    asm_variables = [
+        "_romSize",
+        "_maxRomSize",
+        "_zpSize",
+        "_symbols",
+        "_refsL",
+        "_refsH",
+        "_labels",
+        "_comments",
+        "_rom0",
+        "_rom1",
+        "_linenos",
+        "_errors",
+        "_lineno",
+    ]
+    _asm_state = {
+        variable: copy.copy(getattr(asm, variable)) for variable in asm_variables
+    }
+
+
+def _restore_asm_state():
+    """Restore the asm module to however it was"""
+    global _asm_state
+
+    for variable, old_value in _asm_state.items():
+        setattr(asm, variable, old_value)
+    _asm_state = None
+
+
+def _restart_definition():
+    """Restart the current definition on a fresh page
+
+    Restores the asm module internal state to what it was before the start
+    of the definition, start a new page, and replay the buffer.
+    """
+    _restore_asm_state()
+    _start_page()
+
+    asm.label(_current_label)
+    docol_rom_only()
+
+    for function, args, kwargs in _assembler_call_buffer:
+        # If the operation was PC relative, we need to pass it the current pc
+        try:
+            (arg,) = args
+            if callable(arg):
+                args = (arg(asm.pc()),)
+        except ValueError:
+            pass
+        function(*args, **kwargs)
+    _assembler_call_buffer[:] = []  # Clear
+    # Restart capturing
+    _capture_asm_state()
+
+
+def _start_definiton(label):
+    """Mark the start of a definition"""
+    global _current_label
+    _assembler_call_buffer[:] = []  # Clear anything in the buffer
+    _current_label = label
+    _capture_asm_state()
+    asm.label(label)
+    docol_rom_only()
+
+
+def _end_definition():
+    """Mark the end of a successful definition"""
+    global _asm_state
+    _assembler_call_buffer[:] = []  # Clear anything in the buffer
+    _asm_state = None  # Forget the captured state
+
+
+def _wrap_asm_function(function):
+    """Given an asm module function, decorate it so that it is replayable
+
+    Returns the wrapped function. Beyond the normal arguments, wrapped
+    functions have the capability to take a one argument callable as parameter.
+    This will be called with the next address (asm.pc()) as argument, and the
+    result passed to the underlying function. However these functions should
+    not themselves use wrapped functions - or else they will get called twice
+    on replay.
+
+    When wrapped functions are called, they check the current address.
+    If it is not a page boundary, they immediately emit the appropriate
+    instruction, but also record themselves and their arguments into a list.
+
+    If the call is on a page boundary, they call _restart_definition() before
+    calling the underlying definition
+    """
+
+    @functools.wraps(function)
+    def wrapper(*args, **kwargs):
+        if asm.pc() & 0xFF < 0xFF:
+            # We haven't run out of space yet - Let's keep going!
+            # Record this call for future playback
+            _assembler_call_buffer.append((function, args, kwargs))
+        else:
+            # Oh no - this thread definition crosses a page boundary
+            # Restore the asm.py state to what it was before the start
+            # of the definition, start a new page, and replay the buffer
+            _restart_definition()
+        # Now do the operation we were asked to.
+        # If the operation is PC relative, we need to pass it the current pc
+        try:
+            (arg,) = args
+            if callable(arg):
+                args = (arg(asm.pc()),)
+        except ValueError:
+            pass
+        return function(*args, **kwargs)
+
+    return wrapper
+
+
+C = _wrap_asm_function(asm.C)
+bra = _wrap_asm_function(asm.bra)
+hi = _wrap_asm_function(asm.hi)
+jmp = _wrap_asm_function(asm.jmp)
+label = _wrap_asm_function(asm.label)
+ld = _wrap_asm_function(asm.ld)
+lo = _wrap_asm_function(asm.lo)
+st = _wrap_asm_function(asm.st)
+
+
+# END MASSIVE HACK.
+# BEGIN CODE THAT IS MERELY UGLY AND ILL-CONSIDERED.
+
 
 _THIS_DIR = pathlib.Path(__file__).parent
 
@@ -127,7 +289,19 @@ def forward_mark(state):
     target_label = next(_labels)
     state.data_stack.append(target_label)
     bra(target_label)
-    ld(lo(target_label) - pc() + 4)
+    # Complicated because the expression needs to work twice!
+    # What we want to calculate is the relative movement to the target label
+    # If this code was definitely going to end up where pc() says it will,
+    # we could say
+    #    ld(lo(target_label) - pc() + 4)
+    # At runtime ld gets a parameter of -pc() + 3, as lo() evaluates to 0.
+    # When the label gets resolved later, the address gets added on.
+    # However the call might get used twice, with pc() no longer equal to what we thought.
+    #
+    # The function wrapper above supports using a function of a single argument
+    # which will be called with pc as parameter, so we can do roughly the same thing.
+    # We have to use the unwrapped version of lo()
+    ld(lambda pc: asm.lo(target_label) - pc + 4)
 
 
 @interpreter_dictionary.word(">RESOLVE")
@@ -151,7 +325,7 @@ def backward_resolve(state):
     target_label = state.data_stack.pop()
     state.data_stack.append(target_label)
     bra(target_label)
-    ld(lo(target_label) - pc() + 4)
+    ld(lambda pc: asm.lo(target_label) - pc + 4)
 
 
 # Compile the definitions of various compiling words.
@@ -170,19 +344,19 @@ with open(pathlib.Path(__file__).parent / "control.f") as f:
 @interpreter_dictionary.word(":")
 def _colon(state):
     """Start a colon definition"""
+    _end_definition()  # If we were already in one
     state.interpreter_dictionary["WORD"].execution_token(state)
     name = state.data_stack.pop()
     state.state = State.Compiling
     word_label = _get_label(name)
 
     # Emit a prefix, and store (word_label, address) in dictionary
-    label(word_label)
-    address = pc()
-    docol_rom_only()
+    _start_definiton(word_label)
     if _is_standard_word(name):
         # This is a standard word, and needs to be available to the user.
         # Add an entry to the dictionary that we will eventually copy into RAM.
-        ram_dictionary[name] = ("forth.DOCOL", address + 4)
+        # The eventual address will be the label of the word + 4
+        ram_dictionary[name] = ("forth.DOCOL", (word_label, 4))
     state.target_dictionary.define(name, word_label, flags=DictionaryFlags.Hidden)
 
 
@@ -192,3 +366,4 @@ def compile_file(path):
             interpreter_dictionary, f, target_dictionary=gigatron_forth_dictionary
         )
         interpreter.run(quit)
+        _end_definition()

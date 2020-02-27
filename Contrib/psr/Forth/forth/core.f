@@ -33,3 +33,7 @@
 
 : ABS ( n -- u )
     DUP 0< IF NEGATE THEN ;
+
+: ALIGNED ( addr -- a-addr )
+    DUP 1 AND IF 1+ THEN ;
+

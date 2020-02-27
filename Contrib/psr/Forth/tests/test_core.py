@@ -231,3 +231,16 @@ def test_abs(emulator, data_stack, data_stack_depth, tos):
     # Assert
     assert abs(tos) == data_stack.pop_u16()
     assert data_stack_depth == len(data_stack)
+
+
+@given(data_stack_depth=data_stack_depths(with_room_for_values=1), tos=addresses)
+def test_aligned(emulator, data_stack, data_stack_depth, tos):
+    # Arrange
+    data_stack.set_depth_in_bytes(data_stack_depth)
+    data_stack.push_word(tos)
+    # Act
+    _do_test_thread(emulator, "forth.core.ALIGNED")
+    # Assert
+    expected = tos if tos % 2 == 0 else tos + 1
+    assert expected == data_stack.pop_u16()
+    assert data_stack_depth == len(data_stack)

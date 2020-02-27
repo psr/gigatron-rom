@@ -113,6 +113,10 @@ class _GigatronStack(object):
         else:
             raise AssertionError(f"Value {value:x} is not a valid flag value")
 
+    def pop_char(self):
+        value = self.pop_u16()
+        return chr(value)
+
 
 @pytest.fixture
 def data_stack(emulator):

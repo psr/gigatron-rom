@@ -37,3 +37,6 @@
 : ALIGNED ( addr -- a-addr )
     DUP 1 AND IF 1+ THEN ;
 
+: BL ( -- char )
+    32 ;
+

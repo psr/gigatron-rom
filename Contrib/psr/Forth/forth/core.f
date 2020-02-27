@@ -30,3 +30,6 @@
 
 :  > ( n1 n2 -- flag )  SWAP < ;
 : U> ( u1 u2 -- flag )  SWAP U< ;
+
+: ABS ( n -- u )
+    DUP 0< IF NEGATE THEN ;

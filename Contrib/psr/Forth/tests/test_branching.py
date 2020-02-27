@@ -9,10 +9,11 @@ from utilities import do_test_word, get_IP, get_W, set_IP
 
 WORD_START = dev.start_of_forth_word_space
 
-address = shared(integers(min_value=WORD_START, max_value=(1 << 16) - 1))
+address = shared(integers(min_value=WORD_START, max_value=(1 << 16) - 3))
 target = address.flatmap(
     lambda address: integers(
-        min_value=max(WORD_START, address & 0xFF00), max_value=address | 0xFF
+        min_value=max(WORD_START, address & 0xFF00),
+        max_value=min(address | 0xFF, (1 << 16) - 4),
     )
 )
 

@@ -24,3 +24,9 @@
 : 0> ( n -- flag )
     0 SWAP - 0< ;
 
+\ Taken from the eForth implementation - This confused me!
+: U< ( u1 u2 -- flag )  2DUP XOR 0< IF SWAP DROP 0< EXIT THEN - 0< ;
+:  < ( n1 n2 -- flag )  2DUP XOR 0< IF      DROP 0< EXIT THEN - 0< ;
+
+:  > ( n1 n2 -- flag )  SWAP < ;
+: U> ( u1 u2 -- flag )  SWAP U< ;

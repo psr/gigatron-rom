@@ -8,6 +8,7 @@ from strategies import (
     data_stack_depths,
     numbers,
     truth_values,
+    unsigned_numbers,
 )
 from utilities import do_test_word, get_IP, get_W, set_IP, set_W
 
@@ -149,4 +150,72 @@ def test_zero_greaterthan(emulator, data_stack, data_stack_depth, tos):
     _do_test_thread(emulator, "forth.core.ext.0>")
     # Assert
     assert (tos > 0) == data_stack.pop_flag()
+    assert data_stack_depth == len(data_stack)
+
+
+# @given(
+#     data_stack_depth=data_stack_depths(with_room_for_values=2),
+#     tos=numbers,
+#     nos=numbers,
+# )
+def test_lessthan(emulator, data_stack, data_stack_depth=0, tos=0, nos=0):
+    # Arrange
+    data_stack.set_depth_in_bytes(data_stack_depth)
+    data_stack.push_word(nos)
+    data_stack.push_word(tos)
+    # Act
+    _do_test_thread(emulator, "forth.core.<")
+    # Assert
+    assert (nos < tos) == data_stack.pop_flag()
+    assert data_stack_depth == len(data_stack)
+
+
+@given(
+    data_stack_depth=data_stack_depths(with_room_for_values=2),
+    tos=numbers,
+    nos=numbers,
+)
+def test_greaterthan(emulator, data_stack, data_stack_depth, tos, nos):
+    # Arrange
+    data_stack.set_depth_in_bytes(data_stack_depth)
+    data_stack.push_word(nos)
+    data_stack.push_word(tos)
+    # Act
+    _do_test_thread(emulator, "forth.core.>")
+    # Assert
+    assert (nos > tos) == data_stack.pop_flag()
+    assert data_stack_depth == len(data_stack)
+
+
+@given(
+    data_stack_depth=data_stack_depths(with_room_for_values=2),
+    tos=unsigned_numbers,
+    nos=unsigned_numbers,
+)
+def test_unsigned_lessthan(emulator, data_stack, data_stack_depth, tos, nos):
+    # Arrange
+    data_stack.set_depth_in_bytes(data_stack_depth)
+    data_stack.push_word(nos)
+    data_stack.push_word(tos)
+    # Act
+    _do_test_thread(emulator, "forth.core.U<")
+    # Assert
+    assert (nos < tos) == data_stack.pop_flag()
+    assert data_stack_depth == len(data_stack)
+
+
+@given(
+    data_stack_depth=data_stack_depths(with_room_for_values=2),
+    tos=unsigned_numbers,
+    nos=unsigned_numbers,
+)
+def test_unsigned_greaterthan(emulator, data_stack, data_stack_depth, tos, nos):
+    # Arrange
+    data_stack.set_depth_in_bytes(data_stack_depth)
+    data_stack.push_word(nos)
+    data_stack.push_word(tos)
+    # Act
+    _do_test_thread(emulator, "forth.core.ext.U>")
+    # Assert
+    assert (nos > tos) == data_stack.pop_flag()
     assert data_stack_depth == len(data_stack)

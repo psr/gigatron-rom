@@ -76,15 +76,11 @@ interpreter_dictionary = copy.copy(python_forth_dictionary)
 @interpreter_dictionary.word("COMPILE,")
 def _compile_comma(state):
     """Compile a word"""
-    xt = state.data_stack.pop()
-    try:
-        word_label, address = xt
-    except ValueError:
-        word_label = address = xt
-    st(lo(address), [Y, Xpp])
+    word_label = state.data_stack.pop()
+    st(lo(word_label), [Y, Xpp])
     C(f"-> {word_label}")
     jmp(Y, "forth.move-ip")
-    st(hi(address), [Y, Xpp])
+    st(hi(word_label), [Y, Xpp])
 
 
 @interpreter_dictionary.word(immediate=True)
@@ -187,7 +183,7 @@ def _colon(state):
         # This is a standard word, and needs to be available to the user.
         # Add an entry to the dictionary that we will eventually copy into RAM.
         ram_dictionary[name] = ("forth.DOCOL", address + 4)
-    state.target_dictionary.define(name, (word_label), flags=DictionaryFlags.Hidden)
+    state.target_dictionary.define(name, word_label, flags=DictionaryFlags.Hidden)
 
 
 def compile_file(path):

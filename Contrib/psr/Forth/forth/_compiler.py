@@ -131,7 +131,7 @@ def forward_mark(state):
     target_label = next(_labels)
     state.data_stack.append(target_label)
     bra(target_label)
-    ld(lo(target_label) - pc() + 3)
+    ld(lo(target_label) - pc() + 4)
 
 
 @interpreter_dictionary.word(">RESOLVE")
@@ -155,7 +155,7 @@ def backward_resolve(state):
     target_label = state.data_stack.pop()
     state.data_stack.append(target_label)
     bra(target_label)
-    ld(lo(target_label) - pc() + 3)
+    ld(lo(target_label) - pc() + 4)
 
 
 # Compile the definitions of various compiling words.

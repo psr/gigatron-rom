@@ -7502,7 +7502,7 @@ forth.core.?DUP:
               1674 e07a  jmp  y,$7a
               1675 dc15  st   $15,[y,x++]
               1676 fc7b  bra  .thread_label#0
-              1677 0007  ld   $07
+              1677 0008  ld   $08
               1678 dc4c  st   $4c,[y,x++] ;-> forth.core.DUP
               1679 e07a  jmp  y,$7a
               167a dc15  st   $15,[y,x++]

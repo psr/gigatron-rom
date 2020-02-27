@@ -1,13 +1,13 @@
 numChannels         EQU     register0
 audioPtr            EQU     register1
 waveType            EQU     register2
-midiNote            EQU     register4           ; register4 to register7 are the only free registers during time slicing
+midiNote            EQU     register4           ; register4 to register7 are the only free registers during time slicing, (state is invalidated each time slice)
 midiCommand         EQU     register5
 midiPtr             EQU     register6
 
 
 %SUB                resetAudio
-resetAudio          LDWI    0x0000
+resetAudio          LDI     0
                     STW     midiDelay
                     LDWI    giga_soundChan1
                     STW     audioPtr
@@ -25,7 +25,7 @@ resetA_loop         ST      numChannels
                     DOKE    audioPtr            ; wavA and wavX
                     INC     audioPtr
                     INC     audioPtr    
-                    LDWI    0x0000
+                    LDI     0
                     DOKE    audioPtr            ; keyL and keyH
                     INC     audioPtr
                     INC     audioPtr
@@ -120,7 +120,7 @@ midiEndNote         LDW     midiCommand
                     ST      midiPtr + 1
                     LDI     0xFC
                     ST      midiPtr             ; channels address 0x01FC <-> 0x04FC
-                    LDWI    0x0000
+                    LDI     0
                     DOKE    midiPtr             ; end note
                     RET
 %ENDS

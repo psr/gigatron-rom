@@ -4,18 +4,12 @@
 #include <string>
 #include <fstream>
 #include <algorithm>
+#include <string.h>
 
-#ifndef STAND_ALONE
-#include "editor.h"
-#include "timing.h"
-#include "graphics.h"
-#include "inih/INIReader.h"
-#include "rs232/rs232.h"
-
-#if defined(_WIN32)
+#ifdef _WIN32
+#include <windows.h>
 #include <direct.h>
 #include "dirent/dirent.h"
-#define chdir _chdir
 #ifdef max
 #undef max
 #endif
@@ -23,9 +17,17 @@
 #undef min
 #endif
 #else
+#include <limits.h>
 #include <unistd.h>
 #include <dirent.h>
 #endif
+
+#ifndef STAND_ALONE
+#include "editor.h"
+#include "timing.h"
+#include "graphics.h"
+#include "inih/INIReader.h"
+#include "rs232/rs232.h"
 #endif
 
 #include "memory.h"
@@ -47,6 +49,47 @@ namespace Loader
 {
     bool _hostIsBigEndian = false;
 
+    std::string _exePath = ".";
+    std::string _cwdPath = ".";
+    std::string _filePath = ".";
+
+
+    const std::string& getExePath(void) {return _exePath;}
+    const std::string& getCwdPath(void) {return _cwdPath;}
+    const std::string& getFilePath(void) {return _filePath;}
+    void setFilePath(const std::string& filePath) {_filePath = filePath;}
+
+#ifdef _WIN32
+    char* getcwd(char* dst, int size)
+    {
+        return _getcwd(dst, size);
+    }
+    int chdir(const char* path)
+    {
+        return _chdir(path);
+    }
+    std::string getExeDir(void)
+    {
+        char dir[MAX_PATH] = {0};
+        GetModuleFileName(NULL, dir, MAX_PATH);
+        std::string path = dir;
+        size_t slash = path.find_last_of("\\/");
+        path = (slash != std::string::npos) ? path.substr(0, slash) : ".";
+        Expression::replaceText(path, "\\", "/");
+        return path;
+    }
+#else
+    std::string getExeDir(void)
+    {
+        char dir[PATH_MAX];
+        ssize_t result = readlink("/proc/self/exe", dir, PATH_MAX);
+        std::string path = (result > 0) ? dir : ".";
+        size_t slash = path.find_last_of("\\/");
+        path = (slash != std::string::npos) ? path.substr(0, slash) : ".";
+        Expression::replaceText(path, "\\", "/");
+        return path;
+    }
+#endif
 
     bool loadGt1File(const std::string& filename, Gt1File& gt1File)
     {
@@ -103,8 +146,8 @@ namespace Loader
             return false;
         }
 
-        size_t i = filepath.rfind('.');
-        filename = (i != std::string::npos) ? filepath.substr(0, i) + ".gt1" : filepath + ".gt1";
+        size_t dot = filepath.rfind('.');
+        filename = (dot != std::string::npos) ? filepath.substr(0, dot) + ".gt1" : filepath + ".gt1";
 
         std::ofstream outfile(filename, std::ios::binary | std::ios::out);
         if(!outfile.is_open())
@@ -124,7 +167,7 @@ namespace Loader
         // Merge page 0 segments together
         Gt1Segment page0;
         int segments = 0;
-        for(int i=0; i<gt1File._segments.size(); i++) if(gt1File._segments[i]._hiAddress == 0x00) segments++;
+        for(int i=0; i<int(gt1File._segments.size()); i++) if(gt1File._segments[i]._hiAddress == 0x00) segments++;
         if(segments > 1)
         {
             uint8_t start = gt1File._segments[0]._loAddress;
@@ -150,7 +193,7 @@ namespace Loader
                     return false;
                 }
 
-                for(int k=seg; k<seg+gt1File._segments[i]._dataBytes.size(); k++)
+                for(int k=seg; k<seg+int(gt1File._segments[i]._dataBytes.size()); k++)
                 {
                     page0._dataBytes[k] = gt1File._segments[i]._dataBytes[j++];
                 }
@@ -169,7 +212,7 @@ namespace Loader
                                                                                        uint8_t(gt1File._segments[0]._dataBytes.size()));
         }
 
-        for(int i=0; i<gt1File._segments.size(); i++)
+        for(int i=0; i<int(gt1File._segments.size()); i++)
         {
             // Write header
             outfile.write((char *)&gt1File._segments[i]._hiAddress, SEGMENT_HEADER_SIZE);
@@ -204,44 +247,46 @@ namespace Loader
     {
         size_t nameSuffix = filename.find_last_of(".");
         std::string output = filename.substr(0, nameSuffix) + ".gt1";
-        fprintf(stderr, "\nFile:   %s\n", output.c_str());
+        fprintf(stderr, "\nOutput : %s\n", output.c_str());
 
         // Header
         uint16_t totalSize = 0;
-        for(int i=0; i<gt1File._segments.size(); i++)
+        for(int i=0; i<int(gt1File._segments.size()); i++)
         {
             // Don't count page 0 RAM usage or segments outside of current RAM size
             if(gt1File._segments[i]._hiAddress)
             {
                 uint16_t address = gt1File._segments[i]._loAddress + (gt1File._segments[i]._hiAddress <<8);
-                int segmentSize = (gt1File._segments[i]._segmentSize == 0) ? 256 : gt1File._segments[i]._segmentSize;
-                if((address + segmentSize - 1) < Memory::getSizeRAM()) totalSize += segmentSize;
-                if((address & 0x00FF) + segmentSize > 256) fprintf(stderr, "Loader::printGt1Stats() : Page overflow, segment %d : address 0x%04x : segmentSize %3d\n", i, address, segmentSize);
+                uint16_t segmentSize = (gt1File._segments[i]._segmentSize == 0) ? 256 : gt1File._segments[i]._segmentSize;
+                if((address + segmentSize - 1) < Memory::getSizeRAM()  &&  !Memory::isVideoRAM(address)) totalSize += segmentSize;
+                if((address & 0x00FF) + segmentSize > 256) fprintf(stderr, "Loader::printGt1Stats() : Page overflow, (ignore if non code segment), segment %d : address 0x%04x : segmentSize %3d\n", i, address, segmentSize);
             }
         }
         uint16_t startAddress = gt1File._loStart + (gt1File._hiStart <<8);
-        fprintf(stderr, "\n************************************************************\n");
-        fprintf(stderr, "* %s : 0x%04x : %5d bytes : %3d segments\n", output.c_str(), startAddress, totalSize, int(gt1File._segments.size()));
-        fprintf(stderr, "************************************************************\n");
-        fprintf(stderr, "* Segment :  Type  : Address : Memory Used                  \n");
-        fprintf(stderr, "************************************************************\n");
+        fprintf(stderr, "\n**********************************************\n");
+        fprintf(stderr, "*                   Loading                    \n");
+        fprintf(stderr, "**********************************************\n");
+        fprintf(stderr, "* %-20s : 0x%04x  : %5d bytes\n", output.c_str(), startAddress, totalSize);
+        fprintf(stderr, "**********************************************\n");
+        fprintf(stderr, "*   Segment   :  Type  : Address : Memory Used\n");
+        fprintf(stderr, "**********************************************\n");
 
         // Segments
         int contiguousSegments = 0;
         int startContiguousSegment = 0;
         uint16_t startContiguousAddress = 0x0000;
-        for(int i=0; i<gt1File._segments.size(); i++)
+        for(int i=0; i<int(gt1File._segments.size()); i++)
         {
             uint16_t address = gt1File._segments[i]._loAddress + (gt1File._segments[i]._hiAddress <<8);
-            int segmentSize = (gt1File._segments[i]._segmentSize == 0) ? 256 : gt1File._segments[i]._segmentSize;
+            uint16_t segmentSize = (gt1File._segments[i]._segmentSize == 0) ? 256 : gt1File._segments[i]._segmentSize;
             std::string memory = "RAM";
             if(gt1File._segments[i]._isRomAddress)
             {
                 memory = "ROM";
                 if(gt1File._segments.size() == 1)
                 {
-                    fprintf(stderr, "*  %4d   :  %s   : 0x%04x  : %5d bytes\n", i, memory.c_str(), address, totalSize);
-                    fprintf(stderr, "************************************************************\n");
+                    fprintf(stderr, "*    %4d     :  %s   : 0x%04x  : %5d bytes\n", i, memory.c_str(), address, totalSize);
+                    fprintf(stderr, "**********************************************\n");
                     return totalSize;
                 }
                 totalSize -= segmentSize;
@@ -267,20 +312,20 @@ namespace Loader
                 // Normal segment < 256 bytes
                 if(contiguousSegments == 0)
                 {
-                    fprintf(stderr, "*  %4d   :  %s   : 0x%04x  : %5d bytes\n", i, memory.c_str(), address, segmentSize);
+                    fprintf(stderr, "*    %4d     :  %s   : 0x%04x  : %5d bytes\n", i, memory.c_str(), address, segmentSize);
                 }
                 // Contiguous segment < 256 bytes
                 else
                 {
-                    fprintf(stderr, "*  %4d   :  %s   : 0x%04x  : %5d bytes (%dx256)\n", startContiguousSegment, memory.c_str(), startContiguousAddress, contiguousSegments*256, contiguousSegments);
-                    fprintf(stderr, "*  %4d   :  %s   : 0x%04x  : %5d bytes\n", i, memory.c_str(), address, segmentSize);
+                    fprintf(stderr, "*    %4d     :  %s   : 0x%04x  : %5d bytes (%dx256)\n", startContiguousSegment, memory.c_str(), startContiguousAddress, contiguousSegments*256, contiguousSegments);
+                    fprintf(stderr, "*    %4d     :  %s   : 0x%04x  : %5d bytes\n", i, memory.c_str(), address, segmentSize);
                     contiguousSegments = 0;
                 }
             }
         }
-        fprintf(stderr, "************************************************************\n");
-        fprintf(stderr, "* Free RAM after loading: %d\n", Memory::getBaseFreeRAM() - totalSize);
-        fprintf(stderr, "************************************************************\n");
+        fprintf(stderr, "**********************************************\n");
+        fprintf(stderr, "* Free RAM after load  :  %5d\n", Memory::getBaseFreeRAM() - totalSize);
+        fprintf(stderr, "**********************************************\n");
 
         return totalSize;
     }
@@ -316,21 +361,6 @@ namespace Loader
     std::map<std::string, SaveData> _saveData;
 
 
-    std::string& getCurrentGame(void) {return _currentGame;}
-    void setCurrentGame(std::string& currentGame) {_currentGame = currentGame;}
-
-    UploadTarget getUploadTarget(void) {return _uploadTarget;}
-    void setUploadTarget(UploadTarget target) {_uploadTarget = target;}
-
-    int getConfigRomsSize(void) {return int(_configRoms.size());}
-    ConfigRom* getConfigRom(int index)
-    {
-        if(_configRoms.size() == 0  ||  index >= _configRoms.size()) return nullptr;
-
-        return &_configRoms[index];
-    }
-
-
     bool getKeyAsString(INIReader& iniReader, const std::string& sectionString, const std::string& iniKey, const std::string& defaultKey, std::string& result, bool upperCase=true)
     {
         result = iniReader.Get(sectionString, iniKey, defaultKey);
@@ -338,16 +368,25 @@ namespace Loader
         if(upperCase) Expression::strToUpper(result);
         return true;
     }
+#endif
 
     void initialise(void)
     {
-        if(Cpu::getHostEndianess() == Cpu::BigEndian) _hostIsBigEndian = true;
+        // Current working directory
+        char cwdPath[FILENAME_MAX];
+        if(!getcwd(cwdPath, FILENAME_MAX)) strcpy(cwdPath, ".");
+        _cwdPath = std::string(cwdPath);
+        Expression::replaceText(_cwdPath, "\\", "/");
+        _exePath = getExeDir();
 
+        if(Cpu::getHostEndianness() == Cpu::BigEndian) _hostIsBigEndian = true;
+
+#ifndef STAND_ALONE
         _numComPorts = comEnumerate();
         if(_numComPorts == 0) fprintf(stderr, "Loader::initialise() : no COM ports found.\n");
 
         // Loader config
-        INIReader iniReader(LOADER_CONFIG_INI);
+        INIReader iniReader(_exePath + "/" + LOADER_CONFIG_INI);
         _configIniReader = iniReader;
         if(_configIniReader.ParseError() == 0)
         {
@@ -378,7 +417,7 @@ namespace Loader
                         char *endPtr;
                         getKeyAsString(_configIniReader, sectionString, "ComPort", "0", result);   
                         _configComPort = strtol(result.c_str(), &endPtr, 10);
-                        if((endPtr - &result[0]) != result.size())
+                        if((endPtr - &result[0]) != int(result.size()))
                         {
                             _configComPort = comFindPort(result.c_str());
                             if(_configComPort < 0) _configComPort = DEFAULT_COM_PORT;
@@ -401,7 +440,7 @@ namespace Loader
                             ConfigRom configRom;
 
                             std::string romName = "RomName" + std::to_string(index);
-                            if(getKeyAsString(_configIniReader, sectionString, romName, "", result) == false) break;
+                            if(getKeyAsString(_configIniReader, sectionString, romName, "", result, false) == false) break;
                             configRom._name = result;
 
                             std::string romVer = "RomType" + std::to_string(index);
@@ -412,6 +451,8 @@ namespace Loader
                         }
                     }
                     break;
+
+                    default: break;
                 }
             }
         }
@@ -422,7 +463,7 @@ namespace Loader
 
 
         // High score config
-        INIReader highScoresIniReader(HIGH_SCORES_INI);
+        INIReader highScoresIniReader(_exePath + "/" + HIGH_SCORES_INI);
         _highScoresIniReader = highScoresIniReader;
         if(_highScoresIniReader.ParseError() == 0)
         {
@@ -456,8 +497,25 @@ namespace Loader
         }
         else
         {
-            fprintf(stderr, "Loader::initialise() : couldn't load high scores INI file '%s' : loading and saving of high scores is disabled.\n", HIGH_SCORES_INI);
+            fprintf(stderr, "Loader::initialise() : couldn't load high scores INI file '%s' : high scores are disabled.\n", HIGH_SCORES_INI);
         }
+#endif
+    }
+
+
+#ifndef STAND_ALONE
+    const std::string& getCurrentGame(void) {return _currentGame;}
+    void setCurrentGame(const std::string& currentGame) {_currentGame = currentGame;}
+
+    UploadTarget getUploadTarget(void) {return _uploadTarget;}
+    void setUploadTarget(UploadTarget target) {_uploadTarget = target;}
+
+    int getConfigRomsSize(void) {return int(_configRoms.size());}
+    ConfigRom* getConfigRom(int index)
+    {
+        if(_configRoms.size() == 0  ||  index >= int(_configRoms.size())) return nullptr;
+
+        return &_configRoms[index];
     }
 
     int matchFileSystemName(const std::string& path, const std::string& match, std::vector<std::string>& names)
@@ -592,7 +650,7 @@ namespace Loader
 
             text.push_back(line);
         }
-        while(line.find('?') == std::string::npos);
+        while(line.find("Cmd?") == std::string::npos);
 
         return true;
     }
@@ -615,7 +673,7 @@ namespace Loader
                 return false;
             }
         }
-        while(line.find('?') == std::string::npos);
+        while(line.find("Cmd?") == std::string::npos);
 
         return true;
     }
@@ -631,6 +689,8 @@ namespace Loader
 
     void sendCommandToGiga(char cmd, bool wait)
     {
+        UNREFERENCED_PARAM(wait);
+
         if(!openComPort(_configComPort)) return;
 
         std::string line;
@@ -639,7 +699,7 @@ namespace Loader
         closeComPort();
     }
 
-    bool sendCommandToGiga(std::string& cmd, std::vector<std::string>& text)
+    bool sendCommandToGiga(const std::string& cmd, std::vector<std::string>& text)
     {
         if(!openComPort(_configComPort)) return false;
 
@@ -666,7 +726,7 @@ namespace Loader
         int gt1Size = *((int*)userData);
 
         int index = 0;
-        while(std::isdigit(line[0]))
+        while(std::isdigit((unsigned char)line[0]))
         {
             int n = strtol(line.c_str(), nullptr, 10);
             comWrite(_currentComPort, &_gt1Buffer[index], n);
@@ -714,7 +774,7 @@ namespace Loader
         Graphics::setUploadFilename(filename);
 
         _gt1UploadSize = int(gt1file.gcount());
-        SDL_Thread* uploadThread = SDL_CreateThread(uploadToGigaThread, VERSION_STR, (void*)&_gt1UploadSize);
+        SDL_CreateThread(uploadToGigaThread, VERSION_STR, (void*)&_gt1UploadSize);
     }
 
     void disableUploads(bool disable)
@@ -741,7 +801,7 @@ namespace Loader
             fprintf(stderr, "Loader::loadDataFile() : read error in number of counts in '%s'\n", filename.c_str());
             return false;
         }
-        if(_hostIsBigEndian) Cpu::swapEndianess(numCounts);
+        if(_hostIsBigEndian) Cpu::swapEndianness(numCounts);
         for(int i=0; i<numCounts; i++)
         {
             uint16_t count;
@@ -751,7 +811,7 @@ namespace Loader
                 fprintf(stderr, "Loader::loadDataFile() : read error in counts of '%s'\n", filename.c_str());
                 return false;
             }
-            if(_hostIsBigEndian) Cpu::swapEndianess(count);
+            if(_hostIsBigEndian) Cpu::swapEndianness(count);
             sdata._counts[i] = count;
         }         
 
@@ -763,7 +823,7 @@ namespace Loader
             fprintf(stderr, "Loader::loadDataFile() : read error in number of addresses in '%s'\n", filename.c_str());
             return false;
         }
-        if(_hostIsBigEndian) Cpu::swapEndianess(numAddresses);
+        if(_hostIsBigEndian) Cpu::swapEndianness(numAddresses);
         for(int i=0; i<numAddresses; i++)
         {
             uint16_t address;
@@ -773,7 +833,7 @@ namespace Loader
                 fprintf(stderr, "Loader::loadDataFile() : read error in addresses of '%s'\n", filename.c_str());
                 return false;
             }
-            if(_hostIsBigEndian) Cpu::swapEndianess(address);
+            if(_hostIsBigEndian) Cpu::swapEndianness(address);
             sdata._addresses[i] = address;
         }         
 
@@ -784,10 +844,10 @@ namespace Loader
         }
 
         // load data
-        for(int j=0; j<sdata._addresses.size(); j++)
+        for(int j=0; j<int(sdata._addresses.size()); j++)
         {
             //sdata._data.push_back(std::vector<uint8_t>(sdata._counts[j], 0x00));
-            for(int i=0; i<sdata._counts[j]; i++)
+            for(uint16_t i=0; i<sdata._counts[j]; i++)
             {
                 uint8_t data;
                 infile.read((char *)&data, 1);
@@ -826,9 +886,9 @@ namespace Loader
 
         // Save counts
         uint16_t numCounts = uint16_t(saveData._counts.size());
-        if(_hostIsBigEndian) Cpu::swapEndianess(numCounts);
+        if(_hostIsBigEndian) Cpu::swapEndianness(numCounts);
         outfile.write((char *)&numCounts, 2);
-        if(_hostIsBigEndian) Cpu::swapEndianess(numCounts);
+        if(_hostIsBigEndian) Cpu::swapEndianness(numCounts);
         if(outfile.bad() || outfile.fail())
         {
             fprintf(stderr, "Loader::saveDataFile() : write error in number of counts of '%s'\n", filename.c_str());
@@ -836,9 +896,9 @@ namespace Loader
         }
         for(int i=0; i<numCounts; i++)
         {
-            if(_hostIsBigEndian) Cpu::swapEndianess(saveData._counts[i]);
+            if(_hostIsBigEndian) Cpu::swapEndianness(saveData._counts[i]);
             outfile.write((char *)&saveData._counts[i], 2);
-            if(_hostIsBigEndian) Cpu::swapEndianess(saveData._counts[i]);
+            if(_hostIsBigEndian) Cpu::swapEndianness(saveData._counts[i]);
             if(outfile.bad() || outfile.fail())
             {
                 fprintf(stderr, "Loader::saveDataFile() : write error in counts of '%s'\n", filename.c_str());
@@ -848,9 +908,9 @@ namespace Loader
 
         // Save addresses
         uint16_t numAddresses = uint16_t(saveData._addresses.size());
-        if(_hostIsBigEndian) Cpu::swapEndianess(numAddresses);
+        if(_hostIsBigEndian) Cpu::swapEndianness(numAddresses);
         outfile.write((char *)&numAddresses, 2);
-        if(_hostIsBigEndian) Cpu::swapEndianess(numAddresses);
+        if(_hostIsBigEndian) Cpu::swapEndianness(numAddresses);
         if(outfile.bad() || outfile.fail())
         {
             fprintf(stderr, "Loader::saveDataFile() : write error in number of addresses of '%s'\n", filename.c_str());
@@ -858,9 +918,9 @@ namespace Loader
         }
         for(int i=0; i<numAddresses; i++)
         {
-            if(_hostIsBigEndian) Cpu::swapEndianess(saveData._addresses[i]);
+            if(_hostIsBigEndian) Cpu::swapEndianness(saveData._addresses[i]);
             outfile.write((char *)&saveData._addresses[i], 2);
-            if(_hostIsBigEndian) Cpu::swapEndianess(saveData._addresses[i]);
+            if(_hostIsBigEndian) Cpu::swapEndianness(saveData._addresses[i]);
             if(outfile.bad() || outfile.fail())
             {
                 fprintf(stderr, "Loader::saveDataFile() : write error in addresses of '%s'\n", filename.c_str());
@@ -869,7 +929,7 @@ namespace Loader
         }         
 
         // Check data has been initialised
-        for(int j=0; j<saveData._addresses.size(); j++)
+        for(int j=0; j<int(saveData._addresses.size()); j++)
         {
             if(saveData._data.size() != saveData._addresses.size())
             {
@@ -887,7 +947,7 @@ namespace Loader
         }
 
         // Save data
-        for(int j=0; j<saveData._addresses.size(); j++)
+        for(int j=0; j<int(saveData._addresses.size()); j++)
         {
             for(int i=0; i<saveData._counts[j]; i++)
             {
@@ -951,7 +1011,7 @@ namespace Loader
         frameCount = 0;
 
         // Update data, (checks byte by byte and saves if larger, endian order is configurable)
-        for(int j=0; j<_saveData[_currentGame]._addresses.size(); j++)
+        for(int j=0; j<int(_saveData[_currentGame]._addresses.size()); j++)
         {
             // Defaults to little endian
             int start = _saveData[_currentGame]._counts[j] - 1, end = -1, step = -1;
@@ -966,7 +1026,7 @@ namespace Loader
             while(start != end)
             {
                 int i = start;
-                uint8_t data = Cpu::getRAM(_saveData[_currentGame]._addresses[j] + i);
+                uint8_t data = Cpu::getRAM(uint16_t(_saveData[_currentGame]._addresses[j] + i));
 
                 // TODO: create a list of INI rules to make this test more flexible
                 if(data < _saveData[_currentGame]._data[j][i]) return;
@@ -974,7 +1034,7 @@ namespace Loader
                 {
                     for(int k=i; k!=end; k+=step)
                     {
-                        _saveData[_currentGame]._data[j][k] = Cpu::getRAM(_saveData[_currentGame]._addresses[j] + k);
+                        _saveData[_currentGame]._data[j][k] = Cpu::getRAM(uint16_t(_saveData[_currentGame]._addresses[j] + k));
                     }
                     saveHighScore();
                     return;
@@ -1038,7 +1098,7 @@ namespace Loader
         uint16_t startAddress = GTB_LINE0_ADDRESS + MAX_GTB_LINE_SIZE;
         uint16_t endAddress = startAddress;
         char *endPtr;
-        for(int i=0; i<lines.size(); i++)
+        for(int i=0; i<int(lines.size()); i++)
         {
             uint16_t lineNumber = (uint16_t)strtol(lines[i].c_str(), &endPtr, 10);
             Cpu::setRAM(endAddress + 0, LO_BYTE(lineNumber));
@@ -1057,19 +1117,19 @@ namespace Loader
             if(LO_BYTE(endAddress) < LO_BYTE(GTB_LINE0_ADDRESS)) endAddress = HI_MASK(endAddress) | LO_BYTE(GTB_LINE0_ADDRESS);
         }
 
-        uint16_t freeMemory = Memory::getFreeGtbRAM(uint16_t(lines.size()));
+        uint16_t freeMemory = uint16_t(Memory::getFreeGtbRAM(int(lines.size())));
         fprintf(stderr, "Loader::loadGtbFile() : start %04x : end %04x : free %d : '%s'\n", startAddress, endAddress, freeMemory, filepath.c_str());
 
         Cpu::setRAM(GTB_LINE0_ADDRESS + 0, LO_BYTE(endAddress));
         Cpu::setRAM(GTB_LINE0_ADDRESS + 1, HI_BYTE(endAddress));
         std::string list = "RUN";
-        for(int i=0; i<list.size(); i++) Cpu::setRAM(endAddress + 2 + i, list[i]);
-        Cpu::setRAM(endAddress + 2 + uint16_t(list.size()), 0);
+        for(int i=0; i<int(list.size()); i++) Cpu::setRAM(uint16_t(endAddress + 2 + i), list[i]);
+        Cpu::setRAM(uint16_t(endAddress + 2 + uint16_t(list.size())), 0);
 
         return true;
     }
 
-    void uploadDirect(UploadTarget uploadTarget)
+    void uploadDirect(UploadTarget uploadTarget, const std::string& name)
     {
         Gt1File gt1File;
 
@@ -1079,10 +1139,15 @@ namespace Loader
         bool hasRomCode = false;
         bool hasRamCode = false;
 
-        uint16_t executeAddress = Editor::getLoadBaseAddress();
-        std::string filename = *Editor::getCurrentFileEntryName();
-        std::string filepath = std::string(Editor::getBrowserPath() + filename);
+        uint16_t executeAddress;
         std::string gtbFilepath;
+
+        size_t slash = name.find_last_of("\\/");
+
+        std::string filepath = name;
+        std::string filename = name.substr(slash + 1);
+
+        Expression::replaceText(filepath, "\\", "/");
 
         size_t nameSuffix = filename.find_last_of(".");
         size_t pathSuffix = filepath.find_last_of(".");
@@ -1114,16 +1179,24 @@ namespace Loader
         else if(_configGclBuildFound  &&  filename.find(".gcl") != filename.npos)
         {
             // Create compile gcl string
-            std::string browserPath = Editor::getBrowserPath();
-            browserPath.pop_back(); // remove trailing '/'
             if(chdir(_configGclBuild.c_str()))
             {
                 fprintf(stderr, "\nLoader::uploadDirect() : failed to change directory to '%s' : can't build %s\n", _configGclBuild.c_str(), filename.c_str());
                 return;
             }
 
-            std::string command = "py -B Core\\compilegcl.py -s interface.json \"" + filepath + "\" \"" + browserPath + "\"";
-            //fprintf(stderr, command.c_str());
+            // Prepend CWD to relative paths
+            if(filepath.find(":") == std::string::npos  &&  filepath[0] != '/')
+            {
+                filepath = _cwdPath + "/" + filepath;
+                pathSuffix = filepath.find_last_of(".");
+            }
+
+            slash = filepath.find_last_of("\\/");
+            std::string gclPath = (slash != std::string::npos) ? filepath.substr(0, slash) : "./";
+            std::string command = "python3 -B Core/compilegcl.py -s interface.json \"" + filepath + "\" \"" + gclPath + "\"";
+
+            //fprintf(stderr, "\nLoader::uploadDirect() : %s : %s : %s : %s\n", filepath.c_str(), command.c_str(), _cwdPath.c_str(), _exePath.c_str());
 
             // Create gt1 name and path
             filename = filename.substr(0, nameSuffix) + ".gt1";
@@ -1138,7 +1211,7 @@ namespace Loader
             std::ifstream infile(filepath, std::ios::binary | std::ios::in);
             if(!infile.is_open())
             {
-                fprintf(stderr, "\nLoader::uploadDirect() : failed to compile '%s'\n", filename.c_str());
+                fprintf(stderr, "\nLoader::uploadDirect() : failed to compile '%s'\n", filepath.c_str());
                 filename = "";
                 if(gt1FileDeleted == 0) Editor::browseDirectory();
             }
@@ -1159,15 +1232,15 @@ namespace Loader
 
             if(uploadTarget == Emulator)
             {
-                for(int j=0; j<gt1File._segments.size(); j++)
+                for(int j=0; j<int(gt1File._segments.size()); j++)
                 {
                     // Ignore if address will not fit in current RAM
                     uint16_t address = gt1File._segments[j]._loAddress + (gt1File._segments[j]._hiAddress <<8);
-                    if((address + gt1File._segments[j]._dataBytes.size() - 1) < Memory::getSizeRAM())
+                    if((address + int(gt1File._segments[j]._dataBytes.size()) - 1) < Memory::getSizeRAM())
                     {
-                        for(int i=0; i<gt1File._segments[j]._dataBytes.size(); i++)
+                        for(int i=0; i<int(gt1File._segments[j]._dataBytes.size()); i++)
                         {
-                            Cpu::setRAM(address+i, gt1File._segments[j]._dataBytes[i]);
+                            Cpu::setRAM(uint16_t(address+i), gt1File._segments[j]._dataBytes[i]);
                         }
                     }
                 }
@@ -1266,8 +1339,8 @@ namespace Loader
             return;
         }
 
-        if(uploadTarget == Emulator) fprintf(stderr, "\nTarget: Emulator");
-        else if(uploadTarget == Hardware) fprintf(stderr, "\nTarget: Gigatron");
+        if(uploadTarget == Emulator) fprintf(stderr, "\nTarget : Emulator");
+        else if(uploadTarget == Hardware) fprintf(stderr, "\nTarget : Gigatron");
         uint16_t totalSize = printGt1Stats(filename, gt1File);
         Memory::setSizeFreeRAM(Memory::getBaseFreeRAM() - totalSize); 
 
@@ -1418,6 +1491,8 @@ namespace Loader
                 }
             }
             break;
+
+            default: break;
         }
 
         return sending;
@@ -1427,8 +1502,6 @@ namespace Loader
     void upload(int vgaY)
     {
         static bool frameUploading = false;
-        static FILE* fileToUpload = NULL;
-        static FILE* fileToSave = NULL;
         static uint8_t payload[RAM_SIZE_HI];
         static uint8_t payloadSize = 0;
 
@@ -1437,7 +1510,14 @@ namespace Loader
             uint16_t executeAddress = Editor::getLoadBaseAddress();
             if(_uploadTarget != None)
             {
-                uploadDirect(_uploadTarget);
+                if(Editor::getCurrentFileEntryName())
+                {
+                    _filePath = Editor::getBrowserPath() + *Editor::getCurrentFileEntryName();
+                }
+
+                //fprintf(stderr, "\nLoader::upload() : %s\n", _filePath.c_str());
+
+                uploadDirect(_uploadTarget, _filePath);
                 _uploadTarget = None;
 
                 return;
@@ -1450,7 +1530,7 @@ namespace Loader
             {
                 case FrameState::Resync:
                 {
-                    if(!sendFrame(vgaY, -1, payload, payloadSize, executeAddress, checksum))
+                    if(!sendFrame(vgaY, 0xFF, payload, payloadSize, executeAddress, checksum))
                     {
                         checksum = 'g'; // loader resets checksum
                         frameState = FrameState::Frame;
@@ -1477,6 +1557,8 @@ namespace Loader
                     }
                 }
                 break;
+
+                default: break;
             }
         }
     }

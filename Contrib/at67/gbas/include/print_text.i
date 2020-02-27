@@ -1,4 +1,4 @@
-; do *NOT* use register4 to register7 during time slicing if you call realTimeProc
+; do *NOT* use register4 to register7 during time slicing if you use realTimeProc
 textStr             EQU     register0
 textNum             EQU     register0
 textBak             EQU     register0
@@ -37,16 +37,16 @@ clearCR_loopy       ST      clearLoop
                     
 clearCR_loopx       SUBI    4                               ; loop is unrolled 4 times
                     ST      giga_sysArg4
-                    SYS     0xFF                            ; SYS_Draw4_30, 270 - 30/2 = 0xFF
+                    SYS     30
                     SUBI    4
                     ST      giga_sysArg4
-                    SYS     0xFF                            ; SYS_Draw4_30, 270 - 30/2 = 0xFF
+                    SYS     30
                     SUBI    4
                     ST      giga_sysArg4
-                    SYS     0xFF                            ; SYS_Draw4_30, 270 - 30/2 = 0xFF
+                    SYS     30
                     SUBI    4
                     ST      giga_sysArg4
-                    SYS     0xFF                            ; SYS_Draw4_30, 270 - 30/2 = 0xFF
+                    SYS     30
                     BGT     clearCR_loopx
                     
                     INC     giga_sysArg4 + 1                ; next line
@@ -79,25 +79,21 @@ printInit           LDWI    SYS_VDrawBits_134
 %ENDS
                     
 %SUB                printText
-                    ; prints text string pointed to by the accumulator
+                    ; prints text string pointed to by textStr
 printText           PUSH
                     LDWI    printInit
                     CALL    giga_vAC
-                    LDW     textStr             
-                    PEEK                                    ; first byte is length
-                    BEQ     printT_exit
-    
-printT_char         ST      textLen
-                    INC     textStr                         ; next char
+
+                    ; first byte is length
+printT_char         INC     textStr                         ; next char
                     LDW     textStr             
                     PEEK
+                    BEQ     printT_exit                     ; check for delimiting zero
                     ST      textChr
                     LDWI    printChar
                     CALL    giga_vAC
-
-                    LD      textLen
-                    SUBI    1
-                    BNE     printT_char
+                    BRA     printT_char
+                    
 printT_exit         POP
                     RET
 %ENDS   
@@ -249,7 +245,7 @@ printHexByte        PUSH
                     LDWI    SYS_LSRW4_50                    ; shift right by 4 SYS routine
                     STW     giga_sysFn
                     LD      textHex
-                    SYS     0xF5                            ; SYS_LSRW4_50, 270 - 50/2 = 0xF5
+                    SYS     50
                     SUBI    10
                     BLT     printH_skip0
                     ADDI    7
@@ -328,7 +324,7 @@ printC_slice        ST      textSlice
                     LDW     textFont                        ; text font slice base address
                     LUP     0x00                            ; get ROM slice
                     ST      giga_sysArg2
-                    SYS     0xCB                            ; draw vertical slice, SYS_VDrawBits_134, 270 - 134/2 = 0xCB
+                    SYS     134                             ; draw vertical slice, SYS_VDrawBits_134, 270 - 134/2 = 0xCB
                     INC     textFont                        ; next vertical slice
                     INC     giga_sysArg4                    ; next x
                     LD      textSlice
@@ -336,7 +332,7 @@ printC_slice        ST      textSlice
                     BNE     printC_slice
                     
                     ST      giga_sysArg2                    ; result of printC_slice is 0
-                    SYS     0xCB                            ; draw last blank slice
+                    SYS     134                             ; draw last blank slice
                     INC     giga_sysArg4                    ; using sysArg4 as a temporary cursor address for multiple char prints
                     
                     PUSH

@@ -41,9 +41,9 @@ namespace Graphics
     bool _displayHelpScreen = false;
     uint8_t _displayHelpScreenAlpha = 0;
 
-    std::atomic<bool> _enableUploadBar = false;
-    std::atomic<int> _uploadCursorY = -1;
-    std::atomic<float> _uploadPercentage = 0.0f;
+    std::atomic<bool> _enableUploadBar(false);
+    std::atomic<int> _uploadCursorY(-1);
+    std::atomic<float> _uploadPercentage(0.0f);
     std::string _uploadFilename;
 
     uint32_t _pixels[SCREEN_WIDTH * SCREEN_HEIGHT];
@@ -210,7 +210,7 @@ namespace Graphics
 
             if(nonWhiteSpace == std::string::npos) lineTokens[i] = std::string(MAX_CHARS_HELP, ' ');
             if(lineTokens[i].size() < MAX_CHARS_HELP) lineTokens[i] += std::string(MAX_CHARS_HELP - lineTokens[i].size(), ' ');
-            drawText(lineTokens[i], pixels, 0, y, 0xFF00FF00, false, 0, 0x00000000, false, -1, true, 0xFFFFFFFF, 0xFF00FFFF);
+            drawText(lineTokens[i], pixels, 0, y, 0xFF00FF00, false, 0, 0, 0x00000000, false, -1, true, 0xFFFFFFFF, 0xFF00FFFF);
 
             // Fill in the gaps
             for(int j=FONT_HEIGHT; j<FONT_HEIGHT+2; j++)
@@ -258,6 +258,7 @@ namespace Graphics
             uint8_t b = uint8_t(double((i & 0x30) >>4) / 3.0 * 255.0);
 
             _colours[i] = 0xFF000000 | (r <<16) | (g <<8) | b;
+            //fprintf(stderr, "%08X\n", _colours[i]); // use to create a Paint.Net palette
         }
 
         // Safe resolution by default
@@ -272,13 +273,13 @@ namespace Graphics
         _filter = 0;
         _width = 640;
         _height = 480;
-        _scaleX = 2.0f;
-        _scaleY = 2.0f;
+        _scaleX = 1.5f;
+        _scaleY = 1.5f;
         _posX = 40;
         _posY = 40;
 
         // Parse graphics config file
-        INIReader iniReader(GRAPHICS_CONFIG_INI);
+        INIReader iniReader(Loader::getExePath() + "/" + GRAPHICS_CONFIG_INI);
         _configIniReader = iniReader;
         if(_configIniReader.ParseError() < 0)
         {
@@ -319,13 +320,13 @@ namespace Graphics
                         _filter = (_filter<0 || _filter>2) ? 0 : _filter;
 
                         getKeyAsString(sectionString, "Width", "640", result);
-                        _width = (result == "DESKTOP") ? DM.w : _width = std::strtol(result.c_str(), nullptr, 10);
+                        _width = (result == "DESKTOP") ? DM.w : std::strtol(result.c_str(), nullptr, 10);
                         getKeyAsString(sectionString, "Height", "480", result);
-                        _height = (result == "DESKTOP") ? DM.h : _height = std::strtol(result.c_str(), nullptr, 10);
+                        _height = (result == "DESKTOP") ? DM.h : std::strtol(result.c_str(), nullptr, 10);
 
-                        getKeyAsString(sectionString, "ScaleX", "2.0", result);
+                        getKeyAsString(sectionString, "ScaleX", "1.5", result);
                         _scaleX = std::stof(result.c_str());
-                        getKeyAsString(sectionString, "ScaleY", "2.0", result);
+                        getKeyAsString(sectionString, "ScaleY", "1.5", result);
                         _scaleY = std::stof(result.c_str());
 
                         getKeyAsString(sectionString, "PosX", "0", result);
@@ -334,6 +335,8 @@ namespace Graphics
                         _posY = strtol(result.c_str(), nullptr, 10);
                     }
                     break;
+
+                    default: break;
                 }
             }
         }
@@ -456,7 +459,8 @@ namespace Graphics
     {
         if(x < 0  ||  x > SCREEN_WIDTH - 1) return;
         if(y < 0  ||  y > SCREEN_HEIGHT - 1) return;
-        _pixels[x + y*SCREEN_WIDTH] = 0x00FFFFFFFF; //(0x00FFFFFF ^ _pixels[x + y*SCREEN_WIDTH]) & 0x00FFFFFF;
+        //fprintf(stderr, "%d %d\n", x, y);
+        _pixels[x + y*SCREEN_WIDTH] = 0xFFFFFFFF; //(0x00FFFFFF ^ _pixels[x + y*SCREEN_WIDTH]) & 0x00FFFFFF;
     }
     void drawReticle(int vgaX, int vgaY)
     {
@@ -488,16 +492,19 @@ namespace Graphics
     {
         for(int i=0; i<GIGA_HEIGHT; i++)
         {
-            Cpu::setRAM(GIGA_VTABLE + i*2, (GIGA_VRAM >>8) + i);
-            Cpu::setRAM(GIGA_VTABLE + 1 + i*2, 0x00);
+            Cpu::setRAM(uint16_t(GIGA_VTABLE + i*2), uint8_t((GIGA_VRAM >>8) + i));
+            Cpu::setRAM(uint16_t(GIGA_VTABLE + 1 + i*2), 0x00);
         }
     }
 
     void refreshTimingPixel(const Cpu::State& S, int vgaX, int pixelY, uint32_t colour, bool debugging)
     {
+        UNREFERENCED_PARAM(debugging);
+        UNREFERENCED_PARAM(S);
+
         _hlineTiming[pixelY % GIGA_HEIGHT] = colour;
 
-        //if(debugging) return;
+        if(debugging) return;
 
         uint32_t screen = (vgaX % (GIGA_WIDTH + 1))*3 + (pixelY % GIGA_HEIGHT)*4*SCREEN_WIDTH;
         _pixels[screen + 0 + 0*SCREEN_WIDTH] = colour; _pixels[screen + 1 + 0*SCREEN_WIDTH] = colour; _pixels[screen + 2 + 0*SCREEN_WIDTH] = colour;
@@ -519,20 +526,20 @@ namespace Graphics
     {
         uint8_t offsetx = 0;
 
-        for(int y=0; y<GIGA_HEIGHT; y++)
+        for (int y = 0; y<GIGA_HEIGHT; y++)
         {
-            offsetx += Cpu::getRAM(GIGA_VTABLE + 1 + y*2);
-    
-            for(int x=0; x<=GIGA_WIDTH; x++)
-            {
-                uint16_t address = (Cpu::getRAM(GIGA_VTABLE + y*2) <<8) + ((offsetx + x) & 0xFF);
-                uint32_t colour = (x < GIGA_WIDTH) ? _colours[Cpu::getRAM(address) & (COLOUR_PALETTE-1)] : _hlineTiming[y];
-                uint32_t screen = (y*4 % SCREEN_HEIGHT)*SCREEN_WIDTH  +  (x*3 % SCREEN_WIDTH);
+            offsetx += Cpu::getRAM(uint16_t(GIGA_VTABLE + 1 + y * 2));
 
-                _pixels[screen + 0 + 0*SCREEN_WIDTH] = colour; _pixels[screen + 1 + 0*SCREEN_WIDTH] = colour; _pixels[screen + 2 + 0*SCREEN_WIDTH] = colour;
-                _pixels[screen + 0 + 1*SCREEN_WIDTH] = colour; _pixels[screen + 1 + 1*SCREEN_WIDTH] = colour; _pixels[screen + 2 + 1*SCREEN_WIDTH] = colour;
-                _pixels[screen + 0 + 2*SCREEN_WIDTH] = colour; _pixels[screen + 1 + 2*SCREEN_WIDTH] = colour; _pixels[screen + 2 + 2*SCREEN_WIDTH] = colour;
-                _pixels[screen + 0 + 3*SCREEN_WIDTH] = 0x00;   _pixels[screen + 1 + 3*SCREEN_WIDTH] = 0x00;   _pixels[screen + 2 + 3*SCREEN_WIDTH] = 0x00;
+            for (int x = 0; x <= GIGA_WIDTH; x++)
+            {
+                uint16_t address = (Cpu::getRAM(uint16_t(GIGA_VTABLE + y * 2)) << 8) + ((offsetx + x) & 0xFF);
+                uint32_t colour = (x < GIGA_WIDTH) ? _colours[Cpu::getRAM(address) & (COLOUR_PALETTE - 1)] : _hlineTiming[y];
+                uint32_t screen = (y * 4 % SCREEN_HEIGHT)*SCREEN_WIDTH + (x * 3 % SCREEN_WIDTH);
+
+                _pixels[screen + 0 + 0 * SCREEN_WIDTH] = colour; _pixels[screen + 1 + 0 * SCREEN_WIDTH] = colour; _pixels[screen + 2 + 0 * SCREEN_WIDTH] = colour;
+                _pixels[screen + 0 + 1 * SCREEN_WIDTH] = colour; _pixels[screen + 1 + 1 * SCREEN_WIDTH] = colour; _pixels[screen + 2 + 1 * SCREEN_WIDTH] = colour;
+                _pixels[screen + 0 + 2 * SCREEN_WIDTH] = colour; _pixels[screen + 1 + 2 * SCREEN_WIDTH] = colour; _pixels[screen + 2 + 2 * SCREEN_WIDTH] = colour;
+                _pixels[screen + 0 + 3 * SCREEN_WIDTH] = 0x00;   _pixels[screen + 1 + 3 * SCREEN_WIDTH] = 0x00;   _pixels[screen + 2 + 3 * SCREEN_WIDTH] = 0x00;
             }
         }
     }
@@ -568,7 +575,7 @@ namespace Graphics
 
     void drawLeds(void)
     {
-        // Update 60 times per second no matter how high the FPS is
+        // Update N times per second independently of the main window FPS
         if(Timing::getFrameTime()  &&  Timing::getFrameUpdate())
         {
             for(int i=0; i<NUM_LEDS; i++)
@@ -590,7 +597,8 @@ namespace Graphics
     }
 
     // Simple text routine, font is a non proportional 6*8 font loaded from a 96*48 BMP file
-    bool drawText(const std::string& text, uint32_t* pixels, int x, int y, uint32_t fgColour, bool invert, int invertSize, uint32_t bgColour, bool colourKey, int numChars, bool fullscreen, uint32_t commentColour, uint32_t sectionColour)
+    bool drawText(const std::string& text, uint32_t* pixels, int x, int y, uint32_t fgColour, bool invert, int invertSize, int invertPos, 
+                  uint32_t bgColour, bool colourKey, int numChars, bool fullscreen, uint32_t commentColour, uint32_t sectionColour)
     {
         if(!fullscreen)
         {
@@ -636,7 +644,7 @@ namespace Graphics
                     int fontAddress = (srcx + j)  +  (srcy + k)*FONT_BMP_WIDTH;
                     int pixelAddress = (dstx + j)  +  (dsty + k)*SCREEN_WIDTH;
                     uint32_t fontPixel = fontPixels[fontAddress] & 0x00FFFFFF;
-                    if((invert  &&  i<invertSize) ? !fontPixel : fontPixel)
+                    if((invert  &&  i>=invertPos  &&  i<invertPos+invertSize) ? !fontPixel : fontPixel)
                     {
                         pixels[pixelAddress] = 0xFF000000 | fgColour;
                     }
@@ -651,14 +659,14 @@ namespace Graphics
         return true;
     }
 
-    bool drawText(const std::string& text, int x, int y, uint32_t fgColour, bool invert, int invertSize)
+    bool drawText(const std::string& text, int x, int y, uint32_t fgColour, bool invert, int invertSize, int invertPos)
     {
-        return drawText(text, _pixels, x, y, fgColour, invert, invertSize, 0x00000000, true, -1, true, 0x00000000, 0x00000000);
+        return drawText(text, _pixels, x, y, fgColour, invert, invertSize, invertPos, 0x00000000, true, -1, true, 0x00000000, 0x00000000);
     }
 
     bool drawMenu(const std::string& text, int x, int y, uint32_t fgColour, bool invert, int invertSize, uint32_t bgColour)
     {
-        return drawText(text, _pixels, x, y, fgColour, invert, invertSize, bgColour, false, -1, true, 0x00000000, 0x00000000);
+        return drawText(text, _pixels, x, y, fgColour, invert, invertSize, 0, bgColour, false, -1, true, 0x00000000, 0x00000000);
     }
 
     void drawDigitBox(uint8_t digit, int x, int y, uint32_t colour)
@@ -723,12 +731,12 @@ namespace Graphics
             sprintf(&uploadPercentage[MENU_TEXT_SIZE+1 - 6], " %3d%%\r", int(upload * 100.0f));
         }
 
-        drawText(uploadPercentage, _pixels, HEX_START_X, int(FONT_CELL_Y*4.4) + _uploadCursorY*FONT_CELL_Y, 0xFFB0B0B0, true, MENU_TEXT_SIZE+1, 0x00000000, false, MENU_TEXT_SIZE+1);
+        drawText(uploadPercentage, _pixels, HEX_START_X, int(FONT_CELL_Y*4.4) + _uploadCursorY*FONT_CELL_Y, 0xFFB0B0B0, true, MENU_TEXT_SIZE+1, 0, 0x00000000, false, MENU_TEXT_SIZE+1);
     }
 
     void renderText(void)
     {
-        // Update 60 times per second no matter how high the FPS is
+        // Update N times per second independently of the main window FPS
         if(Timing::getFrameTime()  &&  Timing::getFrameUpdate())
         {
             char str[32];
@@ -737,7 +745,7 @@ namespace Graphics
             drawText(std::string(str), _pixels, 0, FONT_CELL_Y*2, 0xFFFFFFFF, false, 0, false);
             sprintf(str, "%05.1f%%", Cpu::getvCpuUtilisation() * 100.0);
             drawUsageBar(Cpu::getvCpuUtilisation(), FONT_WIDTH*4 - 3, FONT_CELL_Y*2 - 3, FONT_WIDTH*6 + 5, FONT_HEIGHT + 5);
-            drawText(std::string(str), _pixels, FONT_WIDTH*4, FONT_CELL_Y*2, 0x80808080, false, 0, 0x00000000, true);
+            drawText(std::string(str), _pixels, FONT_WIDTH*4, FONT_CELL_Y*2, 0x80808080, false, 0, 0, 0x00000000, true);
 
             //drawText(std::string("LEDS:"), _pixels, 0, 0, 0xFFFFFFFF, false, 0);
             sprintf(str, "FPS %5.1f  XOUT:%02X IN:%02X", 1.0f / Timing::getFrameTime(), Cpu::getXOUT(), Cpu::getIN());
@@ -752,6 +760,7 @@ namespace Graphics
                 case Editor::Dasm:  (Editor::getSingleStepEnabled()) ? strcpy(str, "Debug ") : strcpy(str, "Dasm  "); break;
                 case Editor::Term:  (Editor::getSingleStepEnabled()) ? strcpy(str, "Debug ") : strcpy(str, "Term  "); break;
                 case Editor::Image: (Editor::getSingleStepEnabled()) ? strcpy(str, "Debug ") : strcpy(str, "Image "); break;
+
                 default: strcpy(str, "     ");
             }
             drawText(std::string(str), _pixels, 12, 472 - FONT_CELL_Y, 0xFF00FF00, false, 0);
@@ -762,6 +771,7 @@ namespace Graphics
                 case Editor::PS2:    strcpy(str, "PS2   "); break;
                 case Editor::HwGiga: strcpy(str, "HwKbd "); break;
                 case Editor::HwPS2:  strcpy(str, "HwPS2 "); break;
+
                 default: strcpy(str, "     ");
             }
             drawText("K:", _pixels, 48, 472 - FONT_CELL_Y, 0xFFFFFFFF, false, 0);
@@ -769,7 +779,7 @@ namespace Graphics
 
             sprintf(str, "%-5d", Memory::getSizeFreeRAM());
             drawText(std::string(str), _pixels, RAM_START, 472 - FONT_CELL_Y, 0xFF00FF00, false, 0);
-            sprintf(str, " ROM %02x", Cpu::getRomType());
+            sprintf(str, " ROM %02X", Cpu::getRomType());
             drawText(std::string(VERSION_STR) + std::string(str), _pixels, 0, 472, 0xFFFFFFFF, false, 0);
         }
     }
@@ -784,6 +794,8 @@ namespace Graphics
             case Editor::RAM:  drawText("RAM:       Vars:", _pixels, 0, FONT_CELL_Y*3, 0xFFFFFFFF, false, 0); break;
             case Editor::ROM0: drawText("ROM0:      Vars:", _pixels, 0, FONT_CELL_Y*3, 0xFFFFFFFF, false, 0); break;
             case Editor::ROM1: drawText("ROM1:      Vars:", _pixels, 0, FONT_CELL_Y*3, 0xFFFFFFFF, false, 0); break;
+
+            default: break;
         }
 
         // 8 * 32 hex display of memory
@@ -799,6 +811,8 @@ namespace Graphics
                     case Editor::RAM:  value = Cpu::getRAM(hexAddress);    break;
                     case Editor::ROM0: value = Cpu::getROM(hexAddress, 0); break;
                     case Editor::ROM1: value = Cpu::getROM(hexAddress, 1); break;
+
+                    default: break;
                 }
                 sprintf(str, "%02X ", value);
                 bool onCursor = (i == Editor::getCursorX()  &&  j == Editor::getCursorY());
@@ -837,11 +851,12 @@ namespace Graphics
         // ROM list
         for(int i=0; i<HEX_CHARS_Y; i++)
         {
-            bool onCursor = i == Editor::getCursorY();
+            bool onCursor = (i == Editor::getCursorY());
             int index = Editor::getRomEntriesIndex() + i;
             if(index >= int(Editor::getRomEntriesSize())) break;
             uint32_t colour = (i < NUM_INT_ROMS) ? 0xFFB0B0B0 : 0xFFFFFFFF;
-            drawText(*Editor::getRomEntryName(index), _pixels, HEX_START_X, FONT_CELL_Y*4 + i*FONT_CELL_Y, colour, onCursor, MENU_TEXT_SIZE, 0x00000000, false, MENU_TEXT_SIZE);
+            if(i == Cpu::getRomIndex()) drawText("*", _pixels, HEX_START_X, FONT_CELL_Y*4 + i*FONT_CELL_Y,  0xFFD0D000, onCursor, MENU_TEXT_SIZE, 0, 0x00000000, false, MENU_TEXT_SIZE);
+            drawText(*Editor::getRomEntryName(index), _pixels, HEX_START_X + 6, FONT_CELL_Y*4 + i*FONT_CELL_Y, colour, onCursor, MENU_TEXT_SIZE, 0, 0x00000000, false, MENU_TEXT_SIZE);
         }
 
         // ROM type
@@ -862,11 +877,11 @@ namespace Graphics
         // File list
         for(int i=0; i<HEX_CHARS_Y; i++)
         {
-            bool onCursor = i == Editor::getCursorY();
+            bool onCursor = (i == Editor::getCursorY());
             int index = Editor::getFileEntriesIndex() + i;
             if(index >= int(Editor::getFileEntriesSize())) break;
             uint32_t colour = (Editor::getFileEntryType(index) == Editor::Dir) ? 0xFFB0B0B0 : 0xFFFFFFFF;
-            drawText(*Editor::getFileEntryName(index), _pixels, HEX_START_X, FONT_CELL_Y*4 + i*FONT_CELL_Y, colour, onCursor, MENU_TEXT_SIZE, 0x00000000, false, MENU_TEXT_SIZE);
+            drawText(*Editor::getFileEntryName(index), _pixels, HEX_START_X, FONT_CELL_Y*4 + i*FONT_CELL_Y, colour, onCursor, MENU_TEXT_SIZE, 0, 0x00000000, false, MENU_TEXT_SIZE);
         }
 
         // Load address
@@ -905,8 +920,8 @@ namespace Graphics
             }
 
             // Program counter icon in debug mode
-            bool onCursor = i == Editor::getCursorY();
-            if(onPC) drawText(">", _pixels, HEX_START_X, FONT_CELL_Y*4 + i*FONT_CELL_Y,  0xFF00FF00, onCursor, MENU_TEXT_SIZE, 0x00000000, false, MENU_TEXT_SIZE);
+            bool onCursor = (i == Editor::getCursorY());
+            if(onPC) drawText(">", _pixels, HEX_START_X, FONT_CELL_Y*4 + i*FONT_CELL_Y,  0xFF00FF00, onCursor, MENU_TEXT_SIZE, 0, 0x00000000, false, MENU_TEXT_SIZE);
 
             // Breakpoint icons
             if(Editor::getMemoryMode() == Editor::RAM)
@@ -915,7 +930,7 @@ namespace Graphics
                 {
                     if(Assembler::getDisassembledCode(i)->_address == Editor::getVpcBreakPointAddress(j)  &&  Editor::getSingleStepEnabled())
                     {
-                        drawText("*", _pixels, HEX_START_X, FONT_CELL_Y*4 + i*FONT_CELL_Y,  0xFFC000C0, onCursor, MENU_TEXT_SIZE, 0x00000000, false, MENU_TEXT_SIZE);
+                        drawText("*", _pixels, HEX_START_X, FONT_CELL_Y*4 + i*FONT_CELL_Y,  0xFFC000C0, onCursor, MENU_TEXT_SIZE, 0, 0x00000000, false, MENU_TEXT_SIZE);
                         break;
                     }
                 }
@@ -926,7 +941,7 @@ namespace Graphics
                 {
                     if(Assembler::getDisassembledCode(i)->_address == Editor::getNtvBreakPointAddress(j)  &&  Editor::getSingleStepEnabled())
                     {
-                        drawText("*", _pixels, HEX_START_X, FONT_CELL_Y*4 + i*FONT_CELL_Y,  0xFFC0C000, onCursor, MENU_TEXT_SIZE, 0x00000000, false, MENU_TEXT_SIZE);
+                        drawText("*", _pixels, HEX_START_X, FONT_CELL_Y*4 + i*FONT_CELL_Y,  0xFFC0C000, onCursor, MENU_TEXT_SIZE, 0, 0x00000000, false, MENU_TEXT_SIZE);
                         break;
                     }
                 }
@@ -934,7 +949,8 @@ namespace Graphics
 
             // Mnemonic, highlight if on vPC and show cursor in debug mode
             uint32_t colour = (onPC) ? 0xFFFFFFFF : 0xFFB0B0B0;
-            drawText(Assembler::getDisassembledCode(i)->_text, _pixels, HEX_START_X+6, FONT_CELL_Y*4 + i*FONT_CELL_Y, colour, (onCursor || onPC)  &&  (Editor::getSingleStepEnabled()), MENU_TEXT_SIZE, 0x00000000, false, MENU_TEXT_SIZE);
+            bool highlight = (onCursor || onPC)  &&  (Editor::getSingleStepEnabled());
+            drawText(Assembler::getDisassembledCode(i)->_text, _pixels, HEX_START_X+6, FONT_CELL_Y*4 + i*FONT_CELL_Y, colour, highlight, MENU_TEXT_SIZE, 0, 0x00000000, false, MENU_TEXT_SIZE);
         }
 
         switch(Editor::getMemoryMode())
@@ -942,6 +958,8 @@ namespace Graphics
             case Editor::RAM:  drawText("RAM:       Vars:", _pixels, 0, FONT_CELL_Y*3, 0xFFFFFFFF, false, 0); break;
             case Editor::ROM0: drawText("ROM:       Vars:", _pixels, 0, FONT_CELL_Y*3, 0xFFFFFFFF, false, 0); break;
             case Editor::ROM1: drawText("ROM:       Vars:", _pixels, 0, FONT_CELL_Y*3, 0xFFFFFFFF, false, 0); break;
+
+            default: break;
         }
 
         (Editor::getMemoryMode() == Editor::RAM) ? sprintf(str, "%04X", Editor::getVpcBaseAddress()) : sprintf(str, "%04X", Editor::getNtvBaseAddress());
@@ -968,7 +986,7 @@ namespace Graphics
 
     void renderTextWindow(void)
     {
-        // Update 60 times per second no matter how high the FPS is
+        // Update N times per second independently of the main window FPS
         if(Timing::getFrameTime()  &&  Timing::getFrameUpdate())
         {
             char str[32] = "";
@@ -1002,6 +1020,8 @@ namespace Graphics
                 case Editor::Rom:  renderRomBrowser();                      break;
                 case Editor::Load: renderLoadBrowser(onHex);                break;
                 case Editor::Dasm: renderDisassembler(onHex);               break;
+
+                default: break;
             }
 
             // Disable hex/var editing when mouse moves off a currently editing field
@@ -1013,7 +1033,7 @@ namespace Graphics
             if(Editor::getSingleStepEnabled())
             {
                 drawText("Watch:", _pixels, WATCH_START, FONT_CELL_Y*2, 0xFFFFFFFF, false, 0);
-                sprintf(str, "%04x   ", Editor::getSingleStepAddress());
+                sprintf(str, "%04X   ", Editor::getSingleStepAddress());
                 uint32_t colour = (Editor::getHexEdit() && onWatch) ? 0xFF00FF00 : 0xFFFFFFFF;
                 drawText(str, _pixels, WATCH_START+36, FONT_CELL_Y*2, colour, onWatch, 4);
             }
@@ -1063,11 +1083,14 @@ namespace Graphics
             // Delete icon, (currently only used for clearing breakpoints)
             if(Editor::getEditorMode() == Editor::Dasm  &&  (Editor::getSingleStepEnabled()))
             {
+                int numBrkPoints = (Editor::getMemoryMode() == Editor::RAM) ? Editor::getVpcBreakPointsSize() : Editor::getNtvBreakPointsSize();
+                sprintf(str, "%02d", numBrkPoints);
+                drawText(str, _pixels, DELALL_START_X-12, DELALL_START_Y, 0xFFFFFFFF, false, 0);
                 drawText("x", _pixels, DELALL_START_X, DELALL_START_Y, 0xFFFF0000, Editor::getDelAllButton(), 1);
             }
             else
             {
-                drawText(" ", _pixels, DELALL_START_X, DELALL_START_Y, 0, false, 0);
+                drawText("   ", _pixels, DELALL_START_X-12, DELALL_START_Y, 0, false, 0);
             }
         }
     }
@@ -1089,7 +1112,7 @@ namespace Graphics
             if(!_displayHelpScreen  &&  _displayHelpScreenAlpha > 0)
             {
                 _displayHelpScreenAlpha -= 10;
-                if(_displayHelpScreenAlpha < 0) _displayHelpScreenAlpha = 0;
+                if(_displayHelpScreenAlpha > 240) _displayHelpScreenAlpha = 0;
             }
         }
     }
@@ -1115,7 +1138,7 @@ namespace Graphics
 #endif
 #endif
 
-        SDL_UpdateTexture(_screenTexture, NULL, _pixels, SCREEN_WIDTH * sizeof uint32_t);
+        SDL_UpdateTexture(_screenTexture, NULL, _pixels, SCREEN_WIDTH * sizeof(uint32_t));
         SDL_RenderCopy(_renderer, _screenTexture, NULL, NULL);
         renderHelpScreen();
         SDL_RenderPresent(_renderer);
@@ -1127,7 +1150,6 @@ namespace Graphics
     {
         x = x % GIGA_WIDTH;
         y = y % GIGA_HEIGHT;
-        uint16_t address = GIGA_VRAM + x + (y <<8);
         uint32_t screen = x*3 + y*4*SCREEN_WIDTH;
 
         _pixels[screen + 0 + 0*SCREEN_WIDTH] = colour; _pixels[screen + 1 + 0*SCREEN_WIDTH] = colour; _pixels[screen + 2 + 0*SCREEN_WIDTH] = colour;
@@ -1215,7 +1237,7 @@ namespace Graphics
                 y0 += sy;
             }
 
-            drawPixelGiga(x0, y0, 0xFF);
+            drawPixelGiga(uint8_t(x0), uint8_t(y0), 0xFF);
         }
     }
 
@@ -1301,7 +1323,7 @@ namespace Graphics
 
             for(int j=0; j<LIFE_HEIGHT; j++)
                 for(int i=0; i<LIFE_WIDTH; i++)
-                    lifePixel(i, j, 0);
+                    lifePixel(uint8_t(i), uint8_t(j), 0);
 
             for(int k=0; k<2; k++)
                 for(int j=0; j<LIFE_HEIGHT; j++)
@@ -1312,7 +1334,7 @@ namespace Graphics
             for(int i=0; i<8; i+=4)
             {
                 buffers[0][100][100+i] = 1; buffers[0][101][100+i] = 1; buffers[0][102][100+i] = 1; buffers[0][102][99+i] = 1; buffers[0][101][98+i] = 1;
-                lifePixel(100+i, 100, 1); lifePixel(100+i, 101, 1); lifePixel(100+i, 102, 1); lifePixel(99+i, 102, 1); lifePixel(98+i, 101, 1);
+                lifePixel(uint8_t(100+i), 100, 1); lifePixel(uint8_t(100+i), 101, 1); lifePixel(uint8_t(100+i), 102, 1); lifePixel(uint8_t(99+i), 102, 1); lifePixel(uint8_t(98+i), 101, 1);
             }
 
             index = 0;
@@ -1327,7 +1349,7 @@ namespace Graphics
                     lut[2] = buffers[index][j][i];
                     int count = buffers[index][j-1][i-1] + buffers[index][j-1][i] + buffers[index][j-1][i+1] + buffers[index][j][i+1] + buffers[index][j+1][i+1] + buffers[index][j+1][i] + buffers[index][j+1][i-1] + buffers[index][j][i-1];
                     buffers[index ^ 1][j][i] = lut[count];
-                    if(i < 256  &&  j < 256) lifePixel(i, j, lut[count]);
+                    if(i < 256  &&  j < 256) lifePixel(uint8_t(i), uint8_t(j), lut[count]);
                 }
             }
 
@@ -1347,7 +1369,7 @@ namespace Graphics
 
             for(int j=0; j<LIFE_HEIGHT; j++)
                 for(int i=0; i<LIFE_WIDTH; i++)
-                    lifePixel(i, j, 0);
+                    lifePixel(uint8_t(i), uint8_t(j), 0);
 
             for(int k=0; k<2; k++)
                 for(int j=0; j<LIFE_HEIGHT; j++)
@@ -1358,7 +1380,7 @@ namespace Graphics
             for(int i=0; i<8; i+=4)
             {
                 buffers[0][100][100+i] = 1; buffers[0][101][100+i] = 1; buffers[0][102][100+i] = 1; buffers[0][102][99+i] = 1; buffers[0][101][98+i] = 1;
-                lifePixel(100+i, 100, 1); lifePixel(100+i, 101, 1); lifePixel(100+i, 102, 1); lifePixel(99+i, 102, 1); lifePixel(98+i, 101, 1);
+                lifePixel(uint8_t(100+i), 100, 1); lifePixel(uint8_t(100+i), 101, 1); lifePixel(uint8_t(100+i), 102, 1); lifePixel(uint8_t(99+i), 102, 1); lifePixel(uint8_t(98+i), 101, 1);
             }
         }
 
@@ -1383,8 +1405,8 @@ namespace Graphics
                     lut[2] = buffers[0][j][i];
                     int cell = lut[buffers[1][j][i]];
                     buffers[1][j][i] = 0;
-                    buffers[0][j][i] = cell;
-                    if(i < 256  &&  j < 256) lifePixel(i, j, cell);
+                    buffers[0][j][i] = uint8_t(cell);
+                    if(i < 256  &&  j < 256) lifePixel(uint8_t(i), uint8_t(j), cell);
                 }
             }
         }
@@ -1472,58 +1494,58 @@ namespace Graphics
     int ox, oy, ov;
     int oindex, orotation;
 
-    uint8_t getTetrisPixel(int x, int y)
+    uint8_t getTetrisPixel(int tx, int ty)
     {
-        x *= 4;
-        y *= 4;
-        return getPixelGiga(TETRIS_XPOS + x, TETRIS_YPOS + y);
+        tx *= 4;
+        ty *= 4;
+        return getPixelGiga(uint8_t(TETRIS_XPOS + tx), uint8_t(TETRIS_YPOS + ty));
     }
 
-    void setTetrisPixel(int x, int y, uint8_t colour)
+    void setTetrisPixel(int tx, int ty, uint8_t colour)
     {
-        x *= 4;
-        y *= 4;
-        drawPixelGiga(TETRIS_XPOS + x + 0, TETRIS_YPOS + y + 0, colour);
-        drawPixelGiga(TETRIS_XPOS + x + 0, TETRIS_YPOS + y + 1, colour);
-        drawPixelGiga(TETRIS_XPOS + x + 0, TETRIS_YPOS + y + 2, colour);
-        drawPixelGiga(TETRIS_XPOS + x + 0, TETRIS_YPOS + y + 3, colour);
-        drawPixelGiga(TETRIS_XPOS + x + 1, TETRIS_YPOS + y + 0, colour);
-        drawPixelGiga(TETRIS_XPOS + x + 1, TETRIS_YPOS + y + 1, colour);
-        drawPixelGiga(TETRIS_XPOS + x + 1, TETRIS_YPOS + y + 2, colour);
-        drawPixelGiga(TETRIS_XPOS + x + 1, TETRIS_YPOS + y + 3, colour);
-        drawPixelGiga(TETRIS_XPOS + x + 2, TETRIS_YPOS + y + 0, colour);
-        drawPixelGiga(TETRIS_XPOS + x + 2, TETRIS_YPOS + y + 1, colour);
-        drawPixelGiga(TETRIS_XPOS + x + 2, TETRIS_YPOS + y + 2, colour);
-        drawPixelGiga(TETRIS_XPOS + x + 2, TETRIS_YPOS + y + 3, colour);
-        drawPixelGiga(TETRIS_XPOS + x + 3, TETRIS_YPOS + y + 0, colour);
-        drawPixelGiga(TETRIS_XPOS + x + 3, TETRIS_YPOS + y + 1, colour);
-        drawPixelGiga(TETRIS_XPOS + x + 3, TETRIS_YPOS + y + 2, colour);
-        drawPixelGiga(TETRIS_XPOS + x + 3, TETRIS_YPOS + y + 3, colour);
+        tx *= 4;
+        ty *= 4;
+        drawPixelGiga(uint8_t(TETRIS_XPOS + tx + 0), uint8_t(TETRIS_YPOS + ty + 0), colour);
+        drawPixelGiga(uint8_t(TETRIS_XPOS + tx + 0), uint8_t(TETRIS_YPOS + ty + 1), colour);
+        drawPixelGiga(uint8_t(TETRIS_XPOS + tx + 0), uint8_t(TETRIS_YPOS + ty + 2), colour);
+        drawPixelGiga(uint8_t(TETRIS_XPOS + tx + 0), uint8_t(TETRIS_YPOS + ty + 3), colour);
+        drawPixelGiga(uint8_t(TETRIS_XPOS + tx + 1), uint8_t(TETRIS_YPOS + ty + 0), colour);
+        drawPixelGiga(uint8_t(TETRIS_XPOS + tx + 1), uint8_t(TETRIS_YPOS + ty + 1), colour);
+        drawPixelGiga(uint8_t(TETRIS_XPOS + tx + 1), uint8_t(TETRIS_YPOS + ty + 2), colour);
+        drawPixelGiga(uint8_t(TETRIS_XPOS + tx + 1), uint8_t(TETRIS_YPOS + ty + 3), colour);
+        drawPixelGiga(uint8_t(TETRIS_XPOS + tx + 2), uint8_t(TETRIS_YPOS + ty + 0), colour);
+        drawPixelGiga(uint8_t(TETRIS_XPOS + tx + 2), uint8_t(TETRIS_YPOS + ty + 1), colour);
+        drawPixelGiga(uint8_t(TETRIS_XPOS + tx + 2), uint8_t(TETRIS_YPOS + ty + 2), colour);
+        drawPixelGiga(uint8_t(TETRIS_XPOS + tx + 2), uint8_t(TETRIS_YPOS + ty + 3), colour);
+        drawPixelGiga(uint8_t(TETRIS_XPOS + tx + 3), uint8_t(TETRIS_YPOS + ty + 0), colour);
+        drawPixelGiga(uint8_t(TETRIS_XPOS + tx + 3), uint8_t(TETRIS_YPOS + ty + 1), colour);
+        drawPixelGiga(uint8_t(TETRIS_XPOS + tx + 3), uint8_t(TETRIS_YPOS + ty + 2), colour);
+        drawPixelGiga(uint8_t(TETRIS_XPOS + tx + 3), uint8_t(TETRIS_YPOS + ty + 3), colour);
     }
 
-    void drawTetromino(int index, int rotation, int x, int y, uint8_t colour)
+    void drawTetromino(int idx, int rot, int tx, int ty, uint8_t colour)
     {
         for(int i=0; i<TETROMINOE_SIZE; i++)
         {
-            int xx = x + tetrominoes[index]._pattern[rotation][4 + i*2];
-            int yy = y + tetrominoes[index]._pattern[rotation][5 + i*2];
+            int xx = tx + tetrominoes[idx]._pattern[rot][4 + i*2];
+            int yy = ty + tetrominoes[idx]._pattern[rot][5 + i*2];
             if(xx < 0  ||  xx >= TETRIS_XEXT) continue;
             if(yy < 0  ||  yy >= TETRIS_YEXT) continue;
 
-            setTetrisPixel(xx, yy, colour);
+            setTetrisPixel(uint8_t(xx), uint8_t(yy), colour);
         }
     }
 
-    BoardState checkTetromino(int index, int rotation, int x, int y)
+    BoardState checkTetromino(int idx, int rot, int tx, int ty)
     {
         for(int i=0; i<TETROMINOE_SIZE; i++)
         {
-            int xx = x + tetrominoes[index]._pattern[rotation][4 + i*2];
-            int yy = y + tetrominoes[index]._pattern[rotation][5 + i*2];
+            int xx = tx + tetrominoes[idx]._pattern[rot][4 + i*2];
+            int yy = ty + tetrominoes[idx]._pattern[rot][5 + i*2];
             if(xx < 0  ||  xx >= TETRIS_XEXT) continue;
             if(yy < 0  ||  yy >= TETRIS_YEXT) continue;
 
-            if(getTetrisPixel(xx, yy))
+            if(getTetrisPixel(uint8_t(xx), uint8_t(yy)))
             {
                 if(y == 0) return GameOver;
                 return Blocked;
@@ -1611,23 +1633,23 @@ namespace Graphics
  
     void shakeScreen(int lines)
     {
-        static int frameCount = 0;
+        static int frameCnt = 0;
         static int strength = 0;
 
         if(lines)
         {
-            frameCount = 1;
+            frameCnt = 1;
             strength = lines;
         }
 
-        if(frameCount)
+        if(frameCnt)
         {
             int screenShake = rand() % 4;
             switch(screenShake)
             {
                 case 0:
                 {
-                    Cpu::setRAM(0x0101, strength); 
+                    Cpu::setRAM(0x0101, uint8_t(strength));
                 }
                 break;
          
@@ -1639,22 +1661,24 @@ namespace Graphics
 
                 case 2:
                 {
-                    for(int i=0x0100; i<0x01EE; i+=2) Cpu::setRAM(i, 0x08 + (i-0x0100)/2 + strength); 
+                    for(int i=0x0100; i<0x01EE; i+=2) Cpu::setRAM(uint16_t(i), uint8_t(0x08 + (i-0x0100)/2 + strength));
                 }
                 break;
                 
                 case 3:
                 {
-                    for(int i=0x0100; i<0x01EE; i+=2) Cpu::setRAM(i, 0x08 + (i-0x0100)/2 + uint8_t(0 - strength)); 
+                    for(int i=0x0100; i<0x01EE; i+=2) Cpu::setRAM(uint16_t(i), uint8_t(0x08 + (i-0x0100)/2 + uint8_t(0 - strength)));
                 }
                 break;
+
+                default: break;
             }
             
-            if(++frameCount >= 20) //strength * 10)
+            if(++frameCnt >= 20) //strength * 10)
             {
-                frameCount = 0;
+                frameCnt = 0;
                 Cpu::setRAM(0x0101, 0x00);
-                for(int i=0x0100; i<0x01EF; i+=2) Cpu::setRAM(i, 0x08 + (i-0x0101)/2); 
+                for(int i=0x0100; i<0x01EF; i+=2) Cpu::setRAM(uint16_t(i), uint8_t(0x08 + (i-0x0101)/2));
             }
         }
     }
@@ -1710,6 +1734,8 @@ namespace Graphics
                         Cpu::shutdown();
                         exit(0);
                     }
+
+                    default: break;
                 }
             }
             break;
@@ -1719,9 +1745,13 @@ namespace Graphics
                 switch(event.key.keysym.sym)
                 {
                     case SDLK_DOWN: frameTick = frameTickLevel; break;
+
+                    default: break;
                 }
             }
             break;
+
+            default: break;
         }
 
         int lines = 0;
@@ -1753,7 +1783,8 @@ namespace Graphics
             BoardState boardState = checkTetromino(index, rotation, x, y-v);
             switch(boardState)
             {
-                case Clear:   drawTetromino(index, rotation, x, y-v, tetrominoes[index]._colour);     break;
+                case Clear:   drawTetromino(index, rotation, x, y-v, tetrominoes[index]._colour); break;
+
                 case Blocked:
                 {
                     if(!refresh)
@@ -1769,6 +1800,7 @@ namespace Graphics
                     }
                 }
                 break;
+
                 case GameOver:
                 {
                     // Game over
@@ -1782,6 +1814,8 @@ namespace Graphics
                     fprintf(stderr, "Tetris GAME OVER...\n");
                 }
                 break;
+
+                default: break;
             }
         }
 

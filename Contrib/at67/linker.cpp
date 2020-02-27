@@ -5,6 +5,7 @@
 #include <sstream>
 #include <iomanip>
 #include <string>
+#include <cstring>
 #include <vector>
 #include <algorithm>
 
@@ -28,10 +29,12 @@ namespace Linker
         {0x0000, 0x0000, "convertGeOp"      , "", true,  false},
         {0x0000, 0x0000, "convertLtOp"      , "", true,  false},
         {0x0000, 0x0000, "convertGtOp"      , "", true,  false},
-        {0x0000, 0x0000, "power16bit"       , "", false, false}, 
-        {0x0000, 0x0000, "power16bitExt"    , "", false, false}, 
-        {0x0000, 0x0000, "multiply16bit"    , "", false, false}, 
+        {0x0000, 0x0000, "power16bit"       , "", false, false},
+        {0x0000, 0x0000, "power16bitExt"    , "", false, false},
+        {0x0000, 0x0000, "multiply16bit"    , "", false, false},
+        {0x0000, 0x0000, "multiply16bit_1"  , "", false, false},
         {0x0000, 0x0000, "divide16bit"      , "", false, false},
+        {0x0000, 0x0000, "divide16bit_1"    , "", false, false},
         {0x0000, 0x0000, "rand16bit"        , "", false, false},
         {0x0000, 0x0000, "randMod16bit"     , "", false, false},
         {0x0000, 0x0000, "shiftLeft4bit"    , "", false, false},
@@ -56,9 +59,14 @@ namespace Linker
         {0x0000, 0x0000, "setArrayByte"     , "", false, false},
         {0x0000, 0x0000, "getArrayInt16"    , "", false, false},
         {0x0000, 0x0000, "setArrayInt16"    , "", false, false},
+        {0x0000, 0x0000, "getArrayInt16Low" , "", false, false},
+        {0x0000, 0x0000, "setArrayInt16Low" , "", false, false},
+        {0x0000, 0x0000, "getArrayInt16High", "", false, false},
+        {0x0000, 0x0000, "setArrayInt16High", "", false, false},
         {0x0000, 0x0000, "gotoNumericLabel" , "", false, false},
         {0x0000, 0x0000, "gosubNumericLabel", "", false, false},
         {0x0000, 0x0000, "scanlineMode"     , "", false, false},
+        {0x0000, 0x0000, "waitVBlanks"      , "", false, false},
         {0x0000, 0x0000, "waitVBlank"       , "", false, false},
         {0x0000, 0x0000, "resetVideoTable"  , "", false, false},
         {0x0000, 0x0000, "initClearFuncs"   , "", false, false},
@@ -76,10 +84,28 @@ namespace Linker
         {0x0000, 0x0000, "drawVTLineExt"    , "", false, false},
         {0x0000, 0x0000, "drawVTLineLoop"   , "", false, false},
         {0x0000, 0x0000, "drawVTLineLoadXY" , "", false, false},
+        {0x0000, 0x0000, "drawCircle"       , "", false, false},
+        {0x0000, 0x0000, "drawCircleExt1"   , "", false, false},
+        {0x0000, 0x0000, "drawCircleExt2"   , "", false, false},
+        {0x0000, 0x0000, "drawCircleF"      , "", false, false},
+        {0x0000, 0x0000, "drawRect"         , "", false, false},
+        {0x0000, 0x0000, "drawRectF"        , "", false, false},
+        {0x0000, 0x0000, "drawPoly"         , "", false, false},
         {0x0000, 0x0000, "atLineCursor"     , "", false, false},
         {0x0000, 0x0000, "resetAudio"       , "", false, false},
         {0x0000, 0x0000, "playMidi"         , "", false, false},
         {0x0000, 0x0000, "midiStartNote"    , "", false, false},
+        {0x0000, 0x0000, "input"            , "", false, false},
+        {0x0000, 0x0000, "inputExt1"        , "", false, false},
+        {0x0000, 0x0000, "inputExt2"        , "", false, false},
+        {0x0000, 0x0000, "inputCursor"      , "", false, false},
+        {0x0000, 0x0000, "inputKeys"        , "", false, false},
+        {0x0000, 0x0000, "inputIntVar"      , "", false, false},
+        {0x0000, 0x0000, "inputStrVar"      , "", false, false},
+        {0x0000, 0x0000, "inputReturn"      , "", false, false},
+        {0x0000, 0x0000, "inputDelete"      , "", false, false},
+        {0x0000, 0x0000, "inputPrint"       , "", false, false},
+        {0x0000, 0x0000, "inputNewline"     , "", false, false},
         {0x0000, 0x0000, "printInit"        , "", false, false},
         {0x0000, 0x0000, "printText"        , "", false, false},
         {0x0000, 0x0000, "printLeft"        , "", false, false},
@@ -99,9 +125,11 @@ namespace Linker
         {0x0000, 0x0000, "createHex"        , "", false, false},
         {0x0000, 0x0000, "stringCopy"       , "", false, false},
         {0x0000, 0x0000, "stringAdd"        , "", false, false},
+        {0x0000, 0x0000, "stringConcat"     , "", false, false},
         {0x0000, 0x0000, "stringMid"        , "", false, false},
         {0x0000, 0x0000, "stringLeft"       , "", false, false},
         {0x0000, 0x0000, "stringRight"      , "", false, false},
+        {0x0000, 0x0000, "integerStr"       , "", false, false},
     };
     const std::vector<std::string> _subIncludes = 
     {
@@ -112,8 +140,10 @@ namespace Linker
         "conv_conds.i"  ,
         "graphics.i"    ,
         "audio.i"       ,
+        "input.i"       ,
         "print_text.i"  ,
         "string.i"      ,
+        "numeric.i"     ,
     };
     const std::vector<std::string> _subIncludesCALLI = 
     {
@@ -124,8 +154,10 @@ namespace Linker
         "conv_conds_CALLI.i"  ,
         "graphics_CALLI.i"    ,
         "audio_CALLI.i"       ,
+        "input_CALLI.i"       ,
         "print_text_CALLI.i"  ,
         "string_CALLI.i"      ,
+        "numeric_CALLI.i"     ,
     };
 
 
@@ -137,7 +169,7 @@ namespace Linker
 
     bool findSub(const std::vector<std::string>& tokens, const std::string& subName)
     {
-        for(int i=0; i<tokens.size(); i++)
+        for(int i=0; i<int(tokens.size()); i++)
         {
             if(tokens[i] == subName) return true;
         }
@@ -157,10 +189,10 @@ namespace Linker
         int numLines = 0;
         int vasmSize = 0;
         bool buildingSub = false;
-        for(int i=0; i<_subIncludeFiles[includeName].size(); i++)
+        for(int i=0; i<int(_subIncludeFiles[includeName].size()); i++)
         {
             std::vector<std::string> tokens = Expression::tokeniseLine(_subIncludeFiles[includeName][i]);
-            for(int j=0; j<tokens.size(); j++) Expression::stripWhitespace(tokens[j]);
+            for(int j=0; j<int(tokens.size()); j++) Expression::stripWhitespace(tokens[j]);
             if(!buildingSub  &&  tokens.size() >= 2  &&  tokens[0] == "%SUB"  &&  tokens[1] == subName)
             {
                 buildingSub = true;
@@ -172,7 +204,7 @@ namespace Linker
             }
             else if(buildingSub)
             {
-                for(int j=0; j<tokens.size(); j++)
+                for(int j=0; j<int(tokens.size()); j++)
                 {
                     std::string token = tokens[j];
                     if(tokens[j].find_first_of(";#") != std::string::npos) break;
@@ -191,7 +223,7 @@ namespace Linker
 
     bool getIncludeSubSize(const std::string& includeName, int subIndex)
     {
-        uint16_t size = getAsmOpcodeSizeOfIncludeSub(includeName, _internalSubs[subIndex]._name);
+        uint16_t size = uint16_t(getAsmOpcodeSizeOfIncludeSub(includeName, _internalSubs[subIndex]._name));
         if(size)
         {
             _internalSubs[subIndex]._size = size;
@@ -214,7 +246,7 @@ namespace Linker
 
         // Check if include vars already done
         bool varsDone = false;
-        for(int i=0; i<includeVarsDone.size(); i++)
+        for(int i=0; i<int(includeVarsDone.size()); i++)
         {
             if(includeVarsDone[i] == includeName)
             {
@@ -226,11 +258,11 @@ namespace Linker
         // Find sub in include
         int numLines = 0;
         bool buildingSub = false;
-        for(int i=0; i<_subIncludeFiles[includeName].size(); i++)
+        for(int i=0; i<int(_subIncludeFiles[includeName].size()); i++)
         {
             std::string line = _subIncludeFiles[includeName][i];
             std::vector<std::string> tokens = Expression::tokenise(line, ' ');
-            for(int j=0; j<tokens.size(); j++) Expression::stripWhitespace(tokens[j]);
+            for(int j=0; j<int(tokens.size()); j++) Expression::stripWhitespace(tokens[j]);
 
             bool foundSub = (line.find("%SUB") != std::string::npos);
             bool foundEnd = (line.find("%ENDS") != std::string::npos);
@@ -249,7 +281,7 @@ namespace Linker
             else if(buildingSub)
             {
                 code.push_back(line);
-                for(int j=0; j<_internalSubs.size(); j++)
+                for(int j=0; j<int(_internalSubs.size()); j++)
                 {
                     if(!_internalSubs[j]._inUse  &&  findSub(tokens, _internalSubs[j]._name))
                     {
@@ -279,23 +311,21 @@ namespace Linker
         if(!overwrite  &&  _internalSubs[subIndex]._address) return false;
 
         uint16_t address;
-        if(Memory::giveFreeRAM(Memory::FitAscending, _internalSubs[subIndex]._size, 0x0200, Compiler::getRuntimeStart(), address))
+        if(Memory::getNextCodeAddress(Memory::FitDescending, Compiler::getRuntimeStart(),  _internalSubs[subIndex]._size, address))
         {
+            Memory::takeFreeRAM(address, _internalSubs[subIndex]._size, true);
+
             // Save end of runtime/strings
             if(address < Compiler::getRuntimeEnd()) Compiler::setRuntimeEnd(address);
 
-            fprintf(stderr, "%-18s  :  0x%04x  :  %2d bytes\n", _internalSubs[subIndex]._name.c_str(), address, _internalSubs[subIndex]._size);
+            fprintf(stderr, "* %-20s : 0x%04x  :    %2d bytes\n", _internalSubs[subIndex]._name.c_str(), address, _internalSubs[subIndex]._size);
 
             _internalSubs[subIndex]._address = address;
             _internalSubs[subIndex]._inUse = true;
             return true;
         }
-        else
-        {
-            fprintf(stderr, "Compiler::loadInternalSub() : Not enough RAM for %s of size %d\n", _internalSubs[subIndex]._name.c_str(), _internalSubs[subIndex]._size);
-            return false;
-        }
 
+        fprintf(stderr, "Linker::loadInternalSub() : Not enough RAM for %s of size %d\n", _internalSubs[subIndex]._name.c_str(), _internalSubs[subIndex]._size);
         return false;
     }
 
@@ -337,7 +367,7 @@ namespace Linker
     bool parseIncludes(void)
     {
         // Load include files into memory
-        for(int i=0; i<_subIncludes.size(); i++)
+        for(int i=0; i<int(_subIncludes.size()); i++)
         {
             if(!Assembler::getUseOpcodeCALLI())
             {
@@ -350,18 +380,18 @@ namespace Linker
         }
 
         // Parse loaded includes
-        for(int i=0; i<_internalSubs.size(); i++)
+        for(int i=0; i<int(_internalSubs.size()); i++)
         {
             if(!Assembler::getUseOpcodeCALLI())
             {
-                for(int j=0; j<_subIncludes.size(); j++)
+                for(int j=0; j<int(_subIncludes.size()); j++)
                 {
                     if(getIncludeSubSize(_subIncludes[j], i)) break;
                 }
             }
             else
             {
-                for(int j=0; j<_subIncludesCALLI.size(); j++)
+                for(int j=0; j<int(_subIncludesCALLI.size()); j++)
                 {
                     if(getIncludeSubSize(_subIncludesCALLI[j], i)) break;
                 }
@@ -373,28 +403,40 @@ namespace Linker
 
     bool linkInternalSubs(void)
     {
-        for(int i=0; i<Compiler::getCodeLines().size(); i++)
+        fprintf(stderr, "\n**********************************************\n");
+        fprintf(stderr, "*                   Linking                   \n");
+        fprintf(stderr, "**********************************************\n");
+        fprintf(stderr, "*        Name          : Address :    Size    \n");
+        fprintf(stderr, "**********************************************\n");
+        
+        for(int i=0; i<int(Compiler::getCodeLines().size()); i++)
         {
             // Valid BASIC code
             if(Compiler::getCodeLines()[i]._code.size() >= 2  &&  Compiler::getCodeLines()[i]._vasm.size())
             {
                 // Vasm code
-                for(int j=0; j<Compiler::getCodeLines()[i]._vasm.size(); j++)
+                for(int j=0; j<int(Compiler::getCodeLines()[i]._vasm.size()); j++)
                 {
                     std::vector<std::string> tokens = Expression::tokenise(Compiler::getCodeLines()[i]._vasm[j]._code, ' ');
-                    for(int k=0; k<tokens.size(); k++) Expression::stripWhitespace(tokens[k]);
+                    for(int k=0; k<int(tokens.size()); k++) Expression::stripWhitespace(tokens[k]);
 
-                    for(int k=0; k<_internalSubs.size(); k++)
+                    for(int k=0; k<int(_internalSubs.size()); k++)
                     {
                         // Check for internal subs in code
-                        if(findSub(tokens, _internalSubs[k]._name)) loadInternalSub(k);
+                        if(findSub(tokens, _internalSubs[k]._name))
+                        {
+                            loadInternalSub(k);
+                        }
 
                         // Check for internal subs in macros, (even nested)
                         std::string opcode = Compiler::getCodeLines()[i]._vasm[j]._opcode;
                         if(opcode.size()  &&  opcode[0] == '%')
                         {
                             opcode.erase(0, 1);
-                            if(Compiler::findMacroText(opcode, _internalSubs[k]._name)) loadInternalSub(k);
+                            if(Compiler::findMacroText(opcode, _internalSubs[k]._name))
+                            {
+                                loadInternalSub(k);
+                            }
                         }
                     }
                 }
@@ -409,7 +451,7 @@ namespace Linker
         std::vector<std::string> includeVarsDone;
 
 RESTART_COLLECTION:
-        for(int i=0; i<_internalSubs.size(); i++)
+        for(int i=0; i<int(_internalSubs.size()); i++)
         {
             if(_internalSubs[i]._inUse  &&  !_internalSubs[i]._loaded)
             {
@@ -420,7 +462,7 @@ RESTART_COLLECTION:
 
                 includeVarsDone.push_back(_internalSubs[i]._includeName);
 
-                for(int j=0; j<code.size(); j++)
+                for(int j=0; j<int(code.size()); j++)
                 {
                     Compiler::getRuntime().push_back(code[j] + "\n");
                 }
@@ -432,16 +474,25 @@ RESTART_COLLECTION:
     void relinkInternalSubs(void)
     {
         uint16_t runtimeSize = 0;
-        for(int i=0; i<_internalSubs.size(); i++)
+        for(int i=0; i<int(_internalSubs.size()); i++)
         {
             // Check for internal sub directly
-            if(_internalSubs[i]._inUse  &&  _internalSubs[i]._loaded  &&  _internalSubs[i]._address == 0x0000) loadInternalSub(i);
+            if(_internalSubs[i]._inUse  &&  _internalSubs[i]._loaded  &&  _internalSubs[i]._address == 0x0000)
+            {
+                loadInternalSub(i);
+            }
 
             // Runtime size
             if(_internalSubs[i]._inUse  &&  _internalSubs[i]._loaded  &&  _internalSubs[i]._address) runtimeSize += _internalSubs[i]._size;
         }
 
-        fprintf(stderr, "\nCompiler::relinkInternalSubs() : runtime START 0x%04x : runtime END 0x%04x : runtime SIZE %d bytes\n", Compiler::getRuntimeStart() & Memory::getSizeRAM() - 1, Compiler::getRuntimeEnd(), runtimeSize);
+        fprintf(stderr, "**********************************************\n");
+        fprintf(stderr, "*                 Re-Linking                  \n");
+        fprintf(stderr, "**********************************************\n");
+        fprintf(stderr, "*    Start     :    End       :       Size    \n");
+        fprintf(stderr, "**********************************************\n");
+        fprintf(stderr, "*    0x%04x    :    0x%04x    :    %5d bytes\n", Compiler::getRuntimeStart() & (Memory::getSizeRAM() - 1), Compiler::getRuntimeEnd(), runtimeSize);
+        fprintf(stderr, "**********************************************\n");
     }
 
     void outputInternalSubs(void)
@@ -454,7 +505,7 @@ RESTART_COLLECTION:
         Compiler::getOutput().push_back(";****************************************************************************************************************************************\n");
         Compiler::getOutput().push_back("\n");
 
-        for(int i=0; i<_internalSubs.size(); i++)
+        for(int i=0; i<int(_internalSubs.size()); i++)
         {
             if(_internalSubs[i]._inUse)
             {
@@ -478,7 +529,7 @@ RESTART_COLLECTION:
 
         Compiler::getOutput().push_back("\n");
 
-        for(int i=0; i<Compiler::getRuntime().size(); i++) Compiler::getOutput().push_back(Compiler::getRuntime()[i]);
+        for(int i=0; i<int(Compiler::getRuntime().size()); i++) Compiler::getOutput().push_back(Compiler::getRuntime()[i]);
     }
 
 
@@ -489,7 +540,7 @@ RESTART_COLLECTION:
 
     void resetInternalSubs(void)
     {
-        for(int i=0; i<_internalSubs.size(); i++)
+        for(int i=0; i<int(_internalSubs.size()); i++)
         {
             _internalSubs[i]._size = 0;
             _internalSubs[i]._address = 0;

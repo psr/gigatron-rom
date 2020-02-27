@@ -43,7 +43,54 @@
         DEEK
 %ENDM
 
-%MACRO  ForNextLoopUp _var _label _end
+%MACRO  ForNextInc _var _label _end
+        INC     _var
+        LD      _var
+        SUBI    _end
+        BLE     _label
+%ENDM
+
+%MACRO  ForNextDec _var _label _end
+        LD      _var
+        SUBI    1
+        ST      _var
+        SUBI    _end
+        BGE     _label
+%ENDM
+
+%MACRO  ForNextAdd _var _label _end _step
+        LD      _var
+        ADDI    _step
+        ST      _var
+        SUBI    _end
+        BLE     _label
+%ENDM
+
+%MACRO  ForNextSub _var _label _end _step
+        LD      _var
+        SUBI    _step
+        ST      _var
+        SUBI    _end
+        BGE     _label
+%ENDM
+
+%MACRO  ForNextVarPos _var _label _vEnd _vStep
+        LDW     _var
+        ADDW    _vStep
+        STW     _var
+        SUBW    _vEnd
+        BLE     _label
+%ENDM
+
+%MACRO  ForNextVarNeg _var _label _vEnd _vStep
+        LDW     _var
+        ADDW    _vStep
+        STW     _var
+        SUBW    _vEnd
+        BGE     _label
+%ENDM
+
+%MACRO  ForNextFarInc _var _label _end
         INC     _var
         LD      _var
         SUBI    _end
@@ -52,7 +99,7 @@
 _label_ CALL    giga_vAC
 %ENDM
 
-%MACRO  ForNextLoopDown _var _label _end
+%MACRO  ForNextFarDec _var _label _end
         LD      _var
         SUBI    1
         ST      _var
@@ -62,7 +109,27 @@ _label_ CALL    giga_vAC
 _label_ CALL    giga_vAC
 %ENDM
 
-%MACRO  ForNextLoopStepUp _var _label _vEnd _vStep
+%MACRO  ForNextFarAdd _var _label _end _step
+        LD      _var
+        ADDI    _step
+        ST      _var
+        SUBI    _end
+        BGT     _label_ + 2
+        LDWI    _label
+_label_ CALL    giga_vAC
+%ENDM
+
+%MACRO  ForNextFarSub _var _label _end _step
+        LD      _var
+        SUBI    _step
+        ST      _var
+        SUBI    _end
+        BLT     _label_ + 2
+        LDWI    _label
+_label_ CALL    giga_vAC
+%ENDM
+
+%MACRO  ForNextFarVarPos _var _label _vEnd _vStep
         LDW     _var
         ADDW    _vStep
         STW     _var
@@ -72,7 +139,7 @@ _label_ CALL    giga_vAC
 _label_ CALL    giga_vAC
 %ENDM
 
-%MACRO  ForNextLoopStepDown _var _label _vEnd _vStep
+%MACRO  ForNextFarVarNeg _var _label _vEnd _vStep
         LDW     _var
         ADDW    _vStep
         STW     _var
@@ -80,6 +147,17 @@ _label_ CALL    giga_vAC
         BLT     _label_ + 2
         LDWI    _label
 _label_ CALL    giga_vAC
+%ENDM
+
+%MACRO  Input
+        STW     inpLutAddr
+        LDWI    input
+        CALL    giga_vAC
+%ENDM
+
+%MACRO  NewLine
+        LDWI    newLineScroll
+        CALL    giga_vAC
 %ENDM
 
 %MACRO  PrintChar _chr
@@ -211,6 +289,11 @@ _label_ CALL    giga_vAC
         CALL    giga_vAC
 %ENDM
 
+%MACRO  StringConcat
+        LDWI    stringConcat
+        CALL    giga_vAC
+%ENDM
+
 %MACRO  StringMid
         LDWI    stringMid
         CALL    giga_vAC
@@ -332,6 +415,11 @@ _label_ CALL    giga_vAC
         CALL    giga_vAC
 %ENDM
 
+%MACRO  WaitVBlanks
+        LDWI    waitVBlanks
+        CALL    giga_vAC
+%ENDM
+
 %MACRO  WaitVBlank
         LDWI    waitVBlank
         CALL    giga_vAC
@@ -354,6 +442,31 @@ _label_ CALL    giga_vAC
 
 %MACRO  DrawVLine
         LDWI    drawVLine
+        CALL    giga_vAC
+%ENDM
+
+%MACRO  DrawCircle
+        LDWI    drawCircle
+        CALL    giga_vAC
+%ENDM
+
+%MACRO  DrawCircleF
+        LDWI    drawCircleF
+        CALL    giga_vAC
+%ENDM
+
+%MACRO  DrawRect
+        LDWI    drawRect
+        CALL    giga_vAC
+%ENDM
+
+%MACRO  DrawRectF
+        LDWI    drawRectF
+        CALL    giga_vAC
+%ENDM
+
+%MACRO  DrawPoly
+        LDWI    drawPoly
         CALL    giga_vAC
 %ENDM
 

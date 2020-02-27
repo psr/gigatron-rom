@@ -27,6 +27,7 @@
 
 #define RAM_VIDEO_START  0x0800
 #define RAM_VIDEO_END    0x7F00
+#define RAM_VIDEO_OFS    0x0100
 #define RAM_VIDEO_SIZE   160
 
 #define RAM_SEGMENTS_START  0x08A0
@@ -42,16 +43,16 @@
 #define MAX_GTB_LINE_SIZE     32
 #define NUM_GTB_LINES_PER_ROW 3
 
-#define LO_BYTE(a) (a & 0x00FF)
-#define HI_BYTE(a) ((a >>8) & 0x00FF)
-#define HI_MASK(a) (a & 0xFF00)
+#define LO_BYTE(a)      ((a) & 0x00FF)
+#define HI_BYTE(a)      (((a) >>8) & 0x00FF)
+#define HI_MASK(a)      ((a) & 0xFF00)
 #define MAKE_ADDR(a, b) ((LO_BYTE(a) <<8) | LO_BYTE(b))
 
  
 namespace Memory
 {
-    enum FitType {FitSmallest, FitLargest, FitAscending, FitDescending, NumFitTypes};
-    enum SortType {AddressDescending, AddressAscending, SizeAscending, SizeDescending, NumSortTypes};
+    enum FitType {FitAscending, FitDescending, NumFitTypes};
+    enum SortType {NoSort, AddressDescending, AddressAscending, SizeAscending, SizeDescending, NumSortTypes};
 
     struct RamEntry
     {
@@ -70,8 +71,13 @@ namespace Memory
 
     void initialise(void);
 
-    bool takeFreeRAM(uint16_t address, int size);
-    bool giveFreeRAM(FitType fitType, int size, uint16_t min, uint16_t max, uint16_t& address);
+    bool isFreeRAM(uint16_t address, int size);
+    bool isVideoRAM(uint16_t address);
+    bool getNextCodeAddress(FitType fitType, uint16_t start, int size, uint16_t& address);
+
+    bool giveFreeRAM(uint16_t address, int size);
+    bool takeFreeRAM(uint16_t address, int size, bool printError=true);
+    bool getFreeRAM(FitType fitType, int size, uint16_t min, uint16_t max, uint16_t& address, bool withinPage=true);
 
     void printFreeRamList(SortType sortType=AddressAscending);
 }

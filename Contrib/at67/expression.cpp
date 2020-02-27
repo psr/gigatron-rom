@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <cmath>
 #include <string>
 #include <sstream>
 #include <iomanip>
@@ -16,9 +17,9 @@ namespace Expression
 
     int _lineNumber = 0;
 
-    bool _enablePrint = false;
     bool _advanceError = false;
     bool _containsQuotes = false;
+    bool _enableOptimisedPrint = false;
 
     bool _binaryChars[256]      = {false};
     bool _octalChars[256]       = {false};
@@ -34,109 +35,180 @@ namespace Expression
     // Forward declarations
     Numeric expression(void);
 
+    // Helpers
+    uint32_t revHelper(uint32_t input, uint32_t n)
+    {
+        uint32_t output = 0;
+        uint32_t bits = input & uint32_t(pow(2, n) - 1);
+        for(uint32_t i=0; i<=n-1; i++)
+        {
+            output = (output << 1) | (bits & 1);
+            bits = bits >> 1;
+        }
 
-    // Default operators
-    Numeric neg(Numeric& numeric)
+        return output;
+    }
+
+    // Unary logic operators
+    Numeric& operatorNEG(Numeric& numeric)
     {
         numeric._value = -numeric._value;
         return numeric;
     }
-    Numeric not(Numeric& numeric)
+    Numeric& operatorNOT(Numeric& numeric)
     {
-        numeric._value = ~numeric._value;
+        numeric._value = ~int16_t(std::lround(numeric._value));
         return numeric;
     }
-    Numeric and(Numeric& left, Numeric& right)
+
+    // Unary math operators
+    Numeric& operatorSIN(Numeric& numeric)
     {
-        left._value &= right._value;
+        numeric._value = sin(numeric._value);
+        return numeric;
+    }
+    Numeric& operatorCOS(Numeric& numeric)
+    {
+        numeric._value = cos(numeric._value);
+        return numeric;
+    }
+    Numeric& operatorTAN(Numeric& numeric)
+    {
+        numeric._value = tan(numeric._value);
+        return numeric;
+    }
+    Numeric& operatorASIN(Numeric& numeric)
+    {
+        numeric._value = asin(numeric._value);
+        return numeric;
+    }
+    Numeric& operatorACOS(Numeric& numeric)
+    {
+        numeric._value = acos(numeric._value);
+        return numeric;
+    }
+    Numeric& operatorATAN(Numeric& numeric)
+    {
+        numeric._value = atan(numeric._value);
+        return numeric;
+    }
+    Numeric& operatorRAND(Numeric& numeric)
+    {
+        numeric._value = double(rand() % std::lround(numeric._value));
+        return numeric;
+    }
+    Numeric& operatorREV16(Numeric& numeric)
+    {
+        numeric._value = double(revHelper(uint32_t(std::lround(numeric._value)), 16));
+        return numeric;
+    }
+    Numeric& operatorREV8(Numeric& numeric)
+    {
+        numeric._value = double(revHelper(uint32_t(std::lround(numeric._value)), 8));
+        return numeric;
+    }
+    Numeric& operatorREV4(Numeric& numeric)
+    {
+        numeric._value = double(revHelper(uint32_t(std::lround(numeric._value)), 4));
+        return numeric;
+    }
+
+    // Binary logic operators
+    Numeric& operatorAND(Numeric& left, Numeric& right)
+    {
+        left._value = int16_t(std::lround(left._value)) & int16_t(std::lround(right._value));
         return left;
     }
-    Numeric or(Numeric& left, Numeric& right)
+    Numeric& operatorOR(Numeric& left, Numeric& right)
     {
-        left._value |= right._value;
+        left._value = int16_t(std::lround(left._value)) | int16_t(std::lround(right._value));
         return left;
     }
-    Numeric xor(Numeric& left, Numeric& right)
+    Numeric& operatorXOR(Numeric& left, Numeric& right)
     {
-        left._value ^= right._value;
+        left._value = int16_t(std::lround(left._value)) ^ int16_t(std::lround(right._value));
         return left;
     }
-    Numeric add(Numeric& left, Numeric& right)
+    Numeric& operatorLSL(Numeric& left, Numeric& right)
+    {
+        left._value = (int16_t(std::lround(left._value)) << int16_t(std::lround(right._value))) & 0x0000FFFF;
+        return left;
+    }
+    Numeric& operatorLSR(Numeric& left, Numeric& right)
+    {
+        left._value = int16_t(std::lround(left._value)) >> int16_t(std::lround(right._value));
+        return left;
+    }
+
+    // Binary math operators
+    Numeric& operatorADD(Numeric& left, Numeric& right)
     {
         left._value += right._value;
         return left;
     }
-    Numeric sub(Numeric& left, Numeric& right)
+    Numeric& operatorSUB(Numeric& left, Numeric& right)
     {
         left._value -= right._value;
         return left;
     }
-    Numeric pow(Numeric& left, Numeric& right)
-    {
-        left._value = int16_t(std::pow(double(left._value), double(right._value)));
-        return left;
-    }
-    Numeric mul(Numeric& left, Numeric& right)
+    Numeric& operatorMUL(Numeric& left, Numeric& right)
     {
         left._value *= right._value;
         return left;
     }
-    Numeric div(Numeric& left, Numeric& right)
+    Numeric& operatorDIV(Numeric& left, Numeric& right)
     {
         left._value = (right._value == 0) ? 0 : left._value / right._value;
         return left;
     }
-    Numeric mod(Numeric& left, Numeric& right)
+    Numeric& operatorMOD(Numeric& left, Numeric& right)
     {
-        left._value = (right._value == 0) ? 0 : left._value % right._value;
+        left._value = (right._value == 0) ? 0 : int16_t(std::lround(left._value)) % int16_t(std::lround(right._value));
         return left;
     }
-    Numeric lsl(Numeric& left, Numeric& right)
+    Numeric& operatorPOW(Numeric& left, Numeric& right)
     {
-        left._value = left._value << right._value;
-        return left;
-    }
-    Numeric lsr(Numeric& left, Numeric& right)
-    {
-        left._value = left._value >> right._value;
-        return left;
-    }
-    Numeric lt(Numeric& left, Numeric& right)
-    {
-        left._value = left._value < right._value;
-        return left;
-    }
-    Numeric gt(Numeric& left, Numeric& right)
-    {
-        left._value = left._value > right._value;
-        return left;
-    }
-    Numeric eq(Numeric& left, Numeric& right)
-    {
-        left._value = left._value == right._value;
-        return left;
-    }
-    Numeric ne(Numeric& left, Numeric& right)
-    {
-        left._value = left._value != right._value;
-        return left;
-    }
-    Numeric le(Numeric& left, Numeric& right)
-    {
-        left._value = left._value <= right._value;
-        return left;
-    }
-    Numeric ge(Numeric& left, Numeric& right)
-    {
-        left._value = left._value >= right._value;
+        left._value = pow(left._value, right._value);
         return left;
     }
 
-    bool getEnablePrint(void) {return _enablePrint;}
+    // Relational operators
+    Numeric& operatorLT(Numeric& left, Numeric& right)
+    {
+        left._value = int16_t(std::lround(left._value)) < int16_t(std::lround(right._value));
+        return left;
+    }
+    Numeric& operatorGT(Numeric& left, Numeric& right)
+    {
+        left._value = int16_t(std::lround(left._value)) > int16_t(std::lround(right._value));
+        return left;
+    }
+    Numeric& operatorEQ(Numeric& left, Numeric& right)
+    {
+        left._value = int16_t(std::lround(left._value)) == int16_t(std::lround(right._value));
+        return left;
+    }
+    Numeric& operatorNE(Numeric& left, Numeric& right)
+    {
+        left._value = int16_t(std::lround(left._value)) != int16_t(std::lround(right._value));
+        return left;
+    }
+    Numeric& operatorLE(Numeric& left, Numeric& right)
+    {
+        left._value = int16_t(std::lround(left._value)) <= int16_t(std::lround(right._value));
+        return left;
+    }
+    Numeric& operatorGE(Numeric& left, Numeric& right)
+    {
+        left._value = int16_t(std::lround(left._value)) >= int16_t(std::lround(right._value));
+        return left;
+    }
+
     Numeric& getOutputNumeric(void) {return _output;}
+    bool getEnableOptimisedPrint(void) {return _enableOptimisedPrint;}
 
     void setExprFunc(exprFuncPtr exprFunc) {_exprFunc = exprFunc;}
-    void setEnablePrint(bool enablePrint) {_enablePrint = enablePrint;}
+    void setEnableOptimisedPrint(bool enableOptimisedPrint) {_enableOptimisedPrint = enableOptimisedPrint;}
 
 
     void initialise(void)
@@ -153,26 +225,33 @@ namespace Expression
     // ****************************************************************************************************************
     // Strings
     // ****************************************************************************************************************
+    int isSpace(int chr)
+    {
+        return isspace((unsigned char)chr);
+    }
+
     ExpressionType isExpression(const std::string& input)
     {
-        if(input.find_first_of("[]") != std::string::npos) return Invalid;
-        if(input.find("++") != std::string::npos) return Invalid;
-        if(input.find("--") != std::string::npos) return Invalid;
-        if(input.find_first_of("-+/%*()&|^") != std::string::npos) return HasOperators;
+        if(input.find_first_of("[]") != std::string::npos) return IsInvalid;
+        if(input.find("++") != std::string::npos) return IsInvalid;
+        if(input.find("--") != std::string::npos) return IsInvalid;
+        if(input.find_first_of("~-+/%*()&|^<>") != std::string::npos) return HasOperators;
+        if(input.find("**") != std::string::npos  ||  input.find(">>") != std::string::npos  ||  input.find("<<") != std::string::npos) return HasOperators;
+        if(input.find("==") != std::string::npos  ||  input.find("!=") != std::string::npos  ||  input.find("<=") != std::string::npos  ||  input.find(">=") != std::string::npos) return HasOperators;
         return HasNumbers;
     }
 
     bool isVarNameValid(const std::string& varName)
     {
         if(varName.size() == 0)  return false;
-        if(!isalpha(varName[0])) return false;
+        if(!isalpha((unsigned char)varName[0])) return false;
 
-        for(int i=1; i<varName.size()-1; i++)
+        for(int i=1; i<int(varName.size())-1; i++)
         {
-            if(!isalnum(varName[i])) return false;
+            if(!isalnum((unsigned char)varName[i])) return false;
         }
 
-        if(!isalnum(varName[varName.size() - 1])  &&  varName[varName.size() - 1] != '$') return false;
+        if(!isalnum((unsigned char)varName[varName.size() - 1])  &&  varName[varName.size() - 1] != '$') return false;
 
         return true;
     }
@@ -184,7 +263,7 @@ namespace Expression
         if(str.size() < 2) return false;
         if(str[0] == '"'  &&  str.back() == '"')
         {
-            for(int i=1; i<str.size()-1; i++)
+            for(int i=1; i<int(str.size())-1; i++)
             {
                 if(str[i] == '"') return false;
             }
@@ -198,7 +277,7 @@ namespace Expression
     bool hasNonStringWhiteSpace(int chr)
     {
         if(chr == '"') _containsQuotes = !_containsQuotes;
-        if(!isspace(chr) || _containsQuotes) return false;
+        if(!isspace((unsigned char)chr) || _containsQuotes) return false;
         return true;    
     }
 
@@ -236,7 +315,7 @@ namespace Expression
 
     void stripWhitespace(std::string& input)
     {
-        input.erase(remove_if(input.begin(), input.end(), isspace), input.end());
+        input.erase(remove_if(input.begin(), input.end(), isSpace), input.end());
     }
 
     std::string stripStrings(const std::string& input)
@@ -258,6 +337,55 @@ namespace Expression
         return output;
     }
 
+    std::string stripStrings(const std::string& input, std::vector<std::string>& strings, bool saveExtraFields)
+    {
+        size_t start, end = std::string::npos;
+        std::string output = input;
+
+        do
+        {
+            start = output.find_first_of('"', end + 1);
+            end = output.find_first_of('"', start + 1);
+            if(start == std::string::npos  ||  end == std::string::npos) break;
+
+            strings.push_back(output.substr(start, end - start + 1));
+            output.erase(start, end - start + 1);
+
+            // Save extra fields, (digits and semicolons)
+            if(saveExtraFields  &&  output[start] != ',')
+            {
+                // Save semicolon
+                if(output[start] == ';')
+                {
+                    strings.back() += ';';
+                    output.erase(start, 1);
+                }
+
+                // Save digits
+                if(isdigit((unsigned char)output[start]))
+                {
+                    size_t i = start;
+                    while(isdigit((unsigned char)output[i]))
+                    {
+                        strings.back() += output[i++];
+                    }
+                    output.erase(start, i - start);
+                }
+
+                // Save semicolon
+                if(output[start] == ';')
+                {
+                    strings.back() += ';';
+                    output.erase(start, 1);
+                }
+            }
+            start = 0, end = 0;
+        }
+        while(start != std::string::npos  &&  end != std::string::npos);
+
+        return output;
+    }
+
     void trimWhitespace(std::string& input)
     {
         size_t start = input.find_first_not_of(" \n\r\f\t\v");
@@ -273,7 +401,7 @@ namespace Expression
     {
         std::string output;
 
-        std::unique_copy(input.begin(), input.end(), std::back_insert_iterator<std::string>(output), [](char a, char b) {return isspace(a) && isspace(b);});
+        std::unique_copy(input.begin(), input.end(), std::back_insert_iterator<std::string>(output), [](unsigned char a, unsigned char b) {return isspace(a) && isspace(b);});
 
         return output;
     }
@@ -284,11 +412,11 @@ namespace Expression
         int spaceCount = 0;
         bool inString = false;
 
-        for(int i=0; i<input.size(); i++)
+        for(int i=0; i<int(input.size()); i++)
         {
             if(input[i] == '\"') inString = !inString;
 
-            if(isspace(input[i]))
+            if(isspace((unsigned char)input[i]))
             {
                 if(!inString)
                 {
@@ -315,7 +443,7 @@ namespace Expression
         bool inString = false;
         bool inComment = false;
 
-        for(int i=0; i<input.size(); i++)
+        for(int i=0; i<int(input.size()); i++)
         {
             // Check for string
             if(!inComment  &&  input[i] == '\"') inString = !inString;
@@ -323,7 +451,7 @@ namespace Expression
             // Check for comment, ' and REM
             if(!inString)
             {
-                if((input[i] == '\'')  ||  (i <= input.size()-3  &&  toupper(input[i]) == 'R'  &&  toupper(input[i+1]) == 'E'  &&  toupper(input[i+2]) == 'M'))
+                if((input[i] == '\'')  ||  (i <= int(input.size()) - 3  &&  toupper((unsigned char)input[i]) == 'R'  &&  toupper((unsigned char)input[i+1]) == 'E'  &&  toupper((unsigned char)input[i+2]) == 'M'))
                 {
                     inComment = true;
                 }
@@ -349,7 +477,7 @@ namespace Expression
 
     void padString(std::string &input, int num, char pad)
     {
-        if(num > input.size()) input.insert(0, num - input.size(), pad);
+        if(num > int(input.size())) input.insert(0, num - int(input.size()), pad);
     }
 
     void addString(std::string &input, int num, char add)
@@ -360,7 +488,7 @@ namespace Expression
     int tabbedStringLength(const std::string& input, int tabSize)
     {
         int length = 0, newLine = 0;
-        for(int i=0; i<input.size(); i++)
+        for(int i=0; i<int(input.size()); i++)
         {
             switch(input[i])
             {
@@ -376,8 +504,8 @@ namespace Expression
 
     bool findMatchingBrackets(const std::string& input, size_t start, size_t& lbra, size_t& rbra)
     {
-        lbra = -1;
-        rbra = -1;
+        lbra = std::string::npos;
+        rbra = std::string::npos;
 
         int matched = 0;
         bool startMatching = false;
@@ -403,8 +531,8 @@ namespace Expression
             if(startMatching  &&  matched == 0) return true;
         }
 
-        lbra = -1;
-        rbra = -1;
+        lbra = std::string::npos;
+        rbra = std::string::npos;
 
         return false;
     }
@@ -466,26 +594,26 @@ namespace Expression
 
     std::string& strToLower(std::string& s)
     {
-        std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {return tolower(c);} );
+        std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {return char(tolower(c));} );
         return s;
     }
 
     std::string& strToUpper(std::string& s)
     {
-        std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {return toupper(c);} );
+        std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {return char(toupper(c));} );
         return s;
     }
 
     bool subAlphaHelper(int i)
     {
         // Valid chars are alpha and 'address of'
-        return (isalpha(i) || (i=='@'));
+        return (isalpha((unsigned char)i) || (i=='@'));
     }
     std::string getSubAlpha(const std::string& s)
     {
         if(s.size() > 1)
         {
-            char uchr = toupper(s[1]);
+            char uchr = char(toupper((unsigned char)s[1]));
             if((s[0] == '&'  &&  (uchr == 'H'  ||  uchr == 'B'  ||  uchr == 'O'))  ||
                (s[0] == '0'  &&  (uchr == 'X'  ||  uchr == 'B'  ||  uchr == 'O')))
             {
@@ -512,7 +640,7 @@ namespace Expression
         // Hex
         if(token.size() >= 2  &&  token.c_str()[0] == '$')
         {
-            for(int i=1; i<token.size(); i++) success &= _hexaDecimalChars[token.c_str()[i]];
+            for(int i=1; i<int(token.size()); i++) success &= _hexaDecimalChars[uint8_t(token.c_str()[i])];
             if(success)
             {
                 result = strtol(&token.c_str()[1], NULL, 16);
@@ -522,7 +650,7 @@ namespace Expression
         // Hex
         else if(token.size() >= 3  &&  ((token.c_str()[0] == '0'  &&  token.c_str()[1] == 'X')  ||  (token.c_str()[0] == '&'  &&  token.c_str()[1] == 'H')))
         {
-            for(int i=2; i<token.size(); i++) success &= _hexaDecimalChars[token.c_str()[i]];
+            for(int i=2; i<int(token.size()); i++) success &= _hexaDecimalChars[uint8_t(token.c_str()[i])];
             if(success)
             {
                 result = strtol(&token.c_str()[2], NULL, 16);
@@ -532,7 +660,7 @@ namespace Expression
         // Octal
         else if(token.size() >= 3  &&  ((token.c_str()[0] == '0'  &&  (token.c_str()[1] == 'O' || token.c_str()[1] == 'Q'))  ||  (token.c_str()[0] == '&'  &&  token.c_str()[1] == 'O')))
         {
-            for(int i=2; i<token.size(); i++) success &= _octalChars[token.c_str()[i]];
+            for(int i=2; i<int(token.size()); i++) success &= _octalChars[uint8_t(token.c_str()[i])];
             if(success)
             {
                 result = strtol(&token.c_str()[2], NULL, 8);
@@ -542,7 +670,7 @@ namespace Expression
         // Binary
         else if(token.size() >= 3  &&  ((token.c_str()[0] == '0'  &&  token.c_str()[1] == 'B')  ||  (token.c_str()[0] == '&'  &&  token.c_str()[1] == 'B')))
         {
-            for(int i=2; i<token.size(); i++) success &= _binaryChars[token.c_str()[i]];
+            for(int i=2; i<int(token.size()); i++) success &= _binaryChars[uint8_t(token.c_str()[i])];
             if(success)
             {
                 result = strtol(&token.c_str()[2], NULL, 2);
@@ -552,7 +680,7 @@ namespace Expression
         // Decimal
         else
         {
-            for(int i=0; i<token.size(); i++) success &= _decimalChars[token.c_str()[i]];
+            for(int i=0; i<int(token.size()); i++) success &= _decimalChars[uint8_t(token.c_str()[i])];
             if(success)
             {
                 result = strtol(&token.c_str()[0], NULL, 10);
@@ -611,6 +739,11 @@ namespace Expression
         return true;
     }
 
+    void stringToDouble(const std::string& token, double& result)
+    {
+        result = std::stod(token);
+    }
+
 
     // ****************************************************************************************************************
     // Tokenising
@@ -627,7 +760,7 @@ namespace Expression
     std::vector<std::string> tokenise(const std::string& text, const std::string& delimiters, bool toUpper)
     {
         size_t offset0 = 0;
-        size_t offset1 = -1;
+        size_t offset1 = SIZE_MAX;
         bool firstToken = true;
         std::vector<std::string> result;
 
@@ -691,7 +824,7 @@ namespace Expression
             }
 
             std::string s = std::string(begin, str);
-            if(str > begin  &&  !(skipSpaces  &&  std::all_of(s.begin(), s.end(), isspace)))
+            if(str > begin  &&  !(skipSpaces  &&  std::all_of(s.begin(), s.end(), isSpace)))
             {
                 if(toUpper) strToUpper(s);
                 result.push_back(s);
@@ -720,7 +853,7 @@ namespace Expression
             }
 
             std::string s = std::string(begin, str);
-            if(str > begin  &&  !(skipSpaces  &&  std::all_of(s.begin(), s.end(), isspace)))
+            if(str > begin  &&  !(skipSpaces  &&  std::all_of(s.begin(), s.end(), isSpace)))
             {
                 if(toUpper) strToUpper(s);
                 offsets.push_back(size_t(str - text.c_str()) + 1);
@@ -732,7 +865,7 @@ namespace Expression
         return result;
     }
 
-    // Tokenise using whitespace and quotes, preserves strings
+    // Tokenise using whitespace and single or double quotes, preserves strings
     std::vector<std::string> tokeniseLine(const std::string& line, const std::string& delimiters)
     {
         std::string token = "";
@@ -742,10 +875,10 @@ namespace Expression
         DelimiterState delimiterState = WhiteSpace;
         std::vector<std::string> tokens;
 
-        for(int i=0; i<=line.size(); i++)
+        for(int i=0; i<=int(line.size()); i++)
         {
             // End of line is a delimiter for white space
-            if(i == line.size())
+            if(i == int(line.size()))
             {
                 if(delimiterState != Quotes)
                 {
@@ -812,13 +945,15 @@ namespace Expression
                     }
                 }
                 break;
+
+                default: break;
             }
         }
 
         return tokens;
     }
 
-    // Tokenise using whitespace and quotes, preserves strings
+    // Tokenise using whitespace and double quotes, preserves strings, outputs offsets to tokens
     std::vector<std::string> tokeniseLine(const std::string& line, const std::string& delimiters, std::vector<size_t>& offsets)
     {
         std::string token = "";
@@ -828,10 +963,10 @@ namespace Expression
         DelimiterState delimiterState = WhiteSpace;
         std::vector<std::string> tokens;
 
-        for(int i=0; i<=line.size(); i++)
+        for(int i=0; i<=int(line.size()); i++)
         {
             // End of line is a delimiter for white space
-            if(i == line.size())
+            if(i == int(line.size()))
             {
                 if(delimiterState != Quotes)
                 {
@@ -855,7 +990,7 @@ namespace Expression
                     }
                 }
                 // String delimiters
-                else if(strchr("\'\"", line[i]))
+                else if(strchr("\"", line[i]))
                 {
                     delimiterState = Quotes;
                     stringStart = !stringStart;
@@ -903,6 +1038,8 @@ namespace Expression
                     }
                 }
                 break;
+
+                default: break;
             }
         }
 
@@ -985,7 +1122,8 @@ namespace Expression
     bool find(const std::string& text)
     {
         size_t pos = size_t(_expression - _expressionToParse.c_str());
-        if(strToUpper(_expressionToParse.substr(pos, text.size())) == text)
+        std::string expr = _expressionToParse.substr(pos, text.size());
+        if(strToUpper(expr) == text)
         {
             advance(text.size());
             return true;
@@ -999,17 +1137,17 @@ namespace Expression
         char uchr;
 
         std::string valueStr;
-        uchr = toupper(peek());
+        uchr = char(toupper((unsigned char)peek()));
         valueStr.push_back(uchr); get();
-        uchr = toupper(peek());
+        uchr = char(toupper((unsigned char)peek()));
         if((uchr >= '0'  &&  uchr <= '9')  ||  uchr == 'X'  ||  uchr == 'H'  ||  uchr == 'B'  ||  uchr == 'O'  ||  uchr == 'Q')
         {
             valueStr.push_back(uchr); get();
-            uchr = toupper(peek());
+            uchr = char(toupper((unsigned char)peek()));
             while((uchr >= '0'  &&  uchr <= '9')  ||  (uchr >= 'A'  &&  uchr <= 'F'))
             {
                 valueStr.push_back(get());
-                uchr = toupper(peek());
+                uchr = char(toupper((unsigned char)peek()));
             }
         }
 
@@ -1025,6 +1163,7 @@ namespace Expression
         {
             get();
             numeric = expression();
+
             if(peek() != ')')
             {
                 fprintf(stderr, "Expression::factor() : Missing ')' in '%s' on line %d\n", _expressionToParse.c_str(), _lineNumber + 1);
@@ -1044,16 +1183,55 @@ namespace Expression
                 numeric = Numeric(value, -1, true, Number, BooleanCC, Int16Both, std::string(""), std::string(""));
             }
         }
+        // Functions
+        else if(Expression::find("SIN"))
+        {
+            numeric = factor(0); numeric = operatorSIN(numeric);
+        }
+        else if(Expression::find("COS"))
+        {
+            numeric = factor(0); numeric = operatorCOS(numeric);
+        }
+        else if(Expression::find("TAN"))
+        {
+            numeric = factor(0); numeric = operatorTAN(numeric);
+        }
+        else if(Expression::find("ASIN"))
+        {
+            numeric = factor(0); numeric = operatorASIN(numeric);
+        }
+        else if(Expression::find("ACOS"))
+        {
+            numeric = factor(0); numeric = operatorACOS(numeric);
+        }
+        else if(Expression::find("ATAN"))
+        {
+            numeric = factor(0); numeric = operatorATAN(numeric);
+        }
+        else if(Expression::find("RAND"))
+        {
+            numeric = factor(0); numeric = operatorRAND(numeric);
+        }
+        else if(Expression::find("REV16"))
+        {
+            numeric = factor(0); numeric = operatorREV16(numeric);
+        }
+        else if(Expression::find("REV8"))
+        {
+            numeric = factor(0); numeric = operatorREV8(numeric);
+        }
+        else if(Expression::find("REV4"))
+        {
+            numeric = factor(0); numeric = operatorREV4(numeric);
+        }
         else
         {
-            // Functions
-
             // Unary operators
             switch(peek())
             {
                 case '+': get(); numeric = factor(0);                         break;
-                case '-': get(); numeric = factor(0); numeric = neg(numeric); break;
-                case '~': get(); numeric = factor(0); numeric = not(numeric); break;
+                case '-': get(); numeric = factor(0); numeric = operatorNEG(numeric); break;
+                case '~': get(); numeric = factor(0); numeric = operatorNOT(numeric); break;
 
                 // Unknown
                 default: numeric = Numeric(defaultValue, -1, true, Number, BooleanCC, Int16Both, std::string(_expression), std::string("")); break;
@@ -1065,57 +1243,57 @@ namespace Expression
 
     Numeric term(void)
     {
-        Numeric result = factor(0);
+        Numeric numeric, result = factor(0);
 
         for(;;)
         {
-            if(find("**"))         {       result = pow(result, factor(0));}
-            else if(peek() == '*') {get(); result = mul(result, factor(0));}
-            else if(peek() == '/') {get(); result = div(result, factor(0));}
-            else if(peek() == '%') {get(); result = mod(result, factor(0));}
+            if(find("**"))         {       numeric = factor(0); result = operatorPOW(result, numeric);}
+            else if(peek() == '*') {get(); numeric = factor(0); result = operatorMUL(result, numeric);}
+            else if(peek() == '/') {get(); numeric = factor(0); result = operatorDIV(result, numeric);}
+            else if(peek() == '%') {get(); numeric = factor(0); result = operatorMOD(result, numeric);}
             else return result;
         }
     }
 
     Numeric expr(void)
     {
-        Numeric result = term();
+        Numeric numeric, result = term();
     
         for(;;)
         {
-            if(peek() == '+')      {get(); result = add(result, term());}
-            else if(peek() == '-') {get(); result = sub(result, term());}
+            if(peek() == '+')      {get(); numeric = term(); result = operatorADD(result, numeric);}
+            else if(peek() == '-') {get(); numeric = term(); result = operatorSUB(result, numeric);}
             else return result;
         }
     }
 
     Numeric logical(void)
     {
-        Numeric result = expr();
+        Numeric numeric, result = expr();
     
         for(;;)
         {
-            if(peek() == '&')      {get(); result = and(result, expr());}
-            else if(peek() == '^') {get(); result = xor(result, expr());}
-            else if(peek() == '|') {get(); result = or(result,  expr());}
-            else if(find("<<"))    {       result = lsl(result, expr());}
-            else if(find(">>"))    {       result = lsr(result, expr());}
+            if(peek() == '&')      {get(); numeric = expr(); result = operatorAND(result, numeric);}
+            else if(peek() == '^') {get(); numeric = expr(); result = operatorXOR(result, numeric);}
+            else if(peek() == '|') {get(); numeric = expr(); result = operatorOR(result,  numeric);}
+            else if(find("<<"))    {       numeric = expr(); result = operatorLSL(result, numeric);}
+            else if(find(">>"))    {       numeric = expr(); result = operatorLSR(result, numeric);}
             else return result;
         }
     }
 
     Numeric expression(void)
     {
-        Numeric result = logical();
-    
+        Numeric numeric, result = logical();
+            
         for(;;)
         {
-            if(find("=="))         {       result = eq(result, logical());}
-            else if(find("!="))    {       result = ne(result, logical());}
-            else if(find("<="))    {       result = le(result, logical());}
-            else if(find(">="))    {       result = ge(result, logical());}
-            else if(peek() == '<') {get(); result = lt(result, logical());}
-            else if(peek() == '>') {get(); result = gt(result, logical());}
+            if(find("=="))         {       numeric = logical(); result = operatorEQ(result, numeric);}
+            else if(find("!="))    {       numeric = logical(); result = operatorNE(result, numeric);}
+            else if(find("<="))    {       numeric = logical(); result = operatorLE(result, numeric);}
+            else if(find(">="))    {       numeric = logical(); result = operatorGE(result, numeric);}
+            else if(peek() == '<') {get(); numeric = logical(); result = operatorLT(result, numeric);}
+            else if(peek() == '>') {get(); numeric = logical(); result = operatorGT(result, numeric);}
             else return result;
         }
     }
@@ -1131,6 +1309,6 @@ namespace Expression
         _expression = (char*)_expressionToParse.c_str();
 
         numeric = _exprFunc();
-        return _exprFunc()._isValid;
+        return numeric._isValid;
     }
 }

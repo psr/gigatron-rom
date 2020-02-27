@@ -30,9 +30,16 @@
 
 int main(int argc, char* argv[])
 {
+    if(argc != 1  &&  argc != 2)
+    {
+        fprintf(stderr, "%s\n", VERSION_STR);
+        fprintf(stderr, "Usage:   gtemuAT67 <optional input filename>\n");
+        return 1;
+    }
+
     Memory::initialise();
-    Loader::initialise();
     Cpu::initialise();
+    Loader::initialise();
     Audio::initialise();
     Image::initialise();
     Editor::initialise();
@@ -47,13 +54,32 @@ int main(int argc, char* argv[])
     Validater::initialise();
     Linker::initialise();
 
+    // Load file
+    if(argc == 2)
+    {
+        std::string name = std::string(argv[1]);
+        size_t slash = name.find_last_of("\\/");
+        size_t ram64k = name.find("64k");
+        std::string path = (slash != std::string::npos) ? name.substr(0, slash) : ".";
+        Expression::replaceText(path, "\\", "/");
+        name = (slash != std::string::npos) ? name.substr(slash + 1) : name;
+
+#ifdef _WIN32
+        Cpu::enableWin32ConsoleSaveFile(false);
+#endif
+
+        Assembler::setIncludePath(path);
+        Loader::setFilePath(path + "/" + name);
+        Loader::setUploadTarget(Loader::Emulator);
+        if(ram64k != std::string::npos) Cpu::swapMemoryModel();
+    }
+
 #if 0
     Image::TgaFile tgaFile;
-    Image::GtRgbFile gtRgbFile;
-
     std::string imageName = "Clouds";
     Image::loadTgaFile(imageName + ".tga", tgaFile);
-    gtRgbFile._header = {GTRGB_IDENTIFIER, Image::GT_RGB_222, tgaFile._header._width, tgaFile._header._height};
+
+    Image::GtRgbFile gtRgbFile{GTRGB_IDENTIFIER, Image::GT_RGB_222, tgaFile._header._width, tgaFile._header._height};
     //Image::convertRGB8toRGB2(tgaFile._data, gtRgbFile._data, tgaFile._header._width, tgaFile._header._height, tgaFile._imageOrigin);
     Image::ditherRGB8toRGB2(tgaFile._data, gtRgbFile._data, tgaFile._header._width, tgaFile._header._height, tgaFile._imageOrigin);
     Image::saveGtRgbFile(imageName + ".gtrgb", gtRgbFile);

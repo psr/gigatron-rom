@@ -10,7 +10,7 @@ pytest.register_assert_rewrite("utilities")
 import utilities  # noqa: E402 isort:skip
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def emulator():
     emulator = Emulator()
     emulator.zero_memory()
@@ -118,7 +118,7 @@ class _GigatronStack(object):
         return chr(value)
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def data_stack(emulator):
     """Gives easy access to the data stack"""
     # Emulator is unused, but ensures that we run after the memory is zeroed
@@ -129,7 +129,7 @@ def data_stack(emulator):
     )
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def return_stack(emulator):
     """Gives easy access to the return stack"""
     # Emulator is unused, but ensures that we run after the memory is zeroed

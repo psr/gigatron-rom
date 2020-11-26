@@ -17,6 +17,11 @@ def data_stack_depths(*, with_room_for_values=0):
 # Arbitrary memory addresses, which avoid the zero-page
 addresses = integers(min_value=0x100, max_value=(1 << 15) - 1)
 
+# Arbitrary aligned memory addresses, which avoid the zero-page
+aligned_addresses = integers(min_value=(0x100 / 2), max_value=(1 << 14) - 1).map(
+    lambda n: n * 2
+)
+
 # Arbitary one-byte values
 characters = integers(min_value=0, max_value=0xFF)
 

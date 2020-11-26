@@ -7520,290 +7520,316 @@ forth.core.CELLS:
               164f 1413  ld   $13,y       ;NEXT
               1650 e00f  jmp  y,$0f
               1651 00f7  ld   $f7
+forth.core.@: 1652 80f4  adda $f4
+              1653 1400  ld   $00,y
+              1654 111c  ld   [$1c],x
+              1655 0d00  ld   [y,x]
+              1656 c224  st   [$24]
+              1657 de00  st   [y,x++]
+              1658 0d00  ld   [y,x]
+              1659 1600  ld   ac,y
+              165a 1124  ld   [$24],x
+              165b 0d00  ld   [y,x]
+              165c c224  st   [$24]
+              165d de00  st   [y,x++]
+              165e 0d00  ld   [y,x]
+              165f c225  st   [$25]
+              1660 1400  ld   $00,y
+              1661 111c  ld   [$1c],x
+              1662 0124  ld   [$24]
+              1663 de00  st   [y,x++]
+              1664 0125  ld   [$25]
+              1665 ce00  st   [y,x]
+              1666 1413  ld   $13,y       ;NEXT
+              1667 e00e  jmp  y,$0e
+              1668 00f4  ld   $f4
+forth.core.!: 1669 80f3  adda $f3
+              166a 1400  ld   $00,y       ;Remove 4 bytes from stack (SP moves by 4)
+              166b 011c  ld   [$1c]
+              166c 1200  ld   ac,x
+              166d 8004  adda $04
+              166e c21c  st   [$1c]       ;Copy stack data and low part of address to temporary
+              166f 0d00  ld   [y,x]
+              1670 c224  st   [$24]
+              1671 de00  st   [y,x++]
+              1672 0d00  ld   [y,x]
+              1673 c225  st   [$25]
+              1674 de00  st   [y,x++]
+              1675 0d00  ld   [y,x]
+              1676 c226  st   [$26]
+              1677 de00  st   [y,x++]
+              1678 0d00  ld   [y,x]
+              1679 c227  st   [$27]       ;Load address
+              167a 1124  ld   [$24],x
+              167b 1525  ld   [$25],y     ;Write data
+              167c 0126  ld   [$26]
+              167d de00  st   [y,x++]
+              167e 0127  ld   [$27]
+              167f ce00  st   [y,x]
+              1680 1413  ld   $13,y       ;NEXT
+              1681 e00f  jmp  y,$0f
+              1682 00f3  ld   $f3
 forth.core.ext.NIP:
-              1652 80f6  adda $f6
-              1653 1413  ld   $13,y
-              1654 e023  jmp  y,$23
-              1655 147f  ld   $7f,y
-              1656 dc2c  st   $2c,[y,x++] ;-> forth.core.SWAP
-              1657 e07a  jmp  y,$7a
-              1658 dc15  st   $15,[y,x++]
-              1659 dc1e  st   $1e,[y,x++] ;-> forth.core.DROP
-              165a e07a  jmp  y,$7a
-              165b dc15  st   $15,[y,x++]
-              165c dc52  st   $52,[y,x++] ;-> forth.core.EXIT
-              165d e07a  jmp  y,$7a
-              165e dc14  st   $14,[y,x++]
-forth.core.ext.0<>:
-              165f 80f6  adda $f6
-              1660 1413  ld   $13,y
-              1661 e023  jmp  y,$23
-              1662 147f  ld   $7f,y
-              1663 dcbd  st   $bd,[y,x++] ;-> forth.core.0=
-              1664 e07a  jmp  y,$7a
-              1665 dc14  st   $14,[y,x++]
-              1666 dcbd  st   $bd,[y,x++] ;-> forth.core.0=
-              1667 e07a  jmp  y,$7a
-              1668 dc14  st   $14,[y,x++]
-              1669 dc52  st   $52,[y,x++] ;-> forth.core.EXIT
-              166a e07a  jmp  y,$7a
-              166b dc14  st   $14,[y,x++]
-forth.core.?DUP:
-              166c 80f6  adda $f6
-              166d 1413  ld   $13,y
-              166e e023  jmp  y,$23
-              166f 147f  ld   $7f,y
-              1670 dc4c  st   $4c,[y,x++] ;-> forth.core.DUP
-              1671 e07a  jmp  y,$7a
-              1672 dc15  st   $15,[y,x++]
-              1673 dc04  st   $04,[y,x++] ;-> forth.internal.rom-mode.?BRANCH
-              1674 e07a  jmp  y,$7a
-              1675 dc15  st   $15,[y,x++]
-              1676 fc7b  bra  .thread_label#0
-              1677 0008  ld   $08
-              1678 dc4c  st   $4c,[y,x++] ;-> forth.core.DUP
-              1679 e07a  jmp  y,$7a
-              167a dc15  st   $15,[y,x++]
-.thread_label#0:
-              167b dc52  st   $52,[y,x++] ;-> forth.core.EXIT
-              167c e07a  jmp  y,$7a
-              167d dc14  st   $14,[y,x++]
-forth.core.CELL+:
-              167e 80f6  adda $f6
-              167f 1413  ld   $13,y
-              1680 e023  jmp  y,$23
-              1681 147f  ld   $7f,y
-              1682 dcdf  st   $df,[y,x++] ;-> forth.internal.C-LIT
-              1683 e07a  jmp  y,$7a
-              1684 dc14  st   $14,[y,x++]
-              1685 dc02  st   $02,[y,x++] ;2
-              1686 1030  ld   $30,x       ;X <- W
-              1687 dc21  st   $21,[y,x++] ;-> forth.core.+
+              1683 80f6  adda $f6
+              1684 1413  ld   $13,y
+              1685 e023  jmp  y,$23
+              1686 147f  ld   $7f,y
+              1687 dc2c  st   $2c,[y,x++] ;-> forth.core.SWAP
               1688 e07a  jmp  y,$7a
-              1689 dc16  st   $16,[y,x++]
-              168a dc52  st   $52,[y,x++] ;-> forth.core.EXIT
+              1689 dc15  st   $15,[y,x++]
+              168a dc1e  st   $1e,[y,x++] ;-> forth.core.DROP
               168b e07a  jmp  y,$7a
-              168c dc14  st   $14,[y,x++]
-forth.core.NEGATE:
-              168d 80f6  adda $f6
-              168e 1413  ld   $13,y
-              168f e023  jmp  y,$23
-              1690 147f  ld   $7f,y
-              1691 dce8  st   $e8,[y,x++] ;-> forth.core.INVERT
-              1692 e07a  jmp  y,$7a
-              1693 dc15  st   $15,[y,x++]
-              1694 dc9c  st   $9c,[y,x++] ;-> forth.core.1+
+              168c dc15  st   $15,[y,x++]
+              168d dc52  st   $52,[y,x++] ;-> forth.core.EXIT
+              168e e07a  jmp  y,$7a
+              168f dc14  st   $14,[y,x++]
+forth.core.ext.0<>:
+              1690 80f6  adda $f6
+              1691 1413  ld   $13,y
+              1692 e023  jmp  y,$23
+              1693 147f  ld   $7f,y
+              1694 dcbd  st   $bd,[y,x++] ;-> forth.core.0=
               1695 e07a  jmp  y,$7a
               1696 dc14  st   $14,[y,x++]
-              1697 dc52  st   $52,[y,x++] ;-> forth.core.EXIT
+              1697 dcbd  st   $bd,[y,x++] ;-> forth.core.0=
               1698 e07a  jmp  y,$7a
               1699 dc14  st   $14,[y,x++]
-forth.core.-: 169a 80f6  adda $f6
-              169b 1413  ld   $13,y
-              169c e023  jmp  y,$23
-              169d 147f  ld   $7f,y
-              169e dc8d  st   $8d,[y,x++] ;-> forth.core.NEGATE
-              169f e07a  jmp  y,$7a
-              16a0 dc16  st   $16,[y,x++]
-              16a1 dc21  st   $21,[y,x++] ;-> forth.core.+
+              169a dc52  st   $52,[y,x++] ;-> forth.core.EXIT
+              169b e07a  jmp  y,$7a
+              169c dc14  st   $14,[y,x++]
+forth.core.?DUP:
+              169d 80f6  adda $f6
+              169e 1413  ld   $13,y
+              169f e023  jmp  y,$23
+              16a0 147f  ld   $7f,y
+              16a1 dc4c  st   $4c,[y,x++] ;-> forth.core.DUP
               16a2 e07a  jmp  y,$7a
-              16a3 dc16  st   $16,[y,x++]
-              16a4 dc52  st   $52,[y,x++] ;-> forth.core.EXIT
+              16a3 dc15  st   $15,[y,x++]
+              16a4 dc04  st   $04,[y,x++] ;-> forth.internal.rom-mode.?BRANCH
               16a5 e07a  jmp  y,$7a
-              16a6 dc14  st   $14,[y,x++]
-forth.core.=: 16a7 80f6  adda $f6
-              16a8 1413  ld   $13,y
-              16a9 e023  jmp  y,$23
-              16aa 147f  ld   $7f,y
-              16ab dcc6  st   $c6,[y,x++] ;-> forth.core.XOR
-              16ac e07a  jmp  y,$7a
-              16ad dc15  st   $15,[y,x++]
-              16ae dcbd  st   $bd,[y,x++] ;-> forth.core.0=
-              16af e07a  jmp  y,$7a
-              16b0 dc14  st   $14,[y,x++]
-              16b1 dc52  st   $52,[y,x++] ;-> forth.core.EXIT
-              16b2 e07a  jmp  y,$7a
-              16b3 dc14  st   $14,[y,x++]
-forth.core.0<:
-              16b4 80f6  adda $f6
-              16b5 1413  ld   $13,y
-              16b6 e023  jmp  y,$23
-              16b7 147f  ld   $7f,y
-              16b8 dcd3  st   $d3,[y,x++] ;-> forth.internal.LIT
+              16a6 dc15  st   $15,[y,x++]
+              16a7 fcac  bra  .thread_label#0
+              16a8 0008  ld   $08
+              16a9 dc4c  st   $4c,[y,x++] ;-> forth.core.DUP
+              16aa e07a  jmp  y,$7a
+              16ab dc15  st   $15,[y,x++]
+.thread_label#0:
+              16ac dc52  st   $52,[y,x++] ;-> forth.core.EXIT
+              16ad e07a  jmp  y,$7a
+              16ae dc14  st   $14,[y,x++]
+forth.core.CELL+:
+              16af 80f6  adda $f6
+              16b0 1413  ld   $13,y
+              16b1 e023  jmp  y,$23
+              16b2 147f  ld   $7f,y
+              16b3 dcdf  st   $df,[y,x++] ;-> forth.internal.C-LIT
+              16b4 e07a  jmp  y,$7a
+              16b5 dc14  st   $14,[y,x++]
+              16b6 dc02  st   $02,[y,x++] ;2
+              16b7 1030  ld   $30,x       ;X <- W
+              16b8 dc21  st   $21,[y,x++] ;-> forth.core.+
               16b9 e07a  jmp  y,$7a
-              16ba dc14  st   $14,[y,x++]
-              16bb dc00  st   $00,[y,x++] ;32768
-              16bc dc80  st   $80,[y,x++]
-              16bd 1030  ld   $30,x       ;X <- W
-              16be dcc0  st   $c0,[y,x++] ;-> forth.core.AND
-              16bf e07a  jmp  y,$7a
-              16c0 dc15  st   $15,[y,x++]
-              16c1 dc5f  st   $5f,[y,x++] ;-> forth.core.ext.0<>
-              16c2 e07a  jmp  y,$7a
-              16c3 dc16  st   $16,[y,x++]
-              16c4 dc52  st   $52,[y,x++] ;-> forth.core.EXIT
-              16c5 e07a  jmp  y,$7a
-              16c6 dc14  st   $14,[y,x++]
-forth.core.ext.0>:
-              16c7 80f6  adda $f6
-              16c8 1413  ld   $13,y
-              16c9 e023  jmp  y,$23
-              16ca 147f  ld   $7f,y
-              16cb dcdf  st   $df,[y,x++] ;-> forth.internal.C-LIT
-              16cc e07a  jmp  y,$7a
-              16cd dc14  st   $14,[y,x++]
-              16ce dc00  st   $00,[y,x++] ;0
-              16cf 1030  ld   $30,x       ;X <- W
-              16d0 dc2c  st   $2c,[y,x++] ;-> forth.core.SWAP
-              16d1 e07a  jmp  y,$7a
-              16d2 dc15  st   $15,[y,x++]
-              16d3 dc9a  st   $9a,[y,x++] ;-> forth.core.-
-              16d4 e07a  jmp  y,$7a
-              16d5 dc16  st   $16,[y,x++]
-              16d6 dcb4  st   $b4,[y,x++] ;-> forth.core.0<
-              16d7 e07a  jmp  y,$7a
-              16d8 dc16  st   $16,[y,x++]
-              16d9 dc52  st   $52,[y,x++] ;-> forth.core.EXIT
-              16da e07a  jmp  y,$7a
-              16db dc14  st   $14,[y,x++]
-              16dc 0200  nop
-              16dd 0200  nop
-              16de 0200  nop
-              * 36 times
+              16ba dc16  st   $16,[y,x++]
+              16bb dc52  st   $52,[y,x++] ;-> forth.core.EXIT
+              16bc e07a  jmp  y,$7a
+              16bd dc14  st   $14,[y,x++]
+forth.core.NEGATE:
+              16be 80f6  adda $f6
+              16bf 1413  ld   $13,y
+              16c0 e023  jmp  y,$23
+              16c1 147f  ld   $7f,y
+              16c2 dce8  st   $e8,[y,x++] ;-> forth.core.INVERT
+              16c3 e07a  jmp  y,$7a
+              16c4 dc15  st   $15,[y,x++]
+              16c5 dc9c  st   $9c,[y,x++] ;-> forth.core.1+
+              16c6 e07a  jmp  y,$7a
+              16c7 dc14  st   $14,[y,x++]
+              16c8 dc52  st   $52,[y,x++] ;-> forth.core.EXIT
+              16c9 e07a  jmp  y,$7a
+              16ca dc14  st   $14,[y,x++]
+forth.core.-: 16cb 80f6  adda $f6
+              16cc 1413  ld   $13,y
+              16cd e023  jmp  y,$23
+              16ce 147f  ld   $7f,y
+              16cf dcbe  st   $be,[y,x++] ;-> forth.core.NEGATE
+              16d0 e07a  jmp  y,$7a
+              16d1 dc16  st   $16,[y,x++]
+              16d2 dc21  st   $21,[y,x++] ;-> forth.core.+
+              16d3 e07a  jmp  y,$7a
+              16d4 dc16  st   $16,[y,x++]
+              16d5 dc52  st   $52,[y,x++] ;-> forth.core.EXIT
+              16d6 e07a  jmp  y,$7a
+              16d7 dc14  st   $14,[y,x++]
+forth.core.=: 16d8 80f6  adda $f6
+              16d9 1413  ld   $13,y
+              16da e023  jmp  y,$23
+              16db 147f  ld   $7f,y
+              16dc dcc6  st   $c6,[y,x++] ;-> forth.core.XOR
+              16dd e07a  jmp  y,$7a
+              16de dc15  st   $15,[y,x++]
+              16df dcbd  st   $bd,[y,x++] ;-> forth.core.0=
+              16e0 e07a  jmp  y,$7a
+              16e1 dc14  st   $14,[y,x++]
+              16e2 dc52  st   $52,[y,x++] ;-> forth.core.EXIT
+              16e3 e07a  jmp  y,$7a
+              16e4 dc14  st   $14,[y,x++]
+forth.core.0<:
+              16e5 80f6  adda $f6
+              16e6 1413  ld   $13,y
+              16e7 e023  jmp  y,$23
+              16e8 147f  ld   $7f,y
+              16e9 dcd3  st   $d3,[y,x++] ;-> forth.internal.LIT
+              16ea e07a  jmp  y,$7a
+              16eb dc14  st   $14,[y,x++]
+              16ec dc00  st   $00,[y,x++] ;32768
+              16ed dc80  st   $80,[y,x++]
+              16ee 1030  ld   $30,x       ;X <- W
+              16ef dcc0  st   $c0,[y,x++] ;-> forth.core.AND
+              16f0 e07a  jmp  y,$7a
+              16f1 dc15  st   $15,[y,x++]
+              16f2 dc90  st   $90,[y,x++] ;-> forth.core.ext.0<>
+              16f3 e07a  jmp  y,$7a
+              16f4 dc16  st   $16,[y,x++]
+              16f5 dc52  st   $52,[y,x++] ;-> forth.core.EXIT
+              16f6 e07a  jmp  y,$7a
+              16f7 dc14  st   $14,[y,x++]
+              16f8 0200  nop
+              16f9 0200  nop
+              16fa 0200  nop
+              * 8 times
 forth.restart-or-quit:
               1700 fd30  bra  [$30]
               1701 f802  ble  .quit
 .quit:        1702 1413  ld   $13,y       ;jmp forth.exit.from-failed-test
               1703 e01c  jmp  y,$1c
-forth.core.U<:
+forth.core.ext.0>:
               1704 80f6  adda $f6
               1705 1413  ld   $13,y
               1706 e023  jmp  y,$23
               1707 147f  ld   $7f,y
-              1708 dc04  st   $04,[y,x++] ;-> forth.core.2DUP
+              1708 dcdf  st   $df,[y,x++] ;-> forth.internal.C-LIT
               1709 e07a  jmp  y,$7a
-              170a dc16  st   $16,[y,x++]
-              170b dcc6  st   $c6,[y,x++] ;-> forth.core.XOR
-              170c e07a  jmp  y,$7a
-              170d dc15  st   $15,[y,x++]
-              170e dcb4  st   $b4,[y,x++] ;-> forth.core.0<
-              170f e07a  jmp  y,$7a
-              1710 dc16  st   $16,[y,x++]
-              1711 dc04  st   $04,[y,x++] ;-> forth.internal.rom-mode.?BRANCH
-              1712 e07a  jmp  y,$7a
-              1713 dc15  st   $15,[y,x++]
-              1714 fc22  bra  .thread_label#1
-              1715 0011  ld   $11
-              1716 dc2c  st   $2c,[y,x++] ;-> forth.core.SWAP
+              170a dc14  st   $14,[y,x++]
+              170b dc00  st   $00,[y,x++] ;0
+              170c 1030  ld   $30,x       ;X <- W
+              170d dc2c  st   $2c,[y,x++] ;-> forth.core.SWAP
+              170e e07a  jmp  y,$7a
+              170f dc15  st   $15,[y,x++]
+              1710 dccb  st   $cb,[y,x++] ;-> forth.core.-
+              1711 e07a  jmp  y,$7a
+              1712 dc16  st   $16,[y,x++]
+              1713 dce5  st   $e5,[y,x++] ;-> forth.core.0<
+              1714 e07a  jmp  y,$7a
+              1715 dc16  st   $16,[y,x++]
+              1716 dc52  st   $52,[y,x++] ;-> forth.core.EXIT
               1717 e07a  jmp  y,$7a
-              1718 dc15  st   $15,[y,x++]
-              1719 dc1e  st   $1e,[y,x++] ;-> forth.core.DROP
-              171a e07a  jmp  y,$7a
-              171b dc15  st   $15,[y,x++]
-              171c dcb4  st   $b4,[y,x++] ;-> forth.core.0<
-              171d e07a  jmp  y,$7a
-              171e dc16  st   $16,[y,x++]
-              171f dc52  st   $52,[y,x++] ;-> forth.core.EXIT
-              1720 e07a  jmp  y,$7a
-              1721 dc14  st   $14,[y,x++]
+              1718 dc14  st   $14,[y,x++]
+forth.core.U<:
+              1719 80f6  adda $f6
+              171a 1413  ld   $13,y
+              171b e023  jmp  y,$23
+              171c 147f  ld   $7f,y
+              171d dc04  st   $04,[y,x++] ;-> forth.core.2DUP
+              171e e07a  jmp  y,$7a
+              171f dc16  st   $16,[y,x++]
+              1720 dcc6  st   $c6,[y,x++] ;-> forth.core.XOR
+              1721 e07a  jmp  y,$7a
+              1722 dc15  st   $15,[y,x++]
+              1723 dce5  st   $e5,[y,x++] ;-> forth.core.0<
+              1724 e07a  jmp  y,$7a
+              1725 dc16  st   $16,[y,x++]
+              1726 dc04  st   $04,[y,x++] ;-> forth.internal.rom-mode.?BRANCH
+              1727 e07a  jmp  y,$7a
+              1728 dc15  st   $15,[y,x++]
+              1729 fc37  bra  .thread_label#1
+              172a 0011  ld   $11
+              172b dc2c  st   $2c,[y,x++] ;-> forth.core.SWAP
+              172c e07a  jmp  y,$7a
+              172d dc15  st   $15,[y,x++]
+              172e dc1e  st   $1e,[y,x++] ;-> forth.core.DROP
+              172f e07a  jmp  y,$7a
+              1730 dc15  st   $15,[y,x++]
+              1731 dce5  st   $e5,[y,x++] ;-> forth.core.0<
+              1732 e07a  jmp  y,$7a
+              1733 dc16  st   $16,[y,x++]
+              1734 dc52  st   $52,[y,x++] ;-> forth.core.EXIT
+              1735 e07a  jmp  y,$7a
+              1736 dc14  st   $14,[y,x++]
 .thread_label#1:
-              1722 dc9a  st   $9a,[y,x++] ;-> forth.core.-
-              1723 e07a  jmp  y,$7a
-              1724 dc16  st   $16,[y,x++]
-              1725 dcb4  st   $b4,[y,x++] ;-> forth.core.0<
-              1726 e07a  jmp  y,$7a
-              1727 dc16  st   $16,[y,x++]
-              1728 dc52  st   $52,[y,x++] ;-> forth.core.EXIT
-              1729 e07a  jmp  y,$7a
-              172a dc14  st   $14,[y,x++]
-forth.core.<: 172b 80f6  adda $f6
-              172c 1413  ld   $13,y
-              172d e023  jmp  y,$23
-              172e 147f  ld   $7f,y
-              172f dc04  st   $04,[y,x++] ;-> forth.core.2DUP
-              1730 e07a  jmp  y,$7a
-              1731 dc16  st   $16,[y,x++]
-              1732 dcc6  st   $c6,[y,x++] ;-> forth.core.XOR
-              1733 e07a  jmp  y,$7a
-              1734 dc15  st   $15,[y,x++]
-              1735 dcb4  st   $b4,[y,x++] ;-> forth.core.0<
-              1736 e07a  jmp  y,$7a
-              1737 dc16  st   $16,[y,x++]
-              1738 dc04  st   $04,[y,x++] ;-> forth.internal.rom-mode.?BRANCH
-              1739 e07a  jmp  y,$7a
-              173a dc15  st   $15,[y,x++]
-              173b fc46  bra  .thread_label#2
-              173c 000e  ld   $0e
-              173d dc1e  st   $1e,[y,x++] ;-> forth.core.DROP
+              1737 dccb  st   $cb,[y,x++] ;-> forth.core.-
+              1738 e07a  jmp  y,$7a
+              1739 dc16  st   $16,[y,x++]
+              173a dce5  st   $e5,[y,x++] ;-> forth.core.0<
+              173b e07a  jmp  y,$7a
+              173c dc16  st   $16,[y,x++]
+              173d dc52  st   $52,[y,x++] ;-> forth.core.EXIT
               173e e07a  jmp  y,$7a
-              173f dc15  st   $15,[y,x++]
-              1740 dcb4  st   $b4,[y,x++] ;-> forth.core.0<
-              1741 e07a  jmp  y,$7a
-              1742 dc16  st   $16,[y,x++]
-              1743 dc52  st   $52,[y,x++] ;-> forth.core.EXIT
-              1744 e07a  jmp  y,$7a
-              1745 dc14  st   $14,[y,x++]
+              173f dc14  st   $14,[y,x++]
+forth.core.<: 1740 80f6  adda $f6
+              1741 1413  ld   $13,y
+              1742 e023  jmp  y,$23
+              1743 147f  ld   $7f,y
+              1744 dc04  st   $04,[y,x++] ;-> forth.core.2DUP
+              1745 e07a  jmp  y,$7a
+              1746 dc16  st   $16,[y,x++]
+              1747 dcc6  st   $c6,[y,x++] ;-> forth.core.XOR
+              1748 e07a  jmp  y,$7a
+              1749 dc15  st   $15,[y,x++]
+              174a dce5  st   $e5,[y,x++] ;-> forth.core.0<
+              174b e07a  jmp  y,$7a
+              174c dc16  st   $16,[y,x++]
+              174d dc04  st   $04,[y,x++] ;-> forth.internal.rom-mode.?BRANCH
+              174e e07a  jmp  y,$7a
+              174f dc15  st   $15,[y,x++]
+              1750 fc5b  bra  .thread_label#2
+              1751 000e  ld   $0e
+              1752 dc1e  st   $1e,[y,x++] ;-> forth.core.DROP
+              1753 e07a  jmp  y,$7a
+              1754 dc15  st   $15,[y,x++]
+              1755 dce5  st   $e5,[y,x++] ;-> forth.core.0<
+              1756 e07a  jmp  y,$7a
+              1757 dc16  st   $16,[y,x++]
+              1758 dc52  st   $52,[y,x++] ;-> forth.core.EXIT
+              1759 e07a  jmp  y,$7a
+              175a dc14  st   $14,[y,x++]
 .thread_label#2:
-              1746 dc9a  st   $9a,[y,x++] ;-> forth.core.-
-              1747 e07a  jmp  y,$7a
-              1748 dc16  st   $16,[y,x++]
-              1749 dcb4  st   $b4,[y,x++] ;-> forth.core.0<
-              174a e07a  jmp  y,$7a
-              174b dc16  st   $16,[y,x++]
-              174c dc52  st   $52,[y,x++] ;-> forth.core.EXIT
-              174d e07a  jmp  y,$7a
-              174e dc14  st   $14,[y,x++]
-forth.core.>: 174f 80f6  adda $f6
-              1750 1413  ld   $13,y
-              1751 e023  jmp  y,$23
-              1752 147f  ld   $7f,y
-              1753 dc2c  st   $2c,[y,x++] ;-> forth.core.SWAP
-              1754 e07a  jmp  y,$7a
-              1755 dc15  st   $15,[y,x++]
-              1756 dc2b  st   $2b,[y,x++] ;-> forth.core.<
-              1757 e07a  jmp  y,$7a
-              1758 dc17  st   $17,[y,x++]
-              1759 dc52  st   $52,[y,x++] ;-> forth.core.EXIT
-              175a e07a  jmp  y,$7a
-              175b dc14  st   $14,[y,x++]
+              175b dccb  st   $cb,[y,x++] ;-> forth.core.-
+              175c e07a  jmp  y,$7a
+              175d dc16  st   $16,[y,x++]
+              175e dce5  st   $e5,[y,x++] ;-> forth.core.0<
+              175f e07a  jmp  y,$7a
+              1760 dc16  st   $16,[y,x++]
+              1761 dc52  st   $52,[y,x++] ;-> forth.core.EXIT
+              1762 e07a  jmp  y,$7a
+              1763 dc14  st   $14,[y,x++]
+forth.core.>: 1764 80f6  adda $f6
+              1765 1413  ld   $13,y
+              1766 e023  jmp  y,$23
+              1767 147f  ld   $7f,y
+              1768 dc2c  st   $2c,[y,x++] ;-> forth.core.SWAP
+              1769 e07a  jmp  y,$7a
+              176a dc15  st   $15,[y,x++]
+              176b dc40  st   $40,[y,x++] ;-> forth.core.<
+              176c e07a  jmp  y,$7a
+              176d dc17  st   $17,[y,x++]
+              176e dc52  st   $52,[y,x++] ;-> forth.core.EXIT
+              176f e07a  jmp  y,$7a
+              1770 dc14  st   $14,[y,x++]
 forth.core.ext.U>:
-              175c 80f6  adda $f6
-              175d 1413  ld   $13,y
-              175e e023  jmp  y,$23
-              175f 147f  ld   $7f,y
-              1760 dc2c  st   $2c,[y,x++] ;-> forth.core.SWAP
-              1761 e07a  jmp  y,$7a
-              1762 dc15  st   $15,[y,x++]
-              1763 dc04  st   $04,[y,x++] ;-> forth.core.U<
-              1764 e07a  jmp  y,$7a
-              1765 dc17  st   $17,[y,x++]
-              1766 dc52  st   $52,[y,x++] ;-> forth.core.EXIT
-              1767 e07a  jmp  y,$7a
-              1768 dc14  st   $14,[y,x++]
-forth.core.ABS:
-              1769 80f6  adda $f6
-              176a 1413  ld   $13,y
-              176b e023  jmp  y,$23
-              176c 147f  ld   $7f,y
-              176d dc4c  st   $4c,[y,x++] ;-> forth.core.DUP
-              176e e07a  jmp  y,$7a
-              176f dc15  st   $15,[y,x++]
-              1770 dcb4  st   $b4,[y,x++] ;-> forth.core.0<
-              1771 e07a  jmp  y,$7a
-              1772 dc16  st   $16,[y,x++]
-              1773 dc04  st   $04,[y,x++] ;-> forth.internal.rom-mode.?BRANCH
-              1774 e07a  jmp  y,$7a
-              1775 dc15  st   $15,[y,x++]
-              1776 fc7b  bra  .thread_label#3
-              1777 0008  ld   $08
-              1778 dc8d  st   $8d,[y,x++] ;-> forth.core.NEGATE
+              1771 80f6  adda $f6
+              1772 1413  ld   $13,y
+              1773 e023  jmp  y,$23
+              1774 147f  ld   $7f,y
+              1775 dc2c  st   $2c,[y,x++] ;-> forth.core.SWAP
+              1776 e07a  jmp  y,$7a
+              1777 dc15  st   $15,[y,x++]
+              1778 dc19  st   $19,[y,x++] ;-> forth.core.U<
               1779 e07a  jmp  y,$7a
-              177a dc16  st   $16,[y,x++]
-.thread_label#3:
+              177a dc17  st   $17,[y,x++]
               177b dc52  st   $52,[y,x++] ;-> forth.core.EXIT
               177c e07a  jmp  y,$7a
               177d dc14  st   $14,[y,x++]
-forth.core.ALIGNED:
+forth.core.ABS:
               177e 80f6  adda $f6
               177f 1413  ld   $13,y
               1780 e023  jmp  y,$23
@@ -7811,45 +7837,94 @@ forth.core.ALIGNED:
               1782 dc4c  st   $4c,[y,x++] ;-> forth.core.DUP
               1783 e07a  jmp  y,$7a
               1784 dc15  st   $15,[y,x++]
-              1785 dcdf  st   $df,[y,x++] ;-> forth.internal.C-LIT
+              1785 dce5  st   $e5,[y,x++] ;-> forth.core.0<
               1786 e07a  jmp  y,$7a
-              1787 dc14  st   $14,[y,x++]
-              1788 dc01  st   $01,[y,x++] ;1
-              1789 1030  ld   $30,x       ;X <- W
-              178a dcc0  st   $c0,[y,x++] ;-> forth.core.AND
-              178b e07a  jmp  y,$7a
-              178c dc15  st   $15,[y,x++]
-              178d dc04  st   $04,[y,x++] ;-> forth.internal.rom-mode.?BRANCH
+              1787 dc16  st   $16,[y,x++]
+              1788 dc04  st   $04,[y,x++] ;-> forth.internal.rom-mode.?BRANCH
+              1789 e07a  jmp  y,$7a
+              178a dc15  st   $15,[y,x++]
+              178b fc90  bra  .thread_label#3
+              178c 0008  ld   $08
+              178d dcbe  st   $be,[y,x++] ;-> forth.core.NEGATE
               178e e07a  jmp  y,$7a
-              178f dc15  st   $15,[y,x++]
-              1790 fc95  bra  .thread_label#4
-              1791 0008  ld   $08
-              1792 dc9c  st   $9c,[y,x++] ;-> forth.core.1+
-              1793 e07a  jmp  y,$7a
-              1794 dc14  st   $14,[y,x++]
+              178f dc16  st   $16,[y,x++]
+.thread_label#3:
+              1790 dc52  st   $52,[y,x++] ;-> forth.core.EXIT
+              1791 e07a  jmp  y,$7a
+              1792 dc14  st   $14,[y,x++]
+forth.core.ALIGNED:
+              1793 80f6  adda $f6
+              1794 1413  ld   $13,y
+              1795 e023  jmp  y,$23
+              1796 147f  ld   $7f,y
+              1797 dc4c  st   $4c,[y,x++] ;-> forth.core.DUP
+              1798 e07a  jmp  y,$7a
+              1799 dc15  st   $15,[y,x++]
+              179a dcdf  st   $df,[y,x++] ;-> forth.internal.C-LIT
+              179b e07a  jmp  y,$7a
+              179c dc14  st   $14,[y,x++]
+              179d dc01  st   $01,[y,x++] ;1
+              179e 1030  ld   $30,x       ;X <- W
+              179f dcc0  st   $c0,[y,x++] ;-> forth.core.AND
+              17a0 e07a  jmp  y,$7a
+              17a1 dc15  st   $15,[y,x++]
+              17a2 dc04  st   $04,[y,x++] ;-> forth.internal.rom-mode.?BRANCH
+              17a3 e07a  jmp  y,$7a
+              17a4 dc15  st   $15,[y,x++]
+              17a5 fcaa  bra  .thread_label#4
+              17a6 0008  ld   $08
+              17a7 dc9c  st   $9c,[y,x++] ;-> forth.core.1+
+              17a8 e07a  jmp  y,$7a
+              17a9 dc14  st   $14,[y,x++]
 .thread_label#4:
-              1795 dc52  st   $52,[y,x++] ;-> forth.core.EXIT
-              1796 e07a  jmp  y,$7a
-              1797 dc14  st   $14,[y,x++]
+              17aa dc52  st   $52,[y,x++] ;-> forth.core.EXIT
+              17ab e07a  jmp  y,$7a
+              17ac dc14  st   $14,[y,x++]
 forth.core.BL:
-              1798 80f6  adda $f6
-              1799 1413  ld   $13,y
-              179a e023  jmp  y,$23
-              179b 147f  ld   $7f,y
-              179c dcdf  st   $df,[y,x++] ;-> forth.internal.C-LIT
-              179d e07a  jmp  y,$7a
-              179e dc14  st   $14,[y,x++]
-              179f dc20  st   $20,[y,x++] ;32
-              17a0 1030  ld   $30,x       ;X <- W
-              17a1 dc52  st   $52,[y,x++] ;-> forth.core.EXIT
-              17a2 e07a  jmp  y,$7a
-              17a3 dc14  st   $14,[y,x++]
+              17ad 80f6  adda $f6
+              17ae 1413  ld   $13,y
+              17af e023  jmp  y,$23
+              17b0 147f  ld   $7f,y
+              17b1 dcdf  st   $df,[y,x++] ;-> forth.internal.C-LIT
+              17b2 e07a  jmp  y,$7a
+              17b3 dc14  st   $14,[y,x++]
+              17b4 dc20  st   $20,[y,x++] ;32
+              17b5 1030  ld   $30,x       ;X <- W
+              17b6 dc52  st   $52,[y,x++] ;-> forth.core.EXIT
+              17b7 e07a  jmp  y,$7a
+              17b8 dc14  st   $14,[y,x++]
+forth.core.ABS:
+              17b9 80f6  adda $f6
+              17ba 1413  ld   $13,y
+              17bb e023  jmp  y,$23
+              17bc 147f  ld   $7f,y
+              17bd dc4c  st   $4c,[y,x++] ;-> forth.core.DUP
+              17be e07a  jmp  y,$7a
+              17bf dc15  st   $15,[y,x++]
+              17c0 dce5  st   $e5,[y,x++] ;-> forth.core.0<
+              17c1 e07a  jmp  y,$7a
+              17c2 dc16  st   $16,[y,x++]
+              17c3 dc04  st   $04,[y,x++] ;-> forth.internal.rom-mode.?BRANCH
+              17c4 e07a  jmp  y,$7a
+              17c5 dc15  st   $15,[y,x++]
+              17c6 fccb  bra  .thread_label#5
+              17c7 0008  ld   $08
+              17c8 dcbe  st   $be,[y,x++] ;-> forth.core.NEGATE
+              17c9 e07a  jmp  y,$7a
+              17ca dc16  st   $16,[y,x++]
+.thread_label#5:
+              17cb dc52  st   $52,[y,x++] ;-> forth.core.EXIT
+              17cc e07a  jmp  y,$7a
+              17cd dc14  st   $14,[y,x++]
+              17ce dc52  st   $52,[y,x++] ;-> forth.core.EXIT
+              17cf e07a  jmp  y,$7a
+              17d0 dc14  st   $14,[y,x++]
                                           5361  # --- Page boundary ---
                                           5362  start_of_forth_word_space = pc()  # Variable used in unit tests to locate test data
-              17a4 0200  nop              5363  align(0x100,0x100)
-              17a5 0200  nop
-              17a6 0200  nop
-              * 91 times
+              17d1 0200  nop              5363  align(0x100,0x100)
+              17d2 0200  nop
+              17d3 0200  nop
+              * 46 times
               17ff 0200  nop              5363  align(0x100,0x100)
                                           5364
                                           5365  #-----------------------------------------------------------------------

@@ -82,6 +82,8 @@ def emit_kernel_words():
     _stackmanipulation.two_dup()
     _arithmetic.add()
     _arithmetic.left_shift()
+    _memory.at()
+    _memory.set()
     from . import _compiler
 
     _compiler.compile_file("core.f")

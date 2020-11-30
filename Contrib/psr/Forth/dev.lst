@@ -2248,7 +2248,7 @@ vRTI#15:      04f0 01fc  ld   [$fc]       2294  ld([0xfc])                      
                                           2339  shiftTable = pc()
                                           2340
                                           2341  for ix in range(255):
-                                          2342    for n in range(1,7): # Find first zero
+                                          2342    for n in range(1,9): # Find first zero
                                           2343      if ~ix & (1 << (n-1)):
                                           2344        break
                                           2345    pattern = ['x' if i<n else '1' if ix&(1<<i) else '0' for i in range(8)]
@@ -2316,7 +2316,7 @@ shiftTable:   0500 0000  ld   $00         ;0b0000000x >> 1
               053c 001e  ld   $1e         ;0b0011110x >> 1
               053d 000f  ld   $0f         ;0b001111xx >> 2
               053e 001f  ld   $1f         ;0b0011111x >> 1
-              053f 0000  ld   $00         ;0b00xxxxxx >> 6
+              053f 0000  ld   $00         ;0b0xxxxxxx >> 7
               0540 0020  ld   $20         ;0b0100000x >> 1
               0541 0010  ld   $10         ;0b010000xx >> 2
               0542 0021  ld   $21         ;0b0100001x >> 1
@@ -2380,7 +2380,7 @@ shiftTable:   0500 0000  ld   $00         ;0b0000000x >> 1
               057c 003e  ld   $3e         ;0b0111110x >> 1
               057d 001f  ld   $1f         ;0b011111xx >> 2
               057e 003f  ld   $3f         ;0b0111111x >> 1
-              057f 0001  ld   $01         ;0b01xxxxxx >> 6
+              057f 0000  ld   $00         ;0bxxxxxxxx >> 8
               0580 0040  ld   $40         ;0b1000000x >> 1
               0581 0020  ld   $20         ;0b100000xx >> 2
               0582 0041  ld   $41         ;0b1000001x >> 1
@@ -2444,7 +2444,7 @@ shiftTable:   0500 0000  ld   $00         ;0b0000000x >> 1
               05bc 005e  ld   $5e         ;0b1011110x >> 1
               05bd 002f  ld   $2f         ;0b101111xx >> 2
               05be 005f  ld   $5f         ;0b1011111x >> 1
-              05bf 0002  ld   $02         ;0b10xxxxxx >> 6
+              05bf 0001  ld   $01         ;0b1xxxxxxx >> 7
               05c0 0060  ld   $60         ;0b1100000x >> 1
               05c1 0030  ld   $30         ;0b110000xx >> 2
               05c2 0061  ld   $61         ;0b1100001x >> 1

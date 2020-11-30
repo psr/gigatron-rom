@@ -2339,7 +2339,7 @@ label('shiftTable')
 shiftTable = pc()
 
 for ix in range(255):
-  for n in range(1,7): # Find first zero
+  for n in range(1,9): # Find first zero
     if ~ix & (1 << (n-1)):
       break
   pattern = ['x' if i<n else '1' if ix&(1<<i) else '0' for i in range(8)]

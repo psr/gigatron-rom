@@ -64,7 +64,7 @@ def bootstrap_compiler(input, dictionary):
         if token == ";":
             assert (
                 not control_flow
-            ), f"Ended definitition when control flow stack was not empty"
+            ), "Ended definitition when control flow stack was not empty"
             definition.append(ExecutionToken("EXIT", EXIT))
             defining = False
             dictionary.define(name, ThreadExecutionToken(name, docol, definition))

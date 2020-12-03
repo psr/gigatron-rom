@@ -126,7 +126,8 @@ def test_equals(emulator, data_stack, data_stack_depth, tos, nos):
 
 
 @given(
-    data_stack_depth=data_stack_depths(with_room_for_values=1), tos=numbers,
+    data_stack_depth=data_stack_depths(with_room_for_values=1),
+    tos=numbers,
 )
 def test_zero_lessthan(emulator, data_stack, data_stack_depth, tos):
     # Arrange
@@ -140,7 +141,8 @@ def test_zero_lessthan(emulator, data_stack, data_stack_depth, tos):
 
 
 @given(
-    data_stack_depth=data_stack_depths(with_room_for_values=1), tos=numbers,
+    data_stack_depth=data_stack_depths(with_room_for_values=1),
+    tos=numbers,
 )
 def test_zero_greaterthan(emulator, data_stack, data_stack_depth, tos):
     # Arrange

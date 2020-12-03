@@ -7,7 +7,8 @@ from utilities import do_test_word
 
 
 @given(
-    data_stack_depth=data_stack_depths(with_room_for_values=1), data=numbers,
+    data_stack_depth=data_stack_depths(with_room_for_values=1),
+    data=numbers,
 )
 @example(data_stack_depth=0, data=(1 << 15) - 1)
 def test_increment(emulator, data_stack, data_stack_depth, data):
@@ -22,7 +23,8 @@ def test_increment(emulator, data_stack, data_stack_depth, data):
 
 
 @given(
-    data_stack_depth=data_stack_depths(with_room_for_values=1), data=numbers,
+    data_stack_depth=data_stack_depths(with_room_for_values=1),
+    data=numbers,
 )
 @example(data_stack_depth=0, data=-(1 << 15))
 def test_decrement(emulator, data_stack, data_stack_depth, data):
@@ -37,7 +39,8 @@ def test_decrement(emulator, data_stack, data_stack_depth, data):
 
 
 @given(
-    data_stack_depth=data_stack_depths(with_room_for_values=1), data=numbers,
+    data_stack_depth=data_stack_depths(with_room_for_values=1),
+    data=numbers,
 )
 @example(data_stack_depth=0, data=-(1 << 15))
 def test_zero_equal(emulator, data_stack, data_stack_depth, data):
@@ -80,7 +83,8 @@ test_and = make_binary_bitwise_operator_test("AND", operator.and_)
 
 
 @given(
-    data_stack_depth=data_stack_depths(with_room_for_values=1), tos=numbers,
+    data_stack_depth=data_stack_depths(with_room_for_values=1),
+    tos=numbers,
 )
 def test_invert(emulator, data_stack, data_stack_depth, tos):
     # Arrange

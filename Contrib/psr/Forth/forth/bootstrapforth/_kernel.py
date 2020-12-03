@@ -12,8 +12,7 @@ kernel.system_variable("BASE", "number_base")
 
 
 def _make_unary_operator(name, fn):
-    """Build a Forth word (n -- n) by applying a Python operator
-    """
+    """Build a Forth word (n -- n) by applying a Python operator"""
 
     def do_operator(state):
         stack = state.data_stack
@@ -28,8 +27,7 @@ _make_unary_operator("0=", operator.not_)
 
 
 def _make_binary_operator(name, fn):
-    """Build a Forth word (n n -- n) by applying a Python operator
-    """
+    """Build a Forth word (n n -- n) by applying a Python operator"""
 
     def do_operator(state):
         stack = state.data_stack

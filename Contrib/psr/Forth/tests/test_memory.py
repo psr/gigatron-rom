@@ -1,6 +1,7 @@
 """"Test for memory access words"""
-from gtemu import RAM
 from hypothesis import given
+
+from gtemu import RAM
 from strategies import (
     addresses,
     aligned_addresses,

@@ -171,8 +171,7 @@ def restore_mode():
 
 
 def exit():
-    """Word to exit from a thread
-    """
+    """Word to exit from a thread"""
     label("forth.core.EXIT")
     adda(-add_cost_of_next(cost_of_exit) / 2)
     ld(return_stack_page, Y)

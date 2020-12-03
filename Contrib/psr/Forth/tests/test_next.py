@@ -37,7 +37,9 @@ parity_must_match = {
         "cost_of_failfast_next2",
         "cost_of_failfast_next1_reenter",
     },
-    "cost_of_failed_next1": {"cost_of_exit_from_failed_test",},
+    "cost_of_failed_next1": {
+        "cost_of_exit_from_failed_test",
+    },
 }
 
 
@@ -63,7 +65,10 @@ def test_parity_matches(from_, to):
 
 parity_depends = {
     ("cost_of_next2_failure", "cost_of_exit_from_next2"),
-    ("cost_of_next1_reenter_failure", "cost_of_exit_from_next1_reenter",),
+    (
+        "cost_of_next1_reenter_failure",
+        "cost_of_exit_from_next1_reenter",
+    ),
 }
 
 _parity_match_cases = [

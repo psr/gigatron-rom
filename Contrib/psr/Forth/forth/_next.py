@@ -40,8 +40,7 @@ INBOUND_TICK_CORRECTION = maxTicks * 2
 
 
 def next1(vTicks):
-    """Routine to make continue or abort decisions, and dispatch to the next word
-    """
+    """Routine to make continue or abort decisions, and dispatch to the next word"""
     # Invariant - on entry the vTicks variable and the accumulator both hold
     # an accurate number of cycles until we must be back in the display loop,
     # starting from the first instruction of this routine.

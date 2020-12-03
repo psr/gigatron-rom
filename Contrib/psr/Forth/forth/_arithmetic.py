@@ -1,7 +1,6 @@
 """Words for performing arithmetic"""
 
 from asm import (
-    AC,
     C,
     X,
     Xpp,
@@ -128,8 +127,7 @@ cost_of_zero_equal = 13
 
 
 def bitwise():
-    """Common implementation for all of the bitwise operators
-    """
+    """Common implementation for all of the bitwise operators"""
     for name, target in [("AND", ".and"), ("OR", ".or"), ("XOR", ".xor")]:
         label(f"forth.core.{name}")
         adda(-add_cost_of_next(cost_of_binary_bitwise) / 2)  # 1
@@ -158,8 +156,8 @@ def bitwise():
     bra([tmp1])  # 24
     bra(".bitwise-done")  # 25
     # 26
-    for l, op in [(".and", anda), (".or", ora), (".xor", xora)]:
-        label(l)
+    for label_, op in [(".and", anda), (".or", ora), (".xor", xora)]:
+        label(label_)
         op([tmp2])
         op([tmp3])
     label(".bitwise-done")
@@ -265,31 +263,3 @@ def add():
 
 
 cost_of_add = 24
-
-
-def left_shift():
-    label("forth.core.2*")
-    label("forth.core.CELLS")
-    adda(-add_cost_of_next(cost_of_left_shift) / 2)  # 1
-    ld(data_stack_page, Y)
-    ld([data_stack_pointer], X)
-    C("Load low-byte")
-    ld([X])
-    anda(0b1000_0000, X)  # 5
-    C("Calculate bit to shift in to the high-byte")
-    ld([X])
-    st([tmp0])
-    ld([data_stack_pointer], X)
-    C("Reload and left-shift")
-    ld([X])
-    adda(AC)  # 10
-    st([Y, Xpp])
-    ld([Y, X])
-    C("Load high byte and left-shift")
-    adda(AC)
-    adda([tmp0])
-    st([Y, X])  # 15
-    NEXT(cost_of_left_shift)
-
-
-cost_of_left_shift = 15

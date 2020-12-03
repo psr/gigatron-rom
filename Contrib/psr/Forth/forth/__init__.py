@@ -9,6 +9,7 @@ from . import (
     _literal,
     _memory,
     _next,
+    _shift,
     _stackmanipulation,
 )
 from ._next import move_ip
@@ -81,7 +82,7 @@ def emit_kernel_words():
     _start_page()
     _stackmanipulation.two_dup()
     _arithmetic.add()
-    _arithmetic.left_shift()
+    _shift.two_times()
     _memory.at()
     _memory.set()
     from . import _compiler

@@ -78,11 +78,11 @@ def emit_kernel_words():
     # This can probably be removed later
     label("forth.NOP")
     _docol_exit.make_thread()
-
+    _start_page()
+    _shift.two_times()
     _start_page()
     _stackmanipulation.two_dup()
     _arithmetic.add()
-    _shift.two_times()
     _memory.at()
     _memory.set()
     from . import _compiler

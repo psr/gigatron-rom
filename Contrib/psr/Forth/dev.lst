@@ -7438,15 +7438,15 @@ forth.NOP:    15f4 80f3  adda $f3
               15fe dc14  st   $14,[y,x++]
               15ff 0200  nop
 forth.restart-or-quit:
-              1600 fd30  bra  [$30]
-              1601 f802  ble  .quit
-.quit:        1602 1413  ld   $13,y       ;jmp forth.exit.from-failed-test
-              1603 e01c  jmp  y,$1c
+              1600 f803  ble  $1603
+              1601 1400  ld   $00,y
+              1602 fd30  bra  [$30]
+              1603 111c  ld   [$1c],x
+.quit:        1604 1413  ld   $13,y       ;jmp forth.exit.from-failed-test
+              1605 e01c  jmp  y,$1c
 forth.core.2*:
 forth.core.CELLS:
-              1604 80f7  adda $f7
-              1605 1400  ld   $00,y
-              1606 111c  ld   [$1c],x     ;Load low-byte
+              1606 80f7  adda $f7         ;Load low-byte
               1607 0500  ld   [x]
               1608 3080  anda $80,x       ;Calculate bit to shift in to the high-byte
               1609 0500  ld   [x]
@@ -7464,8 +7464,8 @@ forth.core.CELLS:
               1615 00f7  ld   $f7
 forth.core.LSHIFT:
               1616 80f1  adda $f1
-              1617 fc7f  bra  forth.core.shift.entry
-              1618 1400  ld   $00,y
+              1617 fc77  bra  forth.core.shift.entry
+              1618 011c  ld   [$1c]
 forth.core.LSHIFT.n==8:
               1619 80fa  adda $fa
               161a 1400  ld   $00,y
@@ -7481,219 +7481,242 @@ forth.core.LSHIFT.n==8:
               1624 00fa  ld   $fa
 forth.core.LSHIFT.n>8:
               1625 80f0  adda $f0
-              1626 1400  ld   $00,y
-              1627 111c  ld   [$1c],x
-              1628 002c  ld   $2c
-              1629 c228  st   [$28]
-              162a fcad  bra  left-shift-by-n
-              162b 0125  ld   [$25]
+              1626 002a  ld   $2a
+              1627 c228  st   [$28]
+              1628 fca3  bra  left-shift-by-n
+              1629 0125  ld   [$25]
 forth.core.LSHIFT.n>8.continuation:
-              162c de00  st   [y,x++]
-              162d de00  st   [y,x++]
-              162e 111c  ld   [$1c],x
-              162f 0000  ld   $00
-              1630 de00  st   [y,x++]
-              1631 1413  ld   $13,y       ;NEXT
-              1632 e00f  jmp  y,$0f
-              1633 00f0  ld   $f0
+              162a de00  st   [y,x++]
+              162b de00  st   [y,x++]
+              162c 111c  ld   [$1c],x
+              162d 0000  ld   $00
+              162e de00  st   [y,x++]
+              162f 1413  ld   $13,y       ;NEXT
+              1630 e00f  jmp  y,$0f
+              1631 00f0  ld   $f0
 forth.core.LSHIFT.n<8:
-              1634 80d7  adda $d7
-              1635 1400  ld   $00,y
-              1636 111c  ld   [$1c],x
-              1637 003b  ld   $3b
-              1638 c228  st   [$28]
-              1639 fcc3  bra  right-shift-by-n
-              163a 0126  ld   [$26]
+              1632 80d7  adda $d7
+              1633 0037  ld   $37
+              1634 c228  st   [$28]
+              1635 fcb9  bra  right-shift-by-n
+              1636 0126  ld   [$26]
 forth.core.LSHIFT.n<8.continuation1:
-              163b c227  st   [$27]
-              163c 0040  ld   $40
-              163d c228  st   [$28]
-              163e fcad  bra  left-shift-by-n
-              163f 0125  ld   [$25]
+              1637 c227  st   [$27]
+              1638 003c  ld   $3c
+              1639 c228  st   [$28]
+              163a fca3  bra  left-shift-by-n
+              163b 0125  ld   [$25]
 forth.core.LSHIFT.n<8.continuation2:
-              1640 de00  st   [y,x++]
-              1641 0045  ld   $45
-              1642 c228  st   [$28]
-              1643 fcad  bra  left-shift-by-n
-              1644 0125  ld   [$25]
+              163c de00  st   [y,x++]
+              163d 0041  ld   $41
+              163e c228  st   [$28]
+              163f fca3  bra  left-shift-by-n
+              1640 0125  ld   [$25]
 forth.core.LSHIFT.n<8.continuation3:
-              1645 4127  ora  [$27]
-              1646 ce00  st   [y,x]
-              1647 1413  ld   $13,y       ;NEXT
-              1648 e00e  jmp  y,$0e
-              1649 00d7  ld   $d7
+              1641 4127  ora  [$27]
+              1642 ce00  st   [y,x]
+              1643 1413  ld   $13,y       ;NEXT
+              1644 e00e  jmp  y,$0e
+              1645 00d7  ld   $d7
 forth.core.RSHIFT:
-              164a 80f1  adda $f1
-              164b fc7f  bra  forth.core.shift.entry
-              164c 1400  ld   $00,y
+              1646 80f1  adda $f1
+              1647 fc77  bra  forth.core.shift.entry
+              1648 011c  ld   [$1c]
 forth.core.RSHIFT.n==8:
-              164d 80fa  adda $fa
-              164e 1400  ld   $00,y
-              164f 111c  ld   [$1c],x
-              1650 de00  st   [y,x++]
-              1651 0d00  ld   [y,x]
-              1652 111c  ld   [$1c],x
-              1653 de00  st   [y,x++]
-              1654 0000  ld   $00
-              1655 ce00  st   [y,x]
-              1656 1413  ld   $13,y       ;NEXT
-              1657 e00f  jmp  y,$0f
-              1658 00fa  ld   $fa
+              1649 80fa  adda $fa
+              164a de00  st   [y,x++]
+              164b 0d00  ld   [y,x]
+              164c 111c  ld   [$1c],x
+              164d de00  st   [y,x++]
+              164e 0000  ld   $00
+              164f ce00  st   [y,x]
+              1650 1413  ld   $13,y       ;NEXT
+              1651 e00f  jmp  y,$0f
+              1652 00fa  ld   $fa
+              1653 0200  nop
+              1654 0200  nop
 forth.core.RSHIFT.n>8:
-              1659 80ec  adda $ec
-              165a 1400  ld   $00,y
-              165b 111c  ld   [$1c],x
-              165c 0060  ld   $60
-              165d c228  st   [$28]
-              165e fcc3  bra  right-shift-by-n
-              165f 0125  ld   [$25]
+              1655 80ec  adda $ec
+              1656 005a  ld   $5a
+              1657 c228  st   [$28]
+              1658 fcb9  bra  right-shift-by-n
+              1659 0125  ld   [$25]
 forth.core.RSHIFT.n>8.continuation:
-              1660 de00  st   [y,x++]
-              1661 de00  st   [y,x++]
-              1662 111c  ld   [$1c],x
-              1663 0000  ld   $00
-              1664 ce00  st   [y,x]
-              1665 1413  ld   $13,y       ;NEXT
-              1666 e00f  jmp  y,$0f
-              1667 00ec  ld   $ec
+              165a de00  st   [y,x++]
+              165b de00  st   [y,x++]
+              165c 111c  ld   [$1c],x
+              165d 0000  ld   $00
+              165e ce00  st   [y,x]
+              165f 1413  ld   $13,y       ;NEXT
+              1660 e00f  jmp  y,$0f
+              1661 00ec  ld   $ec
 forth.core.RSHIFT.n<8:
-              1668 80da  adda $da
-              1669 1400  ld   $00,y
-              166a 111c  ld   [$1c],x
-              166b 006f  ld   $6f
-              166c c228  st   [$28]
-              166d fcc3  bra  right-shift-by-n
-              166e 0125  ld   [$25]
+              1662 80da  adda $da
+              1663 0067  ld   $67
+              1664 c228  st   [$28]
+              1665 fcb9  bra  right-shift-by-n
+              1666 0125  ld   [$25]
 forth.core.RSHIFT.n<8.continuation1:
-              166f de00  st   [y,x++]
-              1670 0074  ld   $74
-              1671 c228  st   [$28]
-              1672 fcad  bra  left-shift-by-n
-              1673 0126  ld   [$26]
+              1667 de00  st   [y,x++]
+              1668 006c  ld   $6c
+              1669 c228  st   [$28]
+              166a fca3  bra  left-shift-by-n
+              166b 0126  ld   [$26]
 forth.core.RSHIFT.n<8.continuation2:
-              1674 111c  ld   [$1c],x
-              1675 4d00  ora  [y,x]
-              1676 de00  st   [y,x++]
-              1677 007b  ld   $7b
-              1678 c228  st   [$28]
-              1679 fcdd  bra  right-shift-by-n.second-time
-              167a 0129  ld   [$29]
+              166c 111c  ld   [$1c],x
+              166d 4d00  ora  [y,x]
+              166e de00  st   [y,x++]
+              166f 0073  ld   $73
+              1670 c228  st   [$28]
+              1671 fcd3  bra  right-shift-by-n.second-time
+              1672 0129  ld   [$29]
 forth.core.RSHIFT.n<8.continuation3:
-              167b ce00  st   [y,x]
-              167c 1413  ld   $13,y       ;NEXT
-              167d e00f  jmp  y,$0f
-              167e 00da  ld   $da
+              1673 ce00  st   [y,x]
+              1674 1413  ld   $13,y       ;NEXT
+              1675 e00f  jmp  y,$0f
+              1676 00da  ld   $da
 forth.core.shift.entry:
-              167f 111c  ld   [$1c],x
-              1680 011c  ld   [$1c]
-              1681 8002  adda $02
-              1682 c21c  st   [$1c]
-              1683 0d00  ld   [y,x]
-              1684 de00  st   [y,x++]
-              1685 c225  st   [$25]
-              1686 4d00  ora  [y,x]
-              1687 f0a3  beq  forth.core.shift.entry.amount-zero
-              1688 00f0  ld   $f0
-              1689 2125  anda [$25]
-              168a 4d00  ora  [y,x]
-              168b eca6  bne  forth.core.shift.entry.amount-gte16
-              168c 0125  ld   [$25]
-              168d a008  suba $08
-              168e e49e  bgt  forth.core.shift.entry.amount-gt8
-              168f f09a  beq  forth.core.shift.entry.amount-eq8
-              1690 c226  st   [$26]
-              1691 0000  ld   $00
-              1692 a125  suba [$25]
-              1693 c225  st   [$25]
-              1694 001e  ld   $1e
-.adjust_W:    1695 8130  adda [$30]
-              1696 c230  st   [$30]
-              1697 1413  ld   $13,y       ;REENTER
-              1698 e005  jmp  y,$05
-              1699 00f1  ld   $f1
+              1677 8002  adda $02
+              1678 c21c  st   [$1c]
+              1679 0d00  ld   [y,x]
+              167a de00  st   [y,x++]
+              167b c225  st   [$25]
+              167c 4d00  ora  [y,x]
+              167d f099  beq  forth.core.shift.entry.amount-zero
+              167e 00f0  ld   $f0
+              167f 2125  anda [$25]
+              1680 4d00  ora  [y,x]
+              1681 ec9c  bne  forth.core.shift.entry.amount-gte16
+              1682 0125  ld   [$25]
+              1683 a008  suba $08
+              1684 e494  bgt  forth.core.shift.entry.amount-gt8
+              1685 f090  beq  forth.core.shift.entry.amount-eq8
+              1686 c226  st   [$26]
+              1687 0000  ld   $00
+              1688 a125  suba [$25]
+              1689 c225  st   [$25]
+              168a 001c  ld   $1c
+.adjust_W:    168b 8130  adda [$30]
+              168c c230  st   [$30]
+              168d 1413  ld   $13,y       ;REENTER
+              168e e005  jmp  y,$05
+              168f 00f1  ld   $f1
 forth.core.shift.entry.amount-eq8:
-              169a 0200  nop
-              169b 0200  nop
-              169c fc95  bra  .adjust_W
-              169d 0003  ld   $03
+              1690 0200  nop
+              1691 0200  nop
+              1692 fc8b  bra  .adjust_W
+              1693 0003  ld   $03
 forth.core.shift.entry.amount-gt8:
-              169e 0008  ld   $08
-              169f a125  suba [$25]
-              16a0 c225  st   [$25]
-              16a1 fc95  bra  .adjust_W
-              16a2 000f  ld   $0f
+              1694 0008  ld   $08
+              1695 a125  suba [$25]
+              1696 c225  st   [$25]
+              1697 fc8b  bra  .adjust_W
+              1698 000f  ld   $0f
 forth.core.shift.entry.amount-zero:
-              16a3 1413  ld   $13,y       ;NEXT
-              16a4 e00f  jmp  y,$0f
-              16a5 00f8  ld   $f8
+              1699 1413  ld   $13,y       ;NEXT
+              169a e00f  jmp  y,$0f
+              169b 00f8  ld   $f8
 forth.core.shift.entry.amount-gte16:
-              16a6 de00  st   [y,x++]
-              16a7 0000  ld   $00
-              16a8 de00  st   [y,x++]
-              16a9 de00  st   [y,x++]
-              16aa 1413  ld   $13,y       ;NEXT
-              16ab e00f  jmp  y,$0f
-              16ac 00f4  ld   $f4
+              169c de00  st   [y,x++]
+              169d 0000  ld   $00
+              169e de00  st   [y,x++]
+              169f de00  st   [y,x++]
+              16a0 1413  ld   $13,y       ;NEXT
+              16a1 e00f  jmp  y,$0f
+              16a2 00f4  ld   $f4
 left-shift-by-n:
-              16ad 80c2  adda $c2
-              16ae c224  st   [$24]
-              16af a0bb  suba $bb
-              16b0 60ff  xora $ff
-              16b1 80ba  adda $ba
-              16b2 fe00  bra  ac
-              16b3 0124  ld   [$24]
-              16b4 0200  nop
-              16b5 0200  nop
-              16b6 0200  nop
+              16a3 80b8  adda $b8
+              16a4 c224  st   [$24]
+              16a5 a0b1  suba $b1
+              16a6 60ff  xora $ff
+              16a7 80b0  adda $b0
+              16a8 fe00  bra  ac
+              16a9 0124  ld   [$24]
+              16aa 0200  nop
+              16ab 0200  nop
+              16ac 0200  nop
               * 5 times
-.end-of-nops: 16b9 fe00  bra  ac
-              16ba 0d00  ld   [y,x]
-              16bb 8200  adda ac
-              16bc 8200  adda ac
-              16bd 8200  adda ac
+.end-of-nops: 16af fe00  bra  ac
+              16b0 0d00  ld   [y,x]
+              16b1 8200  adda ac
+              16b2 8200  adda ac
+              16b3 8200  adda ac
               * 6 times
-              16c1 fd28  bra  [$28]
+              16b7 fd28  bra  [$28]
 .end-of-left-shifts:
-              16c2 8200  adda ac
+              16b8 8200  adda ac
 right-shift-by-n:
-              16c3 c224  st   [$24]
-              16c4 80ce  adda $ce
-              16c5 fe00  bra  ac
-              16c6 fcce  bra  .end-of-set_bits_table
-              16c7 003f  ld   $3f
-              16c8 001f  ld   $1f
-              16c9 000f  ld   $0f
-              16ca 0007  ld   $07
-              16cb 0003  ld   $03
-              16cc 0001  ld   $01
-              16cd 0000  ld   $00
+              16b9 c224  st   [$24]
+              16ba 80c4  adda $c4
+              16bb fe00  bra  ac
+              16bc fcc4  bra  .end-of-set_bits_table
+              16bd 003f  ld   $3f
+              16be 001f  ld   $1f
+              16bf 000f  ld   $0f
+              16c0 0007  ld   $07
+              16c1 0003  ld   $03
+              16c2 0001  ld   $01
+              16c3 0000  ld   $00
 .end-of-set_bits_table:
-              16ce c22a  st   [$2a]
-              16cf 00f6  ld   $f6
-              16d0 c21d  st   [$1d]
-              16d1 0124  ld   [$24]
-              16d2 80dc  adda $dc
-              16d3 fe00  bra  ac
-              16d4 fcdc  bra  .end-of-mask-table
-              16d5 0080  ld   $80
-              16d6 00c0  ld   $c0
-              16d7 00e0  ld   $e0
-              16d8 00f0  ld   $f0
-              16d9 00f8  ld   $f8
-              16da 00fc  ld   $fc
-              16db 00fe  ld   $fe
+              16c4 c22a  st   [$2a]
+              16c5 00f6  ld   $f6
+              16c6 c21d  st   [$1d]
+              16c7 0124  ld   [$24]
+              16c8 80d2  adda $d2
+              16c9 fe00  bra  ac
+              16ca fcd2  bra  .end-of-mask-table
+              16cb 0080  ld   $80
+              16cc 00c0  ld   $c0
+              16cd 00e0  ld   $e0
+              16ce 00f0  ld   $f0
+              16cf 00f8  ld   $f8
+              16d0 00fc  ld   $fc
+              16d1 00fe  ld   $fe
 .end-of-mask-table:
-              16dc c229  st   [$29]
+              16d2 c229  st   [$29]
 right-shift-by-n.second-time:
-              16dd 2d00  anda [y,x]
-              16de 412a  ora  [$2a]
+              16d3 2d00  anda [y,x]
+              16d4 412a  ora  [$2a]
+              16d5 1405  ld   $05,y
+              16d6 e200  jmp  y,ac
+              16d7 fcff  bra  $ff
+forth.core.2/:
+              16d8 80e8  adda $e8
+              16d9 00e2  ld   $e2
+              16da c228  st   [$28]
+              16db 00f6  ld   $f6
+              16dc c21d  st   [$1d]
+forth.core.2/.do-shift:
+              16dd 0d00  ld   [y,x]
+              16de 20fe  anda $fe
               16df 1405  ld   $05,y
               16e0 e200  jmp  y,ac
               16e1 fcff  bra  $ff
-              16e2 0200  nop
-              16e3 0200  nop
-              16e4 0200  nop
-              * 30 times
+forth.core.2/.continuation1:
+              16e2 de00  st   [y,x++]
+              16e3 0d00  ld   [y,x]
+              16e4 2001  anda $01
+              16e5 807f  adda $7f
+              16e6 2080  anda $80
+              16e7 111c  ld   [$1c],x
+              16e8 4d00  ora  [y,x]
+              16e9 de00  st   [y,x++]
+              16ea 00ed  ld   $ed
+              16eb fcdd  bra  forth.core.2/.do-shift
+              16ec c228  st   [$28]
+forth.core.2/.continuation2:
+              16ed ce00  st   [y,x]
+              16ee 8200  adda ac
+              16ef 2080  anda $80
+              16f0 4d00  ora  [y,x]
+              16f1 ce00  st   [y,x]
+              16f2 1413  ld   $13,y       ;NEXT
+              16f3 e00f  jmp  y,$0f
+              16f4 00e8  ld   $e8
+              16f5 0200  nop
+              16f6 0200  nop
+              16f7 0200  nop
+              * 11 times
 forth.restart-or-quit:
               1700 fd30  bra  [$30]
               1701 f802  ble  .quit

@@ -78,8 +78,8 @@ def emit_kernel_words(vtmp):
     # This can probably be removed later
     label("forth.NOP")
     _docol_exit.make_thread()
-    _start_page()
-    _shift.two_times()
+    # Shifts have a special restart or quit trampoline to save space.
+    align(0x100, 0x100)
     _shift.shift(vtmp)
     _start_page()
     _stackmanipulation.two_dup()

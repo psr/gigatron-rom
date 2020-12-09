@@ -117,6 +117,10 @@ class _GigatronStack(object):
         value = self.pop_u16()
         return chr(value)
 
+    def set_x_and_y_registers(self, emulator):
+        emulator.X = self.stack_pointer & 0xFF
+        emulator.Y = self.stack_pointer >> 8
+
 
 @pytest.fixture(scope="module")
 def data_stack(emulator):

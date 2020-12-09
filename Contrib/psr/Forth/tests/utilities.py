@@ -107,7 +107,13 @@ def _get_max_tick_cost_of_current_word(emulator):
     return negate_byte(emulator.AC)
 
 
-def do_test_word(emulator, entrypoint=None, continue_on_reenter=True):
+def do_test_word(
+    emulator,
+    entrypoint=None,
+    *,
+    continue_on_reenter=True,
+    cycles_shifted_to_trampoline=0,
+):
     """Execute a single Forth word, checking the timing related invariants
 
     If continue_on_reenter is True (the default),
@@ -135,7 +141,9 @@ def do_test_word(emulator, entrypoint=None, continue_on_reenter=True):
             f" IP = {get_IP():x}; W = {get_W():x}"
         )
         emulator.next_instruction = entrypoint
-        actual_cycles = emulator.run_for(worst_case_ticks * 2)
+        actual_cycles = emulator.run_for(
+            worst_case_ticks * 2 - cycles_shifted_to_trampoline
+        )
         if emulator.PC == reenter_odd:
             # We've jumped to next1-reenter.odd, but not yet loaded the instruction.
             # This is actually OK.
@@ -144,7 +152,10 @@ def do_test_word(emulator, entrypoint=None, continue_on_reenter=True):
 
     def check_next1_reenter_constraints():
         assert not even(actual_cycles)  # We're at the odd entrypoint
-        assert negate_byte(emulator.AC) * 2 == actual_cycles - 1
+        assert (
+            negate_byte(emulator.AC) * 2
+            == actual_cycles - 1 + cycles_shifted_to_trampoline
+        )
 
     actual_cycles = do_iteration()
     while continue_on_reenter and emulator.next_instruction == reenter_odd:
@@ -166,7 +177,9 @@ def do_test_word(emulator, entrypoint=None, continue_on_reenter=True):
 
     if emulator.next_instruction == next2_even:
         assert even(actual_cycles)
-        assert negate_byte(emulator.AC) * 2 == actual_cycles
+        assert (
+            negate_byte(emulator.AC) * 2 == actual_cycles + cycles_shifted_to_trampoline
+        )
         return
 
     raise AssertionError(

@@ -110,15 +110,3 @@ def test_add(emulator, data_stack, data_stack_depth, tos, nos):
     # Assert
     assert (tos + nos) & 0xFFFF == data_stack.pop_u16()
     assert data_stack_depth == len(data_stack)
-
-
-@given(data_stack_depth=data_stack_depths(with_room_for_values=2), tos=numbers)
-def test_left_shift(emulator, data_stack, data_stack_depth, tos):
-    # Arrange
-    data_stack.set_depth_in_bytes(data_stack_depth)
-    data_stack.push_word(tos)
-    # Act
-    do_test_word(emulator, "forth.core.2*")
-    # Assert
-    assert (tos << 1) & 0xFFFF == data_stack.pop_u16()
-    assert data_stack_depth == len(data_stack)

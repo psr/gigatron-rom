@@ -44,7 +44,7 @@ def _start_page():
 
 
 # TODO: find a neater way of packing these things
-def emit_kernel_words():
+def emit_kernel_words(vtmp):
     #### Page
     _start_page()
     _next.next3_rom_head()
@@ -80,6 +80,7 @@ def emit_kernel_words():
     _docol_exit.make_thread()
     _start_page()
     _shift.two_times()
+    _shift.shift(vtmp)
     _start_page()
     _stackmanipulation.two_dup()
     _arithmetic.add()

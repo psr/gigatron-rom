@@ -2697,6 +2697,12 @@ ld(hi('v6502_next'),Y)          #43
 jmp(Y,'v6502_next')             #44
 ld(-46/2)                       #45
 
+
+label('forth.right-shift-return-point')
+ld(hi('forth.core.RSHIFT'), Y)
+jmp(Y, [sysArgs + 4])
+ld(0, Y)  # Restore Y to stack page
+
 #-----------------------------------------------------------------------
 #       Reserved
 #-----------------------------------------------------------------------
@@ -5357,7 +5363,7 @@ suba(1)                         #
 #-----------------------------------------------------------------------
 
 forth.emit_entry_page(vTicks, vReturn)
-forth.emit_kernel_words()
+forth.emit_kernel_words(vTmp)
 # --- Page boundary ---
 start_of_forth_word_space = pc()  # Variable used in unit tests to locate test data
 align(0x100,0x100)

@@ -113,6 +113,7 @@ def do_test_word(
     *,
     continue_on_reenter=True,
     cycles_shifted_to_trampoline=0,
+    before_each_entry_do=lambda: None,
 ):
     """Execute a single Forth word, checking the timing related invariants
 
@@ -141,6 +142,7 @@ def do_test_word(
             f" IP = {get_IP():x}; W = {get_W():x}"
         )
         emulator.next_instruction = entrypoint
+        before_each_entry_do()
         actual_cycles = emulator.run_for(
             worst_case_ticks * 2 - cycles_shifted_to_trampoline
         )

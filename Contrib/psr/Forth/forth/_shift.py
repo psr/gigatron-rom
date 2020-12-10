@@ -303,8 +303,8 @@ def _lshift__amount_eq_8():
     """
     label("forth.core.LSHIFT.n==8")
     adda(-add_cost_of_next(cost_of_lshift__amount_eq_8) / 2)  # 1
-    ld(data_stack_page, Y)
-    ld([data_stack_pointer], X)
+    # ld(data_stack_page, Y)
+    # ld([data_stack_pointer], X)
     ld([Y, X])
     st([tmp0])  # 5
     ld(0)

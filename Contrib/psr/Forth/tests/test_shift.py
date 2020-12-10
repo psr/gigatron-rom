@@ -13,9 +13,14 @@ def test_left_shift(emulator, data_stack, data_stack_depth, tos):
     # Arrange
     data_stack.set_depth_in_bytes(data_stack_depth)
     data_stack.push_word(tos)
-    data_stack.set_x_and_y_registers(emulator)
     # Act
-    do_test_word(emulator, "forth.core.2*", cycles_shifted_to_trampoline=2)
+    do_test_word(
+        emulator,
+        "forth.core.2*",
+        cycles_shifted_to_trampoline=2,
+        before_each_entry_do=lambda: data_stack.set_x_and_y_registers(emulator),
+    )
+
     # Assert
     assert (tos << 1) & 0xFFFF == data_stack.pop_u16()
     assert data_stack_depth == len(data_stack)
@@ -32,10 +37,15 @@ def test_lshift(emulator, data_stack, data_stack_depth, tos, nos):
     data_stack.set_depth_in_bytes(data_stack_depth)
     data_stack.push_word(nos)
     data_stack.push_word(tos)
-    data_stack.set_x_and_y_registers(emulator)
     set_W(asm.symbol("forth.core.LSHIFT"))
     # Act
-    do_test_word(emulator, "forth.core.LSHIFT", cycles_shifted_to_trampoline=2)
+    do_test_word(
+        emulator,
+        "forth.core.LSHIFT",
+        cycles_shifted_to_trampoline=2,
+        before_each_entry_do=lambda: data_stack.set_x_and_y_registers(emulator),
+    )
+
     # Assert
     assert (nos << tos) & 0xFFFF == data_stack.pop_u16()
     assert data_stack_depth == len(data_stack)
@@ -51,11 +61,15 @@ def test_rshift(emulator, data_stack, data_stack_depth, tos, nos):
     data_stack.set_depth_in_bytes(data_stack_depth)
     data_stack.push_word(nos)
     data_stack.push_word(tos)
-    data_stack.set_x_and_y_registers(emulator)
     set_W(asm.symbol("forth.core.RSHIFT"))
 
     # Act
-    do_test_word(emulator, "forth.core.RSHIFT", cycles_shifted_to_trampoline=2)
+    do_test_word(
+        emulator,
+        "forth.core.RSHIFT",
+        cycles_shifted_to_trampoline=2,
+        before_each_entry_do=lambda: data_stack.set_x_and_y_registers(emulator),
+    )
     # Assert
     assert ((nos & 0xFFFF) >> tos) == data_stack.pop_u16()
     assert data_stack_depth == len(data_stack)
@@ -69,9 +83,13 @@ def test_two_div(emulator, data_stack, data_stack_depth, tos):
     # Arrange
     data_stack.set_depth_in_bytes(data_stack_depth)
     data_stack.push_word(tos)
-    data_stack.set_x_and_y_registers(emulator)
     # Act
-    do_test_word(emulator, "forth.core.2/", cycles_shifted_to_trampoline=2)
+    do_test_word(
+        emulator,
+        "forth.core.2/",
+        cycles_shifted_to_trampoline=2,
+        before_each_entry_do=lambda: data_stack.set_x_and_y_registers(emulator),
+    )
     # Assert
     assert (tos >> 1) == data_stack.pop_i16()
     assert data_stack_depth == len(data_stack)

@@ -18,7 +18,6 @@ from asm import (
     pc,
     st,
     suba,
-    wait,
     xora,
 )
 
@@ -94,36 +93,22 @@ def zero_equal():
     """
     label("forth.core.0=")
     adda(-add_cost_of_next(cost_of_zero_equal) / 2)  # 1
+    ld(data_stack_page, Y)
     ld([data_stack_pointer], X)
-    ld([X])
-    bne(".not-zero1")
-    ld(data_stack_page, Y)  # 5
-
-    st([Y, Xpp])  # 6
-    C("Low byte is zero - advance to high-byte")
     ld([Y, X])
-    bne(".not-zero2")
-    ld([data_stack_pointer], X)  # 9
-
-    bra(".write")  # 10
-    C("Both bytes are 0 - replace with true flag")
-    ld(0xFF)  # 11
-
-    label(".not-zero1")
-    wait(9 - 5)  # 6, 7, 8, 9
-    label(".not-zero2")
-    bra(".write")  # 10
-    ld(0x00)  # 11
-    C("One or both bytes are not zero - replace with false flag")
-
-    label(".write")
-    st([Y, Xpp])  # 12
-    C("Overwrite both bytes")
-    st([Y, Xpp])  # 13
+    st([Y, Xpp])  # 5
+    ora([Y, X])
+    beq(pc() + 3)  # 7
+    bra(pc() + 3)  # 8
+    ld(0x00)  # 9 - If any bits were non-zero
+    ld(0xFF)  # 9 - Otherwise
+    ld([data_stack_pointer], X)  # 10
+    st([Y, Xpp])
+    st([Y, X])  # 12
     NEXT(cost_of_zero_equal)
 
 
-cost_of_zero_equal = 13
+cost_of_zero_equal = 12
 
 
 def bitwise():

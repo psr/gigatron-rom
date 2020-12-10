@@ -1,4 +1,4 @@
-* source: .\dev.py
+* source: C:\Users\peter.russell\Documents\Personal\gigatron-rom\Contrib\psr\Forth\dev.py
                                           160   enableListing()
                                           161   #-----------------------------------------------------------------------
                                           162   #
@@ -915,13 +915,13 @@ vBlankStart:  0104 c21f  st   [$1f]       957   st([videoSync0])                
                                           1057  beq('vBlankFirst#75')           #73
               014c f052  beq  vBlankFirst#75
                                           1058
-                                          1059  runVcpu(186-74-extra,           #74 Application cycles (scan line 0)
-                                          1060      '---D line 0 no timeout',
-              014d 0055  ld   $55         1061      returnTo='vBlankFirst#186')
+              014d 0055  ld   $55         1059  runVcpu(186-74-extra,           #74 Application cycles (scan line 0)
               014e c21e  st   [$1e]
               014f 1505  ld   [$05],y
               0150 e0ff  jmp  y,$ff
               0151 0023  ld   $23
+                                          1060      '---D line 0 no timeout',
+                                          1061      returnTo='vBlankFirst#186')
                                           1062
                                           1063  label('vBlankFirst#75')
 vBlankFirst#75:
@@ -1328,12 +1328,12 @@ videoF:       02ec 0120  ld   [$20]       1420  ld([videoSync1])                
                                           1431  #
                                           1432  # Alternative for pixel burst: faster application mode
                                           1433  label('nopixels')
-                                          1434  runVcpu(200-38, 'ABCD line 40-520',
-nopixels:     02f6 00ff  ld   $ff         1435    returnTo=0x1ff)               #38 Application interpreter (black scanlines)
+nopixels:     02f6 00ff  ld   $ff         1434  runVcpu(200-38, 'ABCD line 40-520',
               02f7 c21e  st   [$1e]
               02f8 1505  ld   [$05],y
               02f9 e0ff  jmp  y,$ff
               02fa 003c  ld   $3c
+                                          1435    returnTo=0x1ff)               #38 Application interpreter (black scanlines)
                                           1436
                                           1437  #-----------------------------------------------------------------------
                                           1438  #
@@ -7099,70 +7099,64 @@ forth.core.1-:
               14bc 00f9  ld   $f9
 forth.core.0=:
               14bd 80f8  adda $f8
-              14be 111c  ld   [$1c],x
-              14bf 0500  ld   [x]
-              14c0 ecc8  bne  .not-zero1
-              14c1 1400  ld   $00,y
-              14c2 de00  st   [y,x++]     ;Low byte is zero - advance to high-byte
-              14c3 0d00  ld   [y,x]
-              14c4 eccc  bne  .not-zero2
-              14c5 111c  ld   [$1c],x
-              14c6 fcce  bra  .write      ;Both bytes are 0 - replace with true flag
-              14c7 00ff  ld   $ff
-.not-zero1:   14c8 0200  nop
-              14c9 0200  nop
-              14ca 0200  nop
-              14cb 0200  nop
-.not-zero2:   14cc fcce  bra  .write
-              14cd 0000  ld   $00         ;One or both bytes are not zero - replace with false flag
-.write:       14ce de00  st   [y,x++]     ;Overwrite both bytes
-              14cf de00  st   [y,x++]
-              14d0 1413  ld   $13,y       ;NEXT
-              14d1 e00f  jmp  y,$0f
-              14d2 00f8  ld   $f8
+              14be 1400  ld   $00,y
+              14bf 111c  ld   [$1c],x
+              14c0 0d00  ld   [y,x]
+              14c1 de00  st   [y,x++]
+              14c2 4d00  ora  [y,x]
+              14c3 f0c6  beq  $14c6
+              14c4 fcc7  bra  $14c7
+              14c5 0000  ld   $00
+              14c6 00ff  ld   $ff
+              14c7 111c  ld   [$1c],x
+              14c8 de00  st   [y,x++]
+              14c9 ce00  st   [y,x]
+              14ca 1413  ld   $13,y       ;NEXT
+              14cb e00e  jmp  y,$0e
+              14cc 00f8  ld   $f8
 forth.internal.LIT:
-              14d3 80f5  adda $f5
-              14d4 00f5  ld   $f5         ;Store cost
-              14d5 c224  st   [$24]
-              14d6 011c  ld   [$1c]       ;Decrement Data stack pointer
-              14d7 a002  suba $02
-              14d8 1200  ld   ac,x
-              14d9 c21c  st   [$1c]
-              14da 1534  ld   [$34],y     ;Jump to the code in the thread
-              14db 0006  ld   $06         ;We're going to shift the IP by 6
-              14dc 0200  nop
-              14dd e133  jmp  y,[$33]
-              14de 1400  ld   $00,y
+              14cd 80f5  adda $f5
+              14ce 00f5  ld   $f5         ;Store cost
+              14cf c224  st   [$24]
+              14d0 011c  ld   [$1c]       ;Decrement Data stack pointer
+              14d1 a002  suba $02
+              14d2 1200  ld   ac,x
+              14d3 c21c  st   [$1c]
+              14d4 1534  ld   [$34],y     ;Jump to the code in the thread
+              14d5 0006  ld   $06         ;We're going to shift the IP by 6
+              14d6 0200  nop
+              14d7 e133  jmp  y,[$33]
+              14d8 1400  ld   $00,y
 forth.internal.C-LIT:
-              14df 80f3  adda $f3
-              14e0 00f3  ld   $f3         ;Store cost
-              14e1 c224  st   [$24]
-              14e2 011c  ld   [$1c]       ;Decrement Data stack pointer and store high byte of 0
-              14e3 a001  suba $01
-              14e4 1200  ld   ac,x
-              14e5 0000  ld   $00
-              14e6 c600  st   [x]
-              14e7 011c  ld   [$1c]
-              14e8 a002  suba $02
-              14e9 1200  ld   ac,x
-              14ea c21c  st   [$1c]
-              14eb 1534  ld   [$34],y     ;Jump to the code in the thread
-              14ec 0005  ld   $05         ;We're going to shift the IP by 5
-              14ed 0200  nop
-              14ee e133  jmp  y,[$33]
-              14ef 1400  ld   $00,y
+              14d9 80f3  adda $f3
+              14da 00f3  ld   $f3         ;Store cost
+              14db c224  st   [$24]
+              14dc 011c  ld   [$1c]       ;Decrement Data stack pointer and store high byte of 0
+              14dd a001  suba $01
+              14de 1200  ld   ac,x
+              14df 0000  ld   $00
+              14e0 c600  st   [x]
+              14e1 011c  ld   [$1c]
+              14e2 a002  suba $02
+              14e3 1200  ld   ac,x
+              14e4 c21c  st   [$1c]
+              14e5 1534  ld   [$34],y     ;Jump to the code in the thread
+              14e6 0005  ld   $05         ;We're going to shift the IP by 5
+              14e7 0200  nop
+              14e8 e133  jmp  y,[$33]
+              14e9 1400  ld   $00,y
 forth.internal.rom-mode.BRANCH:
-              14f0 80f7  adda $f7
-              14f1 00f8  ld   $f8         ;Store cost
-              14f2 c224  st   [$24]
-              14f3 1030  ld   $30,x       ;X <- W
-              14f4 1534  ld   [$34],y     ;Jump to the code in the thread
-              14f5 e133  jmp  y,[$33]
-              14f6 1400  ld   $00,y
-              14f7 0200  nop
-              14f8 0200  nop
-              14f9 0200  nop
-              * 9 times
+              14ea 80f7  adda $f7
+              14eb 00f8  ld   $f8         ;Store cost
+              14ec c224  st   [$24]
+              14ed 1030  ld   $30,x       ;X <- W
+              14ee 1534  ld   [$34],y     ;Jump to the code in the thread
+              14ef e133  jmp  y,[$33]
+              14f0 1400  ld   $00,y
+              14f1 0200  nop
+              14f2 0200  nop
+              14f3 0200  nop
+              * 15 times
 forth.restart-or-quit:
               1500 fd30  bra  [$30]
               1501 f802  ble  .quit
@@ -7889,7 +7883,7 @@ forth.core.CELL+:
               179e 1413  ld   $13,y
               179f e023  jmp  y,$23
               17a0 147f  ld   $7f,y
-              17a1 dcdf  st   $df,[y,x++] ;-> forth.internal.C-LIT
+              17a1 dcd9  st   $d9,[y,x++] ;-> forth.internal.C-LIT
               17a2 e07a  jmp  y,$7a
               17a3 dc14  st   $14,[y,x++]
               17a4 dc02  st   $02,[y,x++] ;2
@@ -7945,7 +7939,7 @@ forth.core.0<:
               17d4 1413  ld   $13,y
               17d5 e023  jmp  y,$23
               17d6 147f  ld   $7f,y
-              17d7 dcd3  st   $d3,[y,x++] ;-> forth.internal.LIT
+              17d7 dccd  st   $cd,[y,x++] ;-> forth.internal.LIT
               17d8 e07a  jmp  y,$7a
               17d9 dc14  st   $14,[y,x++]
               17da dc00  st   $00,[y,x++] ;32768
@@ -7965,7 +7959,7 @@ forth.core.ext.0>:
               17e7 1413  ld   $13,y
               17e8 e023  jmp  y,$23
               17e9 147f  ld   $7f,y
-              17ea dcdf  st   $df,[y,x++] ;-> forth.internal.C-LIT
+              17ea dcd9  st   $d9,[y,x++] ;-> forth.internal.C-LIT
               17eb e07a  jmp  y,$7a
               17ec dc14  st   $14,[y,x++]
               17ed dc00  st   $00,[y,x++] ;0
@@ -8127,7 +8121,7 @@ forth.core.ALIGNED:
               1882 dc4c  st   $4c,[y,x++] ;-> forth.core.DUP
               1883 e07a  jmp  y,$7a
               1884 dc15  st   $15,[y,x++]
-              1885 dcdf  st   $df,[y,x++] ;-> forth.internal.C-LIT
+              1885 dcd9  st   $d9,[y,x++] ;-> forth.internal.C-LIT
               1886 e07a  jmp  y,$7a
               1887 dc14  st   $14,[y,x++]
               1888 dc01  st   $01,[y,x++] ;1
@@ -8152,7 +8146,7 @@ forth.core.BL:
               1899 1413  ld   $13,y
               189a e023  jmp  y,$23
               189b 147f  ld   $7f,y
-              189c dcdf  st   $df,[y,x++] ;-> forth.internal.C-LIT
+              189c dcd9  st   $d9,[y,x++] ;-> forth.internal.C-LIT
               189d e07a  jmp  y,$7a
               189e dc14  st   $14,[y,x++]
               189f dc20  st   $20,[y,x++] ;32
